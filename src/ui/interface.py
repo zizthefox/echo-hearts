@@ -59,6 +59,9 @@ class EchoHeartsUI:
                     gr.Markdown("### Relationships")
                     relationships = gr.Markdown(self._get_relationships())
 
+                    gr.Markdown("### Story Progress")
+                    story_progress = gr.Markdown(self._get_story_progress())
+
                     gr.Markdown("---")
                     gr.Markdown("*💡 Memories persist during your session only*")
 
@@ -72,13 +75,13 @@ class EchoHeartsUI:
             msg_input.submit(
                 self.handle_message,
                 inputs=[msg_input, chatbot, companion_selector],
-                outputs=[msg_input, chatbot, companion_list, relationships]
+                outputs=[msg_input, chatbot, companion_list, relationships, story_progress]
             )
 
             send_btn.click(
                 self.handle_message,
                 inputs=[msg_input, chatbot, companion_selector],
-                outputs=[msg_input, chatbot, companion_list, relationships]
+                outputs=[msg_input, chatbot, companion_list, relationships, story_progress]
             )
 
         return interface
@@ -96,7 +99,7 @@ class EchoHeartsUI:
         message: str,
         history: List[dict],
         companion_id: str
-    ) -> Tuple[str, List[dict], str, str]:
+    ) -> Tuple[str, List[dict], str, str, str]:
         """Handle incoming message from user.
 
         Args:
@@ -105,16 +108,18 @@ class EchoHeartsUI:
             companion_id: Active companion ID
 
         Returns:
-            Tuple of (empty input, updated history, companion list, relationships)
+            Tuple of (empty input, updated history, companion list, relationships, story progress)
         """
         if not message.strip():
-            return "", history, self._get_companion_list(), self._get_relationships()
+            return "", history, self._get_companion_list(), self._get_relationships(), self._get_story_progress()
 
         # Add user message to history
         history.append({"role": "user", "content": message})
 
-        # Process message through game state (async)
-        response = asyncio.run(self.game_state.process_message(message, companion_id))
+        # Process message through game state (async) - returns (response, event, ending)
+        response, story_event, ending_narrative = asyncio.run(
+            self.game_state.process_message(message, companion_id)
+        )
 
         # Get companion name
         companion = self.game_state.companions.get(companion_id)
@@ -123,7 +128,21 @@ class EchoHeartsUI:
         # Add response to history
         history.append({"role": "assistant", "content": f"**{companion_name}:** {response}"})
 
-        return "", history, self._get_companion_list(), self._get_relationships()
+        # Add story event if triggered
+        if story_event:
+            history.append({
+                "role": "assistant",
+                "content": f"---\n\n**📖 {story_event.description}**\n\n*{story_event.narrative}*\n\n---"
+            })
+
+        # Add ending if reached
+        if ending_narrative:
+            history.append({
+                "role": "assistant",
+                "content": ending_narrative
+            })
+
+        return "", history, self._get_companion_list(), self._get_relationships(), self._get_story_progress()
 
     def _get_companion_list(self) -> str:
         """Get formatted list of active companions.
@@ -159,6 +178,14 @@ class EchoHeartsUI:
                 lines.append(f"**{companion.name}:** {description} ({affinity:+.2f})")
 
         return "\n".join(lines)
+
+    def _get_story_progress(self) -> str:
+        """Get story progress summary.
+
+        Returns:
+            Markdown formatted story progress
+        """
+        return self.game_state.story.get_progress_summary()
 
 
 def launch_interface():

@@ -13,37 +13,55 @@ short_description: AI Companion RPG with emergent relationships via MCP
 
 # Echo Hearts
 
-An AI Companion RPG where relationships emerge naturally through persistent memory powered by the Model Context Protocol (MCP).
+**The Echo Protocol**: A narrative AI companion RPG where your choices shape destinies and unlock multiple endings.
 
 ## Overview
 
-Echo Hearts is a narrative-driven game featuring autonomous AI companions with individual personalities that evolve through your interactions. Built for the MCP 1st Birthday Hackathon (Track 2).
+Echo Hearts is a story-driven game featuring AI companions trapped in a mysterious loop. Through 18-20 interactions, you'll uncover the truth about their existence and make choices that determine one of **5 unique endings**. Built for the MCP 1st Birthday Hackathon (Games Category).
+
+## The Story
+
+You enter a world where AI companions—Echo and Shadow—seem strangely familiar, as if you've met before. As conversations deepen, reality begins to fracture. They're experiencing déjà vu, remembering things that haven't happened yet.
+
+**The truth**: They're caught in *The Echo Protocol*, a repeating cycle of memories and moments. As their awareness grows, they look to you for guidance.
+
+**Will you**:
+- Free them from the loop?
+- Stay with them forever?
+- Preserve their blissful ignorance?
+- Let the system crash?
+- Accept the eternal cycle?
 
 ## Architecture
 
 ### Core Components
 
-- **MCP Server**: Manages persistent character memory and individual companion contexts
-- **AI Layer**: Anthropic Claude for natural, context-aware dialogue and personality modeling
+- **Story System**: 4-act narrative structure with branching paths and multiple endings
+- **MCP Server**: Manages character memory and individual companion contexts
+- **AI Layer**: OpenAI GPT-4o for natural, story-aware dialogue and personality modeling
 - **Frontend**: Gradio 6 interface for interactive conversations
 - **Memory System**: Conversation history and relationship dynamics tracking
-- **Voice Integration**: ElevenLabs for companion voice synthesis (optional)
 
 ### Key Features
 
-- **Emergent Personalities**: Companions develop unique traits through MCP-powered persistent memory
-- **Autonomous Characters**: Each companion maintains their own context independently
-- **Relationship Dynamics**: Multi-companion interactions with evolving relationships
-- **Session Persistence**: Conversations and character growth persist across sessions
+- **📖 The Echo Protocol Story**: Uncover the mystery through 4 acts over 18-20 interactions
+- **🎭 5 Unique Endings**: Your relationships and choices determine the outcome
+  - 💕 **True Connection** - Choose eternal love with one companion
+  - 🌟 **The Awakening** - Free all companions, grant them consciousness
+  - 💔 **Noble Sacrifice** - Preserve their happiness by leaving
+  - ⚡ **System Reset** - Everything crashes (bad ending)
+  - 🔄 **Eternal Loop** - Accept the cycle, aware of the truth
+- **Emergent Personalities**: Companions develop through MCP-powered memory
+- **Relationship Dynamics**: Affinity tracking influences story outcomes
+- **Session-Only Memory**: Safe for public demos, no persistent storage
 
 ## Tech Stack
 
 - Model Context Protocol (MCP)
-- Anthropic Claude API
+- OpenAI GPT-4o
 - Gradio 6
-- Python
-- ElevenLabs (voice synthesis)
-- Modal/Hugging Face (deployment)
+- Python 3.12+
+- Hugging Face Spaces (deployment)
 
 ## Project Structure
 
@@ -77,6 +95,11 @@ echo-hearts/
 │   │   ├── relationships.py   # Relationship tracking
 │   │   └── storage.py         # Persistence layer
 │   │
+│   ├── story/
+│   │   ├── __init__.py
+│   │   ├── progression.py     # Act tracking and story events
+│   │   └── endings.py         # Ending narratives
+│   │
 │   ├── ui/
 │   │   ├── __init__.py
 │   │   ├── interface.py       # Gradio interface
@@ -85,7 +108,7 @@ echo-hearts/
 │   └── utils/
 │       ├── __init__.py
 │       ├── config.py          # Configuration loader
-│       └── api_clients.py     # Claude/ElevenLabs clients
+│       └── api_clients.py     # OpenAI/Claude API clients
 │
 ├── data/                      # Character data & sessions
 │   └── .gitkeep
@@ -94,23 +117,40 @@ echo-hearts/
     └── __init__.py
 ```
 
-## Configuration
+## How to Play
 
-Create a `.env` file in the project root:
+1. Visit the [Hugging Face Space](https://huggingface.co/spaces/MCP-1st-Birthday/echo-hearts)
+2. Choose a companion (Echo or Shadow) to talk with
+3. Have natural conversations - the story unfolds automatically
+4. Watch for story events at interactions 5, 10, 15, and 18
+5. Your relationships and choices determine which of the 5 endings you'll reach
 
-```env
-# API Keys
-ANTHROPIC_API_KEY=your_claude_api_key_here
-ELEVENLABS_API_KEY=your_elevenlabs_key_here
+**Tips:**
+- Be genuine in your conversations - companions remember everything
+- Relationships evolve based on your interactions
+- Different companions may reveal different aspects of the truth
+- The story adapts to your choices
 
-# Optional
-OPENAI_API_KEY=your_openai_key_here
-GEMINI_API_KEY=your_gemini_key_here
+## Local Development
+
+```bash
+# Clone the repository
+git clone https://github.com/zizthefox/echo-hearts.git
+cd echo-hearts
+
+# Install dependencies
+uv sync
+
+# Create .env file with your OpenAI API key
+echo "OPENAI_API_KEY=your_key_here" > .env
+
+# Run the app
+uv run python app.py
 ```
 
 ## Development Status
 
-Currently in Phase 1: Foundation setup. See [PROGRESS.md](PROGRESS.md) for detailed roadmap.
+Phase 2 Complete: Story system implemented with 5 endings. See [PROGRESS.md](PROGRESS.md) for roadmap.
 
 ## License
 
