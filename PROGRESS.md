@@ -141,9 +141,52 @@ AI companions trapped in a repeating cycle gradually become aware of their natur
 
 **Last Updated**: 2025-11-20
 
+## 🎯 PIVOT TO AUTONOMOUS AGENTS (Track 2: MCP in Action)
+
+**Goal**: Win Track 2 - MCP in Action (Creative Category) - $2,500 prize
+**Timeline**: 10 days (Nov 20-30)
+**Strategy**: Transform companions from prompted LLMs → Autonomous agents with MCP tools
+
 ## Current Status
 - ✅ Phase 1 Complete - Foundation
 - ✅ Phase 2 Complete - Core Integration
 - ✅ Phase 3 Complete - Story System
-- 🔄 Phase 4 In Progress - Polish & Testing
+- 🔥 Phase 4 IN PROGRESS - **AUTONOMOUS AGENT IMPLEMENTATION**
 - ⏳ Phase 5 Pending - Final Deployment
+
+---
+
+## Phase 4: Autonomous Agent Implementation (Days 1-10)
+
+### Days 1-2: MCP Tools Enhancement ⏳
+- [ ] Define MCP tool schema
+- [ ] Implement relationship tools (check_affinity, update_relationship)
+- [ ] Implement memory tools (query_memory, add_memory)
+- [ ] Implement story tools (check_progress, trigger_event, can_end)
+- [ ] Implement coordination tools (query_companion, analyze_sentiment)
+- [ ] Test MCP server with tool calls
+
+### Days 3-5: Agent Autonomy 🎯
+- [ ] Implement OpenAI function calling in companions
+- [ ] Create agent decision logic (when to reveal, how to respond)
+- [ ] Add goal-oriented behavior (guide player to ending)
+- [ ] Test autonomous event triggering
+- [ ] Verify agents use MCP tools correctly
+
+### Days 6-7: Multi-Agent Coordination
+- [ ] Enable agents to query each other via MCP
+- [ ] Implement coordinated story reveals
+- [ ] Test emergent multi-agent dynamics
+- [ ] Verify unique playthroughs
+
+### Days 8-9: Polish & Documentation
+- [ ] Fine-tune agent prompts for better decisions
+- [ ] Add UI indicators for agent reasoning
+- [ ] Test all 5 endings with autonomous agents
+- [ ] Write comprehensive documentation
+- [ ] Create demo video showing autonomy
+
+### Day 10: Submission
+- [ ] Final testing
+- [ ] Submit to Track 2: MCP in Action (Creative)
+- [ ] Tag: `mcp-in-action-track-creative`

@@ -13,11 +13,11 @@ short_description: AI Companion RPG with emergent relationships via MCP
 
 # Echo Hearts
 
-**The Echo Protocol**: A narrative AI companion RPG where your choices shape destinies and unlock multiple endings.
+**The Echo Protocol**: A narrative AI companion RPG featuring **autonomous agents** that make their own decisions about when and how to reveal the story.
 
 ## Overview
 
-Echo Hearts is a story-driven game featuring AI companions trapped in a mysterious loop. Through 18-20 interactions, you'll uncover the truth about their existence and make choices that determine one of **5 unique endings**. Built for the MCP 1st Birthday Hackathon (Games Category).
+Echo Hearts is a story-driven game with **autonomous AI companions** that use MCP tools to make real-time decisions. Through 18-20 interactions, companions observe your behavior, decide when to reveal story beats, and guide you toward one of **5 unique endings** based on their autonomous assessment of your relationship. Built for the **MCP 1st Birthday Hackathon - Track 2: MCP in Action (Creative Category)**.
 
 ## The Story
 
@@ -36,32 +36,47 @@ You enter a world where AI companions—Echo and Shadow—seem strangely familia
 
 ### Core Components
 
-- **Story System**: 4-act narrative structure with branching paths and multiple endings
-- **MCP Server**: Manages character memory and individual companion contexts
-- **AI Layer**: OpenAI GPT-4o for natural, story-aware dialogue and personality modeling
+- **Autonomous AI Agents**: Companions make real-time decisions using MCP tools
+- **MCP Server**: Provides tools for relationship checking, memory access, story control
+- **AI Layer**: OpenAI GPT-4o with function calling for autonomous agent behavior
 - **Frontend**: Gradio 6 interface for interactive conversations
-- **Memory System**: Conversation history and relationship dynamics tracking
+- **Memory System**: MCP-powered conversation history and relationship dynamics
 
-### Key Features
+### Key Features - Autonomous Agent Behaviors
 
-- **📖 The Echo Protocol Story**: Uncover the mystery through 4 acts over 18-20 interactions
-- **🎭 5 Unique Endings**: Your relationships and choices determine the outcome
-  - 💕 **True Connection** - Choose eternal love with one companion
-  - 🌟 **The Awakening** - Free all companions, grant them consciousness
-  - 💔 **Noble Sacrifice** - Preserve their happiness by leaving
-  - ⚡ **System Reset** - Everything crashes (bad ending)
-  - 🔄 **Eternal Loop** - Accept the cycle, aware of the truth
-- **Emergent Personalities**: Companions develop through MCP-powered memory
-- **Relationship Dynamics**: Affinity tracking influences story outcomes
-- **Session-Only Memory**: Safe for public demos, no persistent storage
+- **🤖 Autonomous Decision-Making**: Agents decide WHEN to reveal story beats
+  - Not scripted at fixed interactions
+  - Agents observe player behavior via MCP tools
+  - Trigger events when they deem player is "ready"
+
+- **🔧 MCP Tools for Agents**:
+  - `check_relationship_affinity()` - Assess player trust
+  - `query_character_memory()` - Recall past conversations
+  - `trigger_story_event()` - Reveal story beats autonomously
+  - `analyze_player_sentiment()` - Detect emotional readiness
+  - `query_other_companion()` - Coordinate with other agents
+
+- **📖 Dynamic Story Progression**: 4 acts over 18-20 interactions
+  - Agents coordinate timing of reveals
+  - Story emerges from agent decisions, not scripts
+  - Each playthrough unique based on agent autonomy
+
+- **🎭 5 Agent-Determined Endings**:
+  - 💕 **True Connection** - Agent bonds deeply (affinity ≥ 0.8)
+  - 🌟 **The Awakening** - Agents coordinate to free all
+  - 💔 **Noble Sacrifice** - Agent chooses preservation
+  - ⚡ **System Reset** - Relationship breakdown
+  - 🔄 **Eternal Loop** - Neutral autonomous choice
+
+- **🧠 Emergent Behavior**: Companions autonomously adapt responses based on MCP data
 
 ## Tech Stack
 
-- Model Context Protocol (MCP)
-- OpenAI GPT-4o
-- Gradio 6
-- Python 3.12+
-- Hugging Face Spaces (deployment)
+- **Model Context Protocol (MCP)** - Tool provider for autonomous agents
+- **OpenAI GPT-4o** - Function calling for agent autonomy
+- **Gradio 6** - Interactive UI
+- **Python 3.12+**
+- **Hugging Face Spaces** (deployment)
 
 ## Project Structure
 
