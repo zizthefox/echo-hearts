@@ -1,7 +1,59 @@
 """API client wrappers for external services."""
 
 from typing import Optional, List, Dict, Any
+from openai import OpenAI
 from anthropic import Anthropic
+
+
+class OpenAIClient:
+    """Wrapper for OpenAI API."""
+
+    def __init__(self, api_key: str, model: str = "gpt-4o"):
+        """Initialize OpenAI client.
+
+        Args:
+            api_key: OpenAI API key
+            model: Model to use
+        """
+        self.client = OpenAI(api_key=api_key)
+        self.model = model
+
+    async def generate_response(
+        self,
+        messages: List[Dict[str, str]],
+        system_prompt: Optional[str] = None,
+        max_tokens: int = 1024,
+        temperature: float = 0.7
+    ) -> str:
+        """Generate a response using OpenAI.
+
+        Args:
+            messages: List of message dictionaries with 'role' and 'content'
+            system_prompt: Optional system prompt
+            max_tokens: Maximum tokens to generate
+            temperature: Sampling temperature
+
+        Returns:
+            Generated response text
+        """
+        try:
+            # Prepend system message if provided
+            formatted_messages = []
+            if system_prompt:
+                formatted_messages.append({"role": "system", "content": system_prompt})
+            formatted_messages.extend(messages)
+
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=formatted_messages,
+                max_tokens=max_tokens,
+                temperature=temperature
+            )
+            return response.choices[0].message.content
+
+        except Exception as e:
+            print(f"Error generating response: {e}")
+            return "I'm having trouble responding right now."
 
 
 class ClaudeClient:
@@ -83,6 +135,19 @@ class ElevenLabsClient:
         # TODO: Implement ElevenLabs integration
         print(f"Voice synthesis requested: {text[:50]}...")
         return None
+
+
+def create_openai_client(api_key: str, model: str = "gpt-4o") -> OpenAIClient:
+    """Factory function to create an OpenAI client.
+
+    Args:
+        api_key: OpenAI API key
+        model: Model to use
+
+    Returns:
+        Configured OpenAIClient instance
+    """
+    return OpenAIClient(api_key=api_key, model=model)
 
 
 def create_claude_client(api_key: str, model: str = "claude-3-5-sonnet-20241022") -> ClaudeClient:
