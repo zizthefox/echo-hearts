@@ -55,7 +55,7 @@ class GameState:
             companion = OpenAICompanion(
                 companion_id=comp_config["id"],
                 name=comp_config["name"],
-                personality_traits=personality["traits"],
+                personality_traits=personality,  # Pass full personality dict including character_profile
                 api_key=config.openai_api_key,
                 model=config.default_model
             )

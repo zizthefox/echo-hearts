@@ -68,13 +68,18 @@ class OpenAICompanion(Companion):
         Returns:
             Personality description for the AI
         """
-        traits_str = ", ".join([f"{k}: {v}" for k, v in self.personality_traits.items()])
-        base_prompt = f"You are {self.name}, an AI companion with these personality traits: {traits_str}. Respond naturally and stay in character."
+        # Use character_profile if available, otherwise fallback to traits
+        if isinstance(self.personality_traits, dict) and "character_profile" in self.personality_traits:
+            base_prompt = self.personality_traits["character_profile"]
+        else:
+            # Fallback for old format
+            traits_str = ", ".join([f"{k}: {v}" for k, v in self.personality_traits.get("traits", {}).items()])
+            base_prompt = f"You are {self.name}, an AI companion with these personality traits: {traits_str}. Respond naturally and stay in character."
 
         # Add story context if provided
         if context and "act_context" in context:
-            base_prompt += f"\n\nSTORY CONTEXT: {context['act_context']}"
-            base_prompt += f"\nThis is interaction {context.get('interaction_count', 0)} in The Echo Protocol."
+            base_prompt += f"\n\n--- STORY CONTEXT ---\n{context['act_context']}"
+            base_prompt += f"\n(This is interaction {context.get('interaction_count', 0)}/20 in The Echo Protocol)"
 
         return base_prompt
 
