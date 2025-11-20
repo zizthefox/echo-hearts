@@ -1,7 +1,6 @@
-import gradio as gr
+"""Echo Hearts - Main application entry point."""
 
-def greet(name):
-    return "Hello " + name + "!!"
+from src.ui.interface import launch_interface
 
-demo = gr.Interface(fn=greet, inputs="text", outputs="text")
-demo.launch()
+if __name__ == "__main__":
+    launch_interface()

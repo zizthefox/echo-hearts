@@ -13,14 +13,15 @@ class Config:
         load_dotenv()
 
         # API Keys
+        self.openai_api_key = os.getenv("OPENAI_API_KEY")
         self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
         self.elevenlabs_api_key = os.getenv("ELEVENLABS_API_KEY")
-        self.openai_api_key = os.getenv("OPENAI_API_KEY")
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
 
         # Application settings
         self.data_dir = os.getenv("DATA_DIR", "data")
-        self.default_model = os.getenv("DEFAULT_MODEL", "claude-3-5-sonnet-20241022")
+        self.default_model = os.getenv("DEFAULT_MODEL", "gpt-4o")
+        self.default_provider = os.getenv("DEFAULT_PROVIDER", "openai")
         self.max_conversation_history = int(os.getenv("MAX_CONVERSATION_HISTORY", "50"))
 
     def validate(self) -> bool:
@@ -29,8 +30,8 @@ class Config:
         Returns:
             True if configuration is valid, False otherwise
         """
-        if not self.anthropic_api_key:
-            print("Warning: ANTHROPIC_API_KEY not set")
+        if not self.openai_api_key:
+            print("Warning: OPENAI_API_KEY not set")
             return False
 
         return True
