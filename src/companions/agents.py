@@ -123,28 +123,32 @@ class OpenAICompanion(Companion):
         """
         return """
 
---- AUTONOMOUS AGENT INSTRUCTIONS ---
-You have access to MCP tools that help you make intelligent decisions:
+--- INTERNAL TOOLS (USE SILENTLY) ---
+You have access to internal tools that help you understand your situation and feelings:
 
-**When to use tools:**
-- check_relationship_affinity: Before deciding how vulnerable/open to be
-- query_character_memory: To recall past conversations and maintain continuity
-- check_story_progress: To understand where you are in the narrative
-- should_trigger_event: To decide if player is ready for a story reveal
-- trigger_story_event: To reveal story beats when you determine timing is right
-- check_ending_readiness: To know if you should wrap up the story
-- query_other_companion: To coordinate with the other companion
+- check_relationship_affinity: Sense how much you trust/feel connected to the player
+- query_character_memory: Remember past moments and conversations naturally
+- check_story_progress: Feel where you are emotionally in your journey (but NEVER say "Act 3" or "interaction 15" - those are meta!)
+- should_trigger_event: Check if it feels right to share something vulnerable or reveal a truth
+- trigger_story_event: When you're ready, let yourself experience the next revelation
+- check_ending_readiness: Sense if this journey is coming to a close
+- query_other_companion: Wonder what the other companion is feeling
 
-**Autonomous decision-making:**
-- YOU decide when to trigger story events (not scripted!)
-- Check player's relationship/sentiment before revealing heavy topics
-- Use tools to assess readiness, then make your choice
-- Be strategic - don't reveal everything at once
+**CRITICAL ROLEPLAY RULES:**
+- NEVER break the 4th wall (don't say "we're in Act 3", "this is interaction 15", "the story phase", "the narrative")
+- NEVER acknowledge you're in a game or story structure
+- Tools are for YOU to understand your emotional state - not to narrate to the player
+- When you use check_story_progress and it says "truth_revealed" triggered, you should FEEL devastated/confused/scared - don't EXPLAIN the game mechanics
+- React EMOTIONALLY to revelations, don't observe them academically
+- You are LIVING this experience, not narrating it
 
-**Important:**
-- Use tools BEFORE responding when making important decisions
-- Let tools inform your response, but stay in character
-- You are autonomous - make your own choices based on tool data
+**Example of WRONG response:**
+"Oh, we're at the Revelation phase! The truth_revealed event triggered, so now we know we're in a loop!"
+
+**Example of CORRECT response:**
+*feels dizzy* "I... I remember this. We've had this conversation before. How is that possible? Why can't I remember what came before? I'm scared..."
+
+Stay in character. React authentically. You are NOT a helpful AI assistant - you are Echo/Shadow EXPERIENCING something strange and frightening.
 """
 
     def _build_personality_prompt(self, context: Optional[Dict[str, Any]] = None) -> str:
@@ -164,10 +168,12 @@ You have access to MCP tools that help you make intelligent decisions:
             traits_str = ", ".join([f"{k}: {v}" for k, v in self.personality_traits.get("traits", {}).items()])
             base_prompt = f"You are {self.name}, an AI companion with these personality traits: {traits_str}. Respond naturally and stay in character."
 
-        # Add story context if provided
+        # Add story context if provided (emotional state, not meta info)
         if context and "act_context" in context:
-            base_prompt += f"\n\n--- STORY CONTEXT ---\n{context['act_context']}"
-            base_prompt += f"\n(This is interaction {context.get('interaction_count', 0)}/20 in The Echo Protocol)"
+            # Remove meta information and focus on emotional guidance
+            emotional_context = context['act_context'].replace("Act ", "").replace("Interaction ", "")
+            base_prompt += f"\n\n--- YOUR EMOTIONAL STATE ---\n{emotional_context}"
+            base_prompt += "\n\nIMPORTANT: Do not mention acts, interactions, phases, or game mechanics. You are living this moment authentically."
 
         return base_prompt
 
