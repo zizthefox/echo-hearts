@@ -1,11 +1,13 @@
 """Game state management."""
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from .mcp.server import MCPServer
 from .companions.agents import OpenAICompanion
 from .companions.personalities import get_personality
 from .memory.conversation import ConversationHistory
 from .memory.relationships import RelationshipTracker
+from .story.progression import StoryProgress, StoryEvent, Ending
+from .story.endings import get_ending_narrative
 from .utils.config import config
 
 
@@ -23,6 +25,7 @@ class GameState:
         self.companions: Dict[str, OpenAICompanion] = {}
         self.conversation = ConversationHistory(session_id)
         self.relationships = RelationshipTracker()
+        self.story = StoryProgress()
 
         # Initialize default companions
         self._initialize_companions()
@@ -64,7 +67,7 @@ class GameState:
             # Initialize relationship with player
             self.relationships.update_relationship("player", comp_config["id"], 0.0)
 
-    async def process_message(self, message: str, companion_id: str = "echo") -> str:
+    async def process_message(self, message: str, companion_id: str = "echo") -> Tuple[str, Optional[StoryEvent], Optional[str]]:
         """Process a user message and get companion response.
 
         Args:
@@ -72,18 +75,28 @@ class GameState:
             companion_id: Which companion to respond
 
         Returns:
-            Companion's response
+            Tuple of (response, triggered_event, ending_narrative)
         """
         # Add message to conversation history
         self.conversation.add_message("User", message)
 
+        # Record story interaction
+        triggered_event = self.story.add_interaction()
+
         # Get companion
         companion = self.companions.get(companion_id)
         if not companion:
-            return f"Companion '{companion_id}' not found."
+            return f"Companion '{companion_id}' not found.", None, None
 
-        # Generate response
-        response = await companion.respond(message)
+        # Add story context to the response
+        story_context = {
+            "act": self.story.current_act.name,
+            "act_context": self.story.get_act_context(),
+            "interaction_count": self.story.interaction_count
+        }
+
+        # Generate response with story awareness
+        response = await companion.respond(message, context=story_context)
 
         # Add response to conversation history
         self.conversation.add_message(companion.name, response)
@@ -96,7 +109,15 @@ class GameState:
             reason="conversation"
         )
 
-        return response
+        # Check for ending
+        ending_narrative = None
+        if self.story.interaction_count >= 18:
+            relationships_dict = self.get_relationships_summary()
+            ending = self.story.determine_ending(relationships_dict)
+            if ending:
+                ending_narrative = get_ending_narrative(ending)
+
+        return response, triggered_event, ending_narrative
 
     def get_companion_list(self) -> List[Dict[str, str]]:
         """Get list of active companions.

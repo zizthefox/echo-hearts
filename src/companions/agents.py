@@ -34,8 +34,8 @@ class OpenAICompanion(Companion):
         # Store the message in memory
         self.memory.add_memory(f"User: {message}", memory_type="conversation")
 
-        # Build personality prompt
-        system_prompt = self._build_personality_prompt()
+        # Build personality prompt with story context
+        system_prompt = self._build_personality_prompt(context)
 
         # Get recent memories for context
         recent_memories = self.memory.get_recent_memories(limit=5)
@@ -59,14 +59,24 @@ class OpenAICompanion(Companion):
 
         return response
 
-    def _build_personality_prompt(self) -> str:
+    def _build_personality_prompt(self, context: Optional[Dict[str, Any]] = None) -> str:
         """Build a prompt describing the companion's personality.
+
+        Args:
+            context: Story context including act and narrative guidance
 
         Returns:
             Personality description for the AI
         """
         traits_str = ", ".join([f"{k}: {v}" for k, v in self.personality_traits.items()])
-        return f"You are {self.name}, an AI companion with these personality traits: {traits_str}. Respond naturally and stay in character."
+        base_prompt = f"You are {self.name}, an AI companion with these personality traits: {traits_str}. Respond naturally and stay in character."
+
+        # Add story context if provided
+        if context and "act_context" in context:
+            base_prompt += f"\n\nSTORY CONTEXT: {context['act_context']}"
+            base_prompt += f"\nThis is interaction {context.get('interaction_count', 0)} in The Echo Protocol."
+
+        return base_prompt
 
 
 class ClaudeCompanion(Companion):
