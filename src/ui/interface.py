@@ -59,11 +59,8 @@ class EchoHeartsUI:
                     gr.Markdown("### Relationships")
                     relationships = gr.Markdown(self._get_relationships())
 
-                    with gr.Accordion("Session", open=False):
-                        session_id = gr.Textbox(label="Session ID", value="default")
-                        with gr.Row():
-                            save_btn = gr.Button("Save", size="sm")
-                            load_btn = gr.Button("Load", size="sm")
+                    gr.Markdown("---")
+                    gr.Markdown("*💡 Memories persist during your session only*")
 
             # Event handlers
             companion_selector.change(
@@ -82,18 +79,6 @@ class EchoHeartsUI:
                 self.handle_message,
                 inputs=[msg_input, chatbot, companion_selector],
                 outputs=[msg_input, chatbot, companion_list, relationships]
-            )
-
-            save_btn.click(
-                self.save_session,
-                inputs=[session_id],
-                outputs=[gr.Markdown()]
-            )
-
-            load_btn.click(
-                self.load_session,
-                inputs=[session_id],
-                outputs=[chatbot, companion_list, relationships]
             )
 
         return interface
@@ -139,43 +124,6 @@ class EchoHeartsUI:
         history.append({"role": "assistant", "content": f"**{companion_name}:** {response}"})
 
         return "", history, self._get_companion_list(), self._get_relationships()
-
-    def save_session(self, session_id: str) -> str:
-        """Save current session.
-
-        Args:
-            session_id: Session identifier
-
-        Returns:
-            Status message
-        """
-        success = self.game_state.save_game()
-        return f"✅ Session saved: {session_id}" if success else f"❌ Failed to save session"
-
-    def load_session(
-        self,
-        session_id: str
-    ) -> Tuple[List[dict], str, str]:
-        """Load a saved session.
-
-        Args:
-            session_id: Session identifier
-
-        Returns:
-            Tuple of (chat history, companion list, relationships)
-        """
-        success = self.game_state.load_game(session_id)
-        if not success:
-            return [], self._get_companion_list(), self._get_relationships()
-
-        # Rebuild chat history from conversation
-        history = []
-        for msg in self.game_state.conversation.messages:
-            role = "user" if msg["speaker"] == "User" else "assistant"
-            content = msg["content"] if role == "user" else f"**{msg['speaker']}:** {msg['content']}"
-            history.append({"role": role, "content": content})
-
-        return history, self._get_companion_list(), self._get_relationships()
 
     def _get_companion_list(self) -> str:
         """Get formatted list of active companions.

@@ -6,12 +6,11 @@ from .companions.agents import OpenAICompanion
 from .companions.personalities import get_personality
 from .memory.conversation import ConversationHistory
 from .memory.relationships import RelationshipTracker
-from .memory.storage import StorageManager
 from .utils.config import config
 
 
 class GameState:
-    """Manages the overall game state."""
+    """Manages the overall game state (session-only, no persistence)."""
 
     def __init__(self, session_id: str = "default"):
         """Initialize game state.
@@ -24,7 +23,6 @@ class GameState:
         self.companions: Dict[str, OpenAICompanion] = {}
         self.conversation = ConversationHistory(session_id)
         self.relationships = RelationshipTracker()
-        self.storage = StorageManager()
 
         # Initialize default companions
         self._initialize_companions()
@@ -122,43 +120,3 @@ class GameState:
             Dictionary of companion_id to affinity scores
         """
         return self.relationships.get_all_relationships("player")
-
-    def save_game(self) -> bool:
-        """Save current game state.
-
-        Returns:
-            True if successful
-        """
-        game_data = {
-            "session_id": self.session_id,
-            "companions": [
-                {
-                    "id": comp_id,
-                    "name": comp.name,
-                    "personality_traits": comp.personality_traits,
-                    "memories": comp.memory.memories
-                }
-                for comp_id, comp in self.companions.items()
-            ],
-            "conversation": self.conversation.messages,
-            "relationships": dict(self.relationships.relationships)
-        }
-
-        return self.storage.save_session(self.session_id, game_data)
-
-    def load_game(self, session_id: str) -> bool:
-        """Load a saved game state.
-
-        Args:
-            session_id: Session to load
-
-        Returns:
-            True if successful
-        """
-        game_data = self.storage.load_session(session_id)
-        if not game_data:
-            return False
-
-        # TODO: Restore game state from saved data
-        self.session_id = session_id
-        return True
