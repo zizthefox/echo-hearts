@@ -2,6 +2,7 @@
 
 from typing import Dict, List, Optional, Tuple
 from .mcp.server import MCPServer
+from .mcp.tools import MCPTools
 from .companions.agents import OpenAICompanion
 from .companions.personalities import get_personality
 from .memory.conversation import ConversationHistory
@@ -26,6 +27,9 @@ class GameState:
         self.conversation = ConversationHistory(session_id)
         self.relationships = RelationshipTracker()
         self.story = StoryProgress()
+
+        # MCP tools for autonomous agents
+        self.mcp_tools = MCPTools(self)
 
         # Initialize default companions
         self._initialize_companions()
@@ -57,7 +61,8 @@ class GameState:
                 name=comp_config["name"],
                 personality_traits=personality,  # Pass full personality dict including character_profile
                 api_key=config.openai_api_key,
-                model=config.default_model
+                model=config.default_model,
+                mcp_tools=self.mcp_tools  # Provide MCP tools to agent
             )
             self.companions[comp_config["id"]] = companion
 
@@ -67,26 +72,26 @@ class GameState:
             # Initialize relationship with player
             self.relationships.update_relationship("player", comp_config["id"], 0.0)
 
-    async def process_message(self, message: str, companion_id: str = "echo") -> Tuple[str, Optional[StoryEvent], Optional[str]]:
-        """Process a user message and get companion response.
+    async def process_message(self, message: str, companion_id: str = "echo") -> Tuple[str, Optional[StoryEvent], Optional[str], List]:
+        """Process a user message and get autonomous companion response.
 
         Args:
             message: User's message
             companion_id: Which companion to respond
 
         Returns:
-            Tuple of (response, triggered_event, ending_narrative)
+            Tuple of (response, triggered_event, ending_narrative, tool_calls_made)
         """
         # Add message to conversation history
         self.conversation.add_message("User", message)
 
-        # Record story interaction
+        # Record story interaction (but agents may override event triggering)
         triggered_event = self.story.add_interaction()
 
         # Get companion
         companion = self.companions.get(companion_id)
         if not companion:
-            return f"Companion '{companion_id}' not found.", None, None
+            return f"Companion '{companion_id}' not found.", None, None, []
 
         # Add story context to the response
         story_context = {
@@ -95,11 +100,15 @@ class GameState:
             "interaction_count": self.story.interaction_count
         }
 
-        # Generate response with story awareness
-        response = await companion.respond(message, context=story_context)
+        # Generate AUTONOMOUS response (agent makes own decisions using MCP tools)
+        result = await companion.respond(message, context=story_context)
+
+        # Extract response and tool usage
+        response_text = result.get("response", "") if isinstance(result, dict) else result
+        tool_calls_made = result.get("tool_calls_made", []) if isinstance(result, dict) else []
 
         # Add response to conversation history
-        self.conversation.add_message(companion.name, response)
+        self.conversation.add_message(companion.name, response_text)
 
         # Update relationship (small positive change for interaction)
         self.relationships.update_relationship(
@@ -117,7 +126,7 @@ class GameState:
             if ending:
                 ending_narrative = get_ending_narrative(ending)
 
-        return response, triggered_event, ending_narrative
+        return response_text, triggered_event, ending_narrative, tool_calls_made
 
     def get_companion_list(self) -> List[Dict[str, str]]:
         """Get list of active companions.

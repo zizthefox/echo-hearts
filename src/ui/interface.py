@@ -116,14 +116,37 @@ class EchoHeartsUI:
         # Add user message to history
         history.append({"role": "user", "content": message})
 
-        # Process message through game state (async) - returns (response, event, ending)
-        response, story_event, ending_narrative = asyncio.run(
+        # Process message through game state (async) - returns (response, event, ending, tool_calls)
+        response, story_event, ending_narrative, tool_calls_made = asyncio.run(
             self.game_state.process_message(message, companion_id)
         )
 
         # Get companion name
         companion = self.game_state.companions.get(companion_id)
         companion_name = companion.name if companion else "Companion"
+
+        # Show agent reasoning (tool usage) if any
+        if tool_calls_made:
+            reasoning_text = f"**🤖 {companion_name}'s Autonomous Reasoning:**\n\n"
+            for tool_call in tool_calls_made:
+                tool_name = tool_call["tool"]
+                tool_result = tool_call.get("result", {})
+                reasoning_text += f"- Used `{tool_name}`: "
+
+                # Format result nicely
+                if "affinity" in tool_result:
+                    reasoning_text += f"Relationship is {tool_result['description']} ({tool_result['affinity']:+.2f})\n"
+                elif "should_trigger" in tool_result:
+                    reasoning_text += f"{tool_result['reason']}\n"
+                elif "ready" in tool_result:
+                    if tool_result["ready"]:
+                        reasoning_text += f"Story can end (likely: {tool_result.get('most_likely_ending', 'unknown')})\n"
+                    else:
+                        reasoning_text += f"{tool_result.get('interactions_remaining', '?')} interactions remaining\n"
+                else:
+                    reasoning_text += "Checked data\n"
+
+            history.append({"role": "assistant", "content": reasoning_text})
 
         # Add response to history
         history.append({"role": "assistant", "content": f"**{companion_name}:** {response}"})

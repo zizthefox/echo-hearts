@@ -23,18 +23,22 @@ class OpenAIClient:
         messages: List[Dict[str, str]],
         system_prompt: Optional[str] = None,
         max_tokens: int = 1024,
-        temperature: float = 0.7
-    ) -> str:
-        """Generate a response using OpenAI.
+        temperature: float = 0.7,
+        tools: Optional[List[Dict]] = None,
+        tool_choice: str = "auto"
+    ) -> Dict[str, Any]:
+        """Generate a response using OpenAI with optional function calling.
 
         Args:
             messages: List of message dictionaries with 'role' and 'content'
             system_prompt: Optional system prompt
             max_tokens: Maximum tokens to generate
             temperature: Sampling temperature
+            tools: Optional list of tool definitions for function calling
+            tool_choice: When to use tools ("auto", "none", or specific function)
 
         Returns:
-            Generated response text
+            Dictionary with 'content' and optionally 'tool_calls'
         """
         try:
             # Prepend system message if provided
@@ -43,17 +47,46 @@ class OpenAIClient:
                 formatted_messages.append({"role": "system", "content": system_prompt})
             formatted_messages.extend(messages)
 
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=formatted_messages,
-                max_tokens=max_tokens,
-                temperature=temperature
-            )
-            return response.choices[0].message.content
+            # Build API call parameters
+            params = {
+                "model": self.model,
+                "messages": formatted_messages,
+                "max_tokens": max_tokens,
+                "temperature": temperature
+            }
+
+            # Add tools if provided
+            if tools:
+                params["tools"] = tools
+                params["tool_choice"] = tool_choice
+
+            response = self.client.chat.completions.create(**params)
+            message = response.choices[0].message
+
+            result = {
+                "content": message.content or "",
+                "tool_calls": []
+            }
+
+            # Extract tool calls if any
+            if hasattr(message, 'tool_calls') and message.tool_calls:
+                result["tool_calls"] = [
+                    {
+                        "id": tc.id,
+                        "name": tc.function.name,
+                        "arguments": tc.function.arguments
+                    }
+                    for tc in message.tool_calls
+                ]
+
+            return result
 
         except Exception as e:
             print(f"Error generating response: {e}")
-            return "I'm having trouble responding right now."
+            return {
+                "content": "I'm having trouble responding right now.",
+                "tool_calls": []
+            }
 
 
 class ClaudeClient:
