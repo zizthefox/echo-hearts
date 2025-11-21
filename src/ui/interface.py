@@ -33,8 +33,9 @@ class EchoHeartsUI:
             gr.Markdown("# 💕 Echo Hearts")
             gr.Markdown("*An AI Companion RPG with Emergent Relationships*")
 
-            # Per-session state - creates new GameState for each browser session
-            game_state = gr.State(value=self._create_game_state())
+            # Per-session state - will be initialized on first message (lazy loading)
+            # Can't use initial value because GameState contains unpicklable OpenAI client
+            game_state = gr.State(value=None)
 
             with gr.Row():
                 # Main chat area
@@ -77,37 +78,42 @@ class EchoHeartsUI:
             msg_input.submit(
                 self.handle_message,
                 inputs=[msg_input, chatbot, companion_selector, game_state],
-                outputs=[msg_input, chatbot, companion_list, relationships, story_progress]
+                outputs=[msg_input, chatbot, companion_list, relationships, story_progress, game_state]
             )
 
             send_btn.click(
                 self.handle_message,
                 inputs=[msg_input, chatbot, companion_selector, game_state],
-                outputs=[msg_input, chatbot, companion_list, relationships, story_progress]
+                outputs=[msg_input, chatbot, companion_list, relationships, story_progress, game_state]
             )
 
             # Initialize sidebar on load
             interface.load(
                 self.initialize_ui,
                 inputs=[game_state],
-                outputs=[companion_list, relationships, story_progress]
+                outputs=[companion_list, relationships, story_progress, game_state]
             )
 
         return interface
 
-    def initialize_ui(self, game_state: GameState) -> Tuple[str, str, str]:
+    def initialize_ui(self, game_state: GameState) -> Tuple[str, str, str, GameState]:
         """Initialize UI with fresh game state data.
 
         Args:
-            game_state: The session's game state
+            game_state: The session's game state (may be None on first load)
 
         Returns:
-            Tuple of (companion_list, relationships, story_progress)
+            Tuple of (companion_list, relationships, story_progress, game_state)
         """
+        # Lazy initialization - create game state if not exists
+        if game_state is None:
+            game_state = self._create_game_state()
+
         return (
             self._get_companion_list(game_state),
             self._get_relationships(game_state),
-            self._get_story_progress(game_state)
+            self._get_story_progress(game_state),
+            game_state  # Return updated state to persist it
         )
 
     def handle_message(
@@ -116,20 +122,24 @@ class EchoHeartsUI:
         history: List[dict],
         companion_id: str,
         game_state: GameState
-    ) -> Tuple[str, List[dict], str, str, str]:
+    ) -> Tuple[str, List[dict], str, str, str, GameState]:
         """Handle incoming message from user.
 
         Args:
             message: User's message
             history: Chat history
             companion_id: Active companion ID
-            game_state: Session game state
+            game_state: Session game state (may be None on first message)
 
         Returns:
-            Tuple of (empty input, updated history, companion list, relationships, story progress)
+            Tuple of (empty input, updated history, companion list, relationships, story progress, game_state)
         """
+        # Lazy initialization - create game state on first message if not exists
+        if game_state is None:
+            game_state = self._create_game_state()
+
         if not message.strip():
-            return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state)
+            return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state), game_state
 
         # Add user message to history
         history.append({"role": "user", "content": message})
@@ -183,7 +193,7 @@ class EchoHeartsUI:
                 "content": ending_narrative
             })
 
-        return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state)
+        return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state), game_state
 
     def _get_companion_list(self, game_state: GameState) -> str:
         """Get formatted list of active companions.
