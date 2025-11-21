@@ -2,6 +2,7 @@
 
 import gradio as gr
 import asyncio
+import uuid
 from typing import List, Tuple, Optional
 from ..game_state import GameState
 
@@ -9,14 +10,18 @@ from ..game_state import GameState
 class EchoHeartsUI:
     """Main UI interface for the game."""
 
-    def __init__(self, session_id: str = "default"):
-        """Initialize the UI.
+    def __init__(self):
+        """Initialize the UI (no shared state)."""
+        pass
 
-        Args:
-            session_id: Session identifier
+    def _create_game_state(self):
+        """Create a new game state with unique session ID.
+
+        Returns:
+            New GameState instance
         """
-        self.game_state = GameState(session_id)
-        self.current_companion = "echo"  # Default active companion
+        session_id = str(uuid.uuid4())[:8]  # Short unique ID
+        return GameState(session_id)
 
     def create_interface(self) -> gr.Blocks:
         """Create the Gradio interface.
@@ -27,6 +32,9 @@ class EchoHeartsUI:
         with gr.Blocks(title="Echo Hearts", theme=gr.themes.Soft()) as interface:
             gr.Markdown("# 💕 Echo Hearts")
             gr.Markdown("*An AI Companion RPG with Emergent Relationships*")
+
+            # Per-session state - creates new GameState for each browser session
+            game_state = gr.State(value=self._create_game_state)
 
             with gr.Row():
                 # Main chat area
@@ -54,51 +62,60 @@ class EchoHeartsUI:
                         label="Talk to:",
                         interactive=True
                     )
-                    companion_list = gr.Markdown(self._get_companion_list())
+                    companion_list = gr.Markdown()
 
                     gr.Markdown("### Relationships")
-                    relationships = gr.Markdown(self._get_relationships())
+                    relationships = gr.Markdown()
 
                     gr.Markdown("### Story Progress")
-                    story_progress = gr.Markdown(self._get_story_progress())
+                    story_progress = gr.Markdown()
 
                     gr.Markdown("---")
-                    gr.Markdown("*💡 Memories persist during your session only*")
+                    gr.Markdown("*💡 Each browser session starts a new story*")
 
-            # Event handlers
-            companion_selector.change(
-                self.change_companion,
-                inputs=[companion_selector],
-                outputs=[]
-            )
-
+            # Event handlers - pass game_state for per-session isolation
             msg_input.submit(
                 self.handle_message,
-                inputs=[msg_input, chatbot, companion_selector],
+                inputs=[msg_input, chatbot, companion_selector, game_state],
                 outputs=[msg_input, chatbot, companion_list, relationships, story_progress]
             )
 
             send_btn.click(
                 self.handle_message,
-                inputs=[msg_input, chatbot, companion_selector],
+                inputs=[msg_input, chatbot, companion_selector, game_state],
                 outputs=[msg_input, chatbot, companion_list, relationships, story_progress]
+            )
+
+            # Initialize sidebar on load
+            interface.load(
+                self.initialize_ui,
+                inputs=[game_state],
+                outputs=[companion_list, relationships, story_progress]
             )
 
         return interface
 
-    def change_companion(self, companion_id: str):
-        """Change the active companion.
+    def initialize_ui(self, game_state: GameState) -> Tuple[str, str, str]:
+        """Initialize UI with fresh game state data.
 
         Args:
-            companion_id: ID of the companion to switch to
+            game_state: The session's game state
+
+        Returns:
+            Tuple of (companion_list, relationships, story_progress)
         """
-        self.current_companion = companion_id
+        return (
+            self._get_companion_list(game_state),
+            self._get_relationships(game_state),
+            self._get_story_progress(game_state)
+        )
 
     def handle_message(
         self,
         message: str,
         history: List[dict],
-        companion_id: str
+        companion_id: str,
+        game_state: GameState
     ) -> Tuple[str, List[dict], str, str, str]:
         """Handle incoming message from user.
 
@@ -106,23 +123,24 @@ class EchoHeartsUI:
             message: User's message
             history: Chat history
             companion_id: Active companion ID
+            game_state: Session game state
 
         Returns:
             Tuple of (empty input, updated history, companion list, relationships, story progress)
         """
         if not message.strip():
-            return "", history, self._get_companion_list(), self._get_relationships(), self._get_story_progress()
+            return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state)
 
         # Add user message to history
         history.append({"role": "user", "content": message})
 
         # Process message through game state (async) - returns (response, event, ending, tool_calls)
         response, story_event, ending_narrative, tool_calls_made = asyncio.run(
-            self.game_state.process_message(message, companion_id)
+            game_state.process_message(message, companion_id)
         )
 
         # Get companion name
-        companion = self.game_state.companions.get(companion_id)
+        companion = game_state.companions.get(companion_id)
         companion_name = companion.name if companion else "Companion"
 
         # Show agent reasoning (tool usage) if any
@@ -165,15 +183,18 @@ class EchoHeartsUI:
                 "content": ending_narrative
             })
 
-        return "", history, self._get_companion_list(), self._get_relationships(), self._get_story_progress()
+        return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state)
 
-    def _get_companion_list(self) -> str:
+    def _get_companion_list(self, game_state: GameState) -> str:
         """Get formatted list of active companions.
+
+        Args:
+            game_state: Session game state
 
         Returns:
             Markdown formatted companion list
         """
-        companions = self.game_state.get_companion_list()
+        companions = game_state.get_companion_list()
         if not companions:
             return "*No companions available*"
 
@@ -183,32 +204,38 @@ class EchoHeartsUI:
 
         return "\n".join(lines)
 
-    def _get_relationships(self) -> str:
+    def _get_relationships(self, game_state: GameState) -> str:
         """Get formatted relationship status.
+
+        Args:
+            game_state: Session game state
 
         Returns:
             Markdown formatted relationships
         """
-        relationships = self.game_state.get_relationships_summary()
+        relationships = game_state.get_relationships_summary()
         if not relationships:
             return "*No relationships yet*"
 
         lines = []
         for companion_id, affinity in relationships.items():
-            companion = self.game_state.companions.get(companion_id)
+            companion = game_state.companions.get(companion_id)
             if companion:
-                description = self.game_state.relationships.get_relationship_description(affinity)
+                description = game_state.relationships.get_relationship_description(affinity)
                 lines.append(f"**{companion.name}:** {description} ({affinity:+.2f})")
 
         return "\n".join(lines)
 
-    def _get_story_progress(self) -> str:
+    def _get_story_progress(self, game_state: GameState) -> str:
         """Get story progress summary.
+
+        Args:
+            game_state: Session game state
 
         Returns:
             Markdown formatted story progress
         """
-        return self.game_state.story.get_progress_summary()
+        return game_state.story.get_progress_summary()
 
 
 def launch_interface():
