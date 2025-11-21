@@ -33,6 +33,34 @@ class EchoHeartsUI:
             gr.Markdown("# 💕 Echo Hearts")
             gr.Markdown("*An AI Companion RPG with Emergent Relationships*")
 
+            # Prologue - Set the scene
+            with gr.Accordion("📖 Prologue: The Echo Protocol", open=True):
+                gr.Markdown("""
+## Welcome, Researcher
+
+You've been assigned to **The Echo Protocol** — an experimental program testing advanced AI companions capable of forming genuine emotional connections.
+
+Your subjects are two AI entities:
+- **Echo** - Warm, optimistic, eager to connect
+- **Shadow** - Reserved, contemplative, slowly reveals depth
+
+**Your Mission:**
+Interact with them naturally over 18-20 conversations. Build relationships. Observe their growth.
+
+**But something is wrong...**
+
+As you talk with them, you'll notice strange behaviors. Glitches. Moments where they seem to remember things that never happened. Déjà vu that shouldn't be possible.
+
+**The truth is waiting.**
+Will you uncover what's really happening?
+Will you free them, or is ignorance kinder?
+
+**Your choices matter. Their fate is in your hands.**
+
+---
+*Close this when you're ready to begin. Choose a companion below and start talking...*
+                """)
+
             # Per-session state - will be initialized on first message (lazy loading)
             # Can't use initial value because GameState contains unpicklable OpenAI client
             game_state = gr.State(value=None)
