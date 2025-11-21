@@ -1,38 +1,46 @@
 """Game state management."""
 
+import asyncio
 from typing import Dict, List, Optional, Tuple
-from .mcp.server import MCPServer
-from .mcp.tools import MCPTools
+from .game_mcp.in_process_mcp import InProcessMCPServer, InProcessMCPClient
 from .companions.agents import OpenAICompanion
 from .companions.personalities import get_personality
 from .memory.conversation import ConversationHistory
 from .memory.relationships import RelationshipTracker
-from .story.progression import StoryProgress, StoryEvent, Ending
-from .story.endings import get_ending_narrative
+from .story.rooms import RoomProgression, MemoryFragment
+from .story.new_endings import determine_ending_from_relationships, get_ending_narrative, RoomEnding
 from .utils.config import config
 
 
 class GameState:
-    """Manages the overall game state (session-only, no persistence)."""
+    """Manages the overall game state with real MCP architecture (session-only, no persistence)."""
 
     def __init__(self, session_id: str = "default"):
-        """Initialize game state.
+        """Initialize game state with MCP server/client.
 
         Args:
             session_id: Unique session identifier
         """
         self.session_id = session_id
-        self.mcp_server = MCPServer()
         self.companions: Dict[str, OpenAICompanion] = {}
         self.conversation = ConversationHistory(session_id)
         self.relationships = RelationshipTracker()
-        self.story = StoryProgress()
 
-        # MCP tools for autonomous agents
-        self.mcp_tools = MCPTools(self)
+        # NEW: Room-based progression system
+        self.room_progression = RoomProgression()
+
+        # REAL MCP Architecture: Server and Client
+        self.mcp_server = InProcessMCPServer(self, name=f"echo-hearts-{session_id}")
+        self.mcp_client = InProcessMCPClient(self.mcp_server)
+        self._mcp_initialized = False
 
         # Initialize default companions
         self._initialize_companions()
+
+    async def _initialize_mcp(self):
+        """Initialize the MCP client connection."""
+        await self.mcp_client.initialize()
+        print(f"[MCP] Server initialized with {len(self.mcp_client.available_tools)} tools")
 
     def _initialize_companions(self):
         """Initialize default companion characters."""
@@ -62,17 +70,14 @@ class GameState:
                 personality_traits=personality,  # Pass full personality dict including character_profile
                 api_key=config.openai_api_key,
                 model=config.default_model,
-                mcp_tools=self.mcp_tools  # Provide MCP tools to agent
+                mcp_client=self.mcp_client  # Provide MCP CLIENT to agent (real MCP!)
             )
             self.companions[comp_config["id"]] = companion
-
-            # Create MCP context for this companion
-            self.mcp_server.create_context(comp_config["id"])
 
             # Initialize relationship with player
             self.relationships.update_relationship("player", comp_config["id"], 0.0)
 
-    async def process_message(self, message: str, companion_id: str = "echo") -> Tuple[str, Optional[StoryEvent], Optional[str], List]:
+    async def process_message(self, message: str, companion_id: str = "echo") -> Tuple[str, Optional[MemoryFragment], Optional[str], List]:
         """Process a user message and get autonomous companion response.
 
         Args:
@@ -80,30 +85,36 @@ class GameState:
             companion_id: Which companion to respond
 
         Returns:
-            Tuple of (response, triggered_event, ending_narrative, tool_calls_made)
+            Tuple of (response, new_memory_fragment, ending_narrative, tool_calls_made)
         """
+        # Initialize MCP on first message (lazy initialization)
+        if not self._mcp_initialized:
+            await self._initialize_mcp()
+            self._mcp_initialized = True
+
         # Add message to conversation history
         self.conversation.add_message("User", message)
 
-        # Record story interaction (but agents may override event triggering)
-        triggered_event = self.story.add_interaction()
+        # Get current room info
+        current_room = self.room_progression.get_current_room()
 
         # Get companion
         companion = self.companions.get(companion_id)
         if not companion:
             return f"Companion '{companion_id}' not found.", None, None, []
 
-        # Add story context to the response - INCLUDE triggered event and all past events
-        story_context = {
-            "act": self.story.current_act.name,
-            "act_context": self.story.get_act_context(),
-            "interaction_count": self.story.interaction_count,
-            "triggered_event": triggered_event,  # Event happening RIGHT NOW
-            "events_triggered": self.story.events_triggered  # ALL past events (persistent state)
+        # Add room context to the response
+        room_context = {
+            "current_room": current_room.name,
+            "room_number": current_room.room_number,
+            "objective": current_room.objective,
+            "room_description": current_room.description,
+            "rooms_completed": sum(1 for r in self.room_progression.rooms.values() if r.completed),
+            "memory_fragments_collected": len(self.room_progression.memory_fragments)
         }
 
         # Generate AUTONOMOUS response (agent makes own decisions using MCP tools)
-        result = await companion.respond(message, context=story_context)
+        result = await companion.respond(message, context=room_context)
 
         # Extract response and tool usage
         response_text = result.get("response", "") if isinstance(result, dict) else result
@@ -112,23 +123,86 @@ class GameState:
         # Add response to conversation history
         self.conversation.add_message(companion.name, response_text)
 
-        # Update relationship (small positive change for interaction)
+        # AUTO-CHECK: See if player's message triggered room progression
+        auto_unlock_result = None
+        trigger_check = self.room_progression.check_trigger_match(message)
+        if trigger_check.get("matched") and current_room.room_number < 5:
+            # Automatically progress if triggers matched and companion hasn't done it yet
+            room_unlocked = False
+            for tool_call in tool_calls_made:
+                if tool_call["tool"] == "unlock_next_room" and tool_call.get("result", {}).get("success"):
+                    room_unlocked = True
+                    break
+
+            # If companion didn't unlock room but triggers matched, do it automatically
+            if not room_unlocked:
+                from .game_mcp.tools import MCPTools
+                mcp_tools = MCPTools(self)
+                unlock_result = mcp_tools.unlock_next_room(f"Auto-unlock: player said '{trigger_check['trigger']}'")
+                if unlock_result.get("success"):
+                    print(f"[AUTO-UNLOCK] Room progressed due to trigger: {trigger_check['trigger']}")
+                    auto_unlock_result = unlock_result
+
+        # Update relationship dynamically based on sentiment analysis
+        sentiment_result = None
+        for tool_call in tool_calls_made:
+            if tool_call["tool"] == "analyze_player_sentiment":
+                sentiment_result = tool_call["result"]
+                break
+
+        # Use dynamic affinity change if sentiment was analyzed, otherwise use default
+        if sentiment_result and "affinity_change" in sentiment_result:
+            affinity_change = sentiment_result["affinity_change"]
+            sentiment = sentiment_result.get("sentiment", "unknown")
+            reason = f"conversation ({sentiment})"
+        else:
+            # Fallback to default if companion didn't analyze sentiment
+            affinity_change = 0.01
+            reason = "conversation (default)"
+
         self.relationships.update_relationship(
             "player",
             companion_id,
-            0.01,
-            reason="conversation"
+            affinity_change,
+            reason=reason
         )
 
-        # Check for ending
-        ending_narrative = None
-        if self.story.interaction_count >= 18:
-            relationships_dict = self.get_relationships_summary()
-            ending = self.story.determine_ending(relationships_dict)
-            if ending:
-                ending_narrative = get_ending_narrative(ending)
+        # Check if a room was unlocked (from tool calls OR auto-unlock)
+        new_memory_fragment = None
 
-        return response_text, triggered_event, ending_narrative, tool_calls_made
+        # Check tool calls first
+        for tool_call in tool_calls_made:
+            if tool_call["tool"] == "unlock_next_room" and tool_call["result"].get("success"):
+                # A new room was unlocked, get the memory fragment
+                fragment_title = tool_call["result"].get("memory_fragment")
+                if fragment_title:
+                    # Get the most recently added memory fragment
+                    if self.room_progression.memory_fragments:
+                        new_memory_fragment = self.room_progression.memory_fragments[-1]
+
+        # If no fragment from tool calls, check auto-unlock
+        if not new_memory_fragment and auto_unlock_result and auto_unlock_result.get("success"):
+            if self.room_progression.memory_fragments:
+                new_memory_fragment = self.room_progression.memory_fragments[-1]
+
+        # Check for ending (Room 5 = The Exit)
+        ending_narrative = None
+        if current_room.room_number == 5 and current_room.unlocked:
+            # Determine ending based on relationships
+            echo_affinity = self.relationships.get_relationship("player", "echo")
+            shadow_affinity = self.relationships.get_relationship("player", "shadow")
+            key_choices = self.room_progression.key_choices
+
+            ending_result = determine_ending_from_relationships(
+                echo_affinity,
+                shadow_affinity,
+                key_choices
+            )
+
+            ending = ending_result["ending"]
+            ending_narrative = get_ending_narrative(ending)
+
+        return response_text, new_memory_fragment, ending_narrative, tool_calls_made
 
     def get_companion_list(self) -> List[Dict[str, str]]:
         """Get list of active companions.

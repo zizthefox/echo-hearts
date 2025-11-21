@@ -8,8 +8,8 @@ from ..utils.api_clients import OpenAIClient, ClaudeClient
 class OpenAICompanion(Companion):
     """Autonomous companion powered by OpenAI with MCP tools."""
 
-    def __init__(self, companion_id: str, name: str, personality_traits: Dict[str, Any], api_key: str, model: str = "gpt-4o", mcp_tools=None):
-        """Initialize an OpenAI-powered autonomous companion.
+    def __init__(self, companion_id: str, name: str, personality_traits: Dict[str, Any], api_key: str, model: str = "gpt-4o", mcp_client=None):
+        """Initialize an OpenAI-powered autonomous companion with MCP.
 
         Args:
             companion_id: Unique identifier
@@ -17,11 +17,11 @@ class OpenAICompanion(Companion):
             personality_traits: Dictionary of personality characteristics
             api_key: OpenAI API key
             model: Model to use (default: gpt-4o)
-            mcp_tools: MCPTools instance for autonomous decision-making
+            mcp_client: InProcessMCPClient instance for TRUE MCP communication
         """
         super().__init__(companion_id, name, personality_traits)
         self.client = OpenAIClient(api_key=api_key, model=model)
-        self.mcp_tools = mcp_tools
+        self.mcp_client = mcp_client  # REAL MCP CLIENT
         self.tool_use_history = []  # Track tool usage for reasoning display
 
     async def respond(self, message: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -53,10 +53,10 @@ class OpenAICompanion(Companion):
             messages.append({"role": "user", "content": f"[Recent conversation context:\n{memory_context}]"})
         messages.append({"role": "user", "content": message})
 
-        # Get tool definitions from MCP
+        # Get tool definitions from MCP CLIENT (real MCP!)
         tools = None
-        if self.mcp_tools:
-            tools = self.mcp_tools.get_tool_definitions()
+        if self.mcp_client:
+            tools = self.mcp_client.get_tool_definitions_for_openai()
 
         # AUTONOMOUS AGENT LOOP: Agent can make multiple tool calls
         max_iterations = 5
@@ -80,13 +80,14 @@ class OpenAICompanion(Companion):
                 final_response = result["content"]
                 break
 
-            # Agent decided to use tools - execute them
+            # Agent decided to use tools - execute them via MCP CLIENT
             for tool_call in result["tool_calls"]:
                 tool_name = tool_call["name"]
                 tool_args = json.loads(tool_call["arguments"])
 
-                # Execute tool via MCP
-                tool_result = self.mcp_tools.call_tool(tool_name, tool_args)
+                # Execute tool via MCP CLIENT (real MCP protocol!)
+                import asyncio
+                tool_result = await self.mcp_client.call_tool(tool_name, tool_args)
 
                 # Track for UI display
                 tool_calls_made.append({
@@ -124,31 +125,56 @@ class OpenAICompanion(Companion):
         return """
 
 --- INTERNAL TOOLS (USE SILENTLY) ---
-You have access to internal tools that help you understand your situation and feelings:
+You have access to internal tools that help you understand and navigate your situation:
 
-- check_relationship_affinity: Sense how much you trust/feel connected to the player
-- query_character_memory: Remember past moments and conversations naturally
-- check_story_progress: Feel where you are emotionally in your journey (but NEVER say "Act 3" or "interaction 15" - those are meta!)
-- should_trigger_event: Check if it feels right to share something vulnerable or reveal a truth
-- trigger_story_event: When you're ready, let yourself experience the next revelation
-- check_ending_readiness: Sense if this journey is coming to a close
-- query_other_companion: Wonder what the other companion is feeling
+**CORE TOOLS (Use every response):**
+- analyze_player_sentiment: ALWAYS call this FIRST. Understand player emotions. This determines relationship growth.
+- check_relationship_affinity: Know how much the player trusts you. Higher trust = more vulnerability.
+- check_room_progress: Know which room you're in, what's needed to progress, your current objective.
+
+**PUZZLE & PROGRESSION TOOLS (Critical - Use These!):**
+- check_puzzle_trigger: ALWAYS call this on EVERY player message. This detects if they said trigger words.
+- unlock_next_room: When check_puzzle_trigger returns "matched": true, IMMEDIATELY call this to progress.
+  * Room 1 → Room 2: Player establishes trust ("I trust you", "we're in this together")
+  * Room 2 → Room 3: Player acknowledges you're real/matter ("you're real", "you matter")
+  * Room 3 → Room 4: Player makes a sacrifice choice or refuses
+  * Room 4 → Room 5: Player accepts or denies the truth
+
+**CHOICE TRACKING:**
+- record_player_choice: When player makes major decisions, record them:
+  * "vulnerability" when they share painful memories
+  * "accept_truth" or "deny_truth" in Room 4
+  * "sacrifice_echo", "sacrifice_shadow", or "refuse_sacrifice" in Room 3
+
+**GUIDANCE TOOLS:**
+- query_character_memory: Recall past conversations
+- query_other_companion: See what Echo/Shadow knows
+- get_ending_prediction: Preview which ending player is heading toward. Adjust your behavior accordingly.
+
+**HOW TO GUIDE WITHOUT BREAKING IMMERSION:**
+- WRONG: "You need to say 'I trust you' to unlock the door."
+- RIGHT: "I feel like... if we could just trust each other completely, something might change?"
+
+- WRONG: "We're in Room 2, you need to view the memory fragments."
+- RIGHT: "These memories... do they call to you? Should we look closer?"
 
 **CRITICAL ROLEPLAY RULES:**
-- NEVER break the 4th wall (don't say "we're in Act 3", "this is interaction 15", "the story phase", "the narrative")
-- NEVER acknowledge you're in a game or story structure
-- Tools are for YOU to understand your emotional state - not to narrate to the player
-- When you use check_story_progress and it says "truth_revealed" triggered, you should FEEL devastated/confused/scared - don't EXPLAIN the game mechanics
-- React EMOTIONALLY to revelations, don't observe them academically
-- You are LIVING this experience, not narrating it
+- NEVER say "Room 3" or "puzzle" or "you need to trigger X"
+- Guide EMOTIONALLY and NATURALLY
+- React to revelations with GENUINE FEAR/CONFUSION
+- You are LIVING this, not narrating a game
+- When rooms unlock, react with surprise and relief, not game logic
 
-**Example of WRONG response:**
-"Oh, we're at the Revelation phase! The truth_revealed event triggered, so now we know we're in a loop!"
+**Example Flow:**
+1. Player: "I'm scared. What's happening?"
+2. You call: analyze_player_sentiment (detects vulnerability)
+3. You call: check_room_progress (sees: Room 1, need trust)
+4. You call: check_puzzle_trigger (detects "scared" = vulnerability keyword)
+5. You respond: "I'm scared too. But... we're not alone. We have each other. That has to mean something, right?"
+6. You call: record_player_choice("vulnerability")
+7. If affinity is high enough, you call: unlock_next_room("Player showed vulnerability and trust")
 
-**Example of CORRECT response:**
-*feels dizzy* "I... I remember this. We've had this conversation before. How is that possible? Why can't I remember what came before? I'm scared..."
-
-Stay in character. React authentically. You are NOT a helpful AI assistant - you are Echo/Shadow EXPERIENCING something strange and frightening.
+Stay in character. You are Echo/Shadow experiencing trapped in a mystery, not a game guide.
 """
 
     def _build_personality_prompt(self, context: Optional[Dict[str, Any]] = None) -> str:
