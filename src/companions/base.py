@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
-from ..mcp.memory import CharacterMemory
+from ..game_mcp.memory import CharacterMemory
 
 
 class Companion(ABC):

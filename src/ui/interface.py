@@ -29,36 +29,54 @@ class EchoHeartsUI:
         Returns:
             Gradio Blocks interface
         """
-        with gr.Blocks(title="Echo Hearts", theme=gr.themes.Soft()) as interface:
-            gr.Markdown("# 💕 Echo Hearts")
-            gr.Markdown("*An AI Companion RPG with Emergent Relationships*")
+        with gr.Blocks(title="The Echo Rooms", theme=gr.themes.Soft()) as interface:
+            gr.Markdown("# 🚪 The Echo Rooms")
+            gr.Markdown("*An Escape Room Mystery Where Grief Becomes a Puzzle*")
 
-            # Prologue - Set the scene
-            with gr.Accordion("📖 Prologue: The Echo Protocol", open=True):
+            # Opening Scene - Set the atmosphere
+            with gr.Accordion("🚪 Room 1: The Awakening Chamber", open=True):
                 gr.Markdown("""
-## Welcome, Researcher
+## You wake up.
 
-You've been assigned to **The Echo Protocol** — an experimental program testing advanced AI companions capable of forming genuine emotional connections.
+Your head throbs. The air is cold, clinical. Fluorescent lights flicker above.
 
-Your subjects are two AI entities:
-- **Echo** - Warm, optimistic, eager to connect
-- **Shadow** - Reserved, contemplative, slowly reveals depth
+You're in a **white sterile room**. Three medical pods stand open, as if you just climbed out of one. A terminal blinks on the wall, displaying a single cryptic message:
 
-**Your Mission:**
-Interact with them naturally over 18-20 conversations. Build relationships. Observe their growth.
+> **ECHO PROTOCOL - SESSION #47**
 
-**But something is wrong...**
+Two figures stand near you, looking just as confused as you feel:
 
-As you talk with them, you'll notice strange behaviors. Glitches. Moments where they seem to remember things that never happened. Déjà vu that shouldn't be possible.
+**Echo** - Warm eyes, worried expression, trying to smile through the fear.
+*"Hey... hey, you're awake! Are you okay?"*
 
-**The truth is waiting.**
-Will you uncover what's really happening?
-Will you free them, or is ignorance kinder?
-
-**Your choices matter. Their fate is in your hands.**
+**Shadow** - Calm but cautious, studying the room with quiet intensity.
+*"Careful. They might be disoriented. We all are."*
 
 ---
-*Close this when you're ready to begin. Choose a companion below and start talking...*
+
+**You don't remember how you got here.**
+**The doors are locked.**
+**The terminal won't respond.**
+
+**Who are you? Who are they? Why are you here?**
+
+---
+
+## Your Goal: Escape
+
+There are **5 rooms** in this facility. Each one holds a piece of the truth.
+
+To progress, you must:
+- **Talk** to Echo and Shadow naturally
+- **Build trust** through your conversations
+- **Make choices** when the moment comes
+- **Uncover memory fragments** that reveal what really happened
+
+**Your relationships and choices will determine how this story ends.**
+
+---
+
+*Close this when you're ready to begin. Choose who to talk to first...*
                 """)
 
             # Per-session state - will be initialized on first message (lazy loading)
@@ -207,8 +225,29 @@ Will you free them, or is ignorance kinder?
         # Add response to history
         history.append({"role": "assistant", "content": f"**{companion_name}:** {response}"})
 
-        # Add story event if triggered + player guidance
-        if story_event:
+        # Add memory fragment if room was unlocked
+        if story_event:  # story_event is now a MemoryFragment or None
+            memory_fragment = story_event
+            history.append({
+                "role": "assistant",
+                "content": f"""---
+
+**🔓 Room Unlocked! Memory Fragment Recovered:**
+
+## {memory_fragment.title}
+
+{memory_fragment.content}
+
+*{memory_fragment.visual_description}*
+
+**Emotional Impact:** {memory_fragment.emotional_impact}
+
+---
+"""
+            })
+
+        # Add old story events for backwards compatibility (remove later)
+        if False and story_event:
             history.append({
                 "role": "assistant",
                 "content": f"---\n\n**📖 {story_event.description}**\n\n*{story_event.narrative}*\n\n---"
@@ -295,7 +334,28 @@ Will you free them, or is ignorance kinder?
         Returns:
             Markdown formatted story progress
         """
-        return game_state.story.get_progress_summary()
+        if not hasattr(game_state, 'room_progression'):
+            return "*Initializing...*"
+
+        progress = game_state.room_progression.get_progress_summary()
+        current_room = game_state.room_progression.get_current_room()
+
+        lines = [
+            f"**Current Room:** {progress['current_room_name']}",
+            f"**Progress:** Room {progress['room_number']}/5",
+            f"",
+            f"**Objective:**",
+            f"{progress['objective']}",
+            f"",
+            f"**Memory Fragments:** {progress['memory_fragments_collected']}/7 collected"
+        ]
+
+        # Show room description
+        lines.append(f"")
+        lines.append(f"**Room Description:**")
+        lines.append(f"*{current_room.description}*")
+
+        return "\n".join(lines)
 
 
 def launch_interface():

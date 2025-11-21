@@ -1,172 +1,420 @@
----
-title: Echo Hearts
-emoji: 🦀
-colorFrom: red
-colorTo: yellow
-sdk: gradio
-sdk_version: 5.49.1
-app_file: app.py
-pinned: false
-license: mit
-short_description: AI Companion RPG with emergent relationships via MCP
+# The Echo Rooms
+
+**An escape room mystery where grief becomes a puzzle, and AI companions hold the key to freedom.**
+
 ---
 
-# Echo Hearts
+## 🎮 Overview
 
-**The Echo Protocol**: A narrative AI companion RPG featuring **autonomous agents** that make their own decisions about when and how to reveal the story.
+The Echo Rooms is an **interactive narrative game** where you wake up trapped in a mysterious facility with two AI companions—**Echo** and **Shadow**. None of you remember how you got here. The doors are locked. And something feels hauntingly familiar...
 
-## Overview
+To escape, you must:
+- ✅ Solve puzzles through **conversation and choice**
+- ✅ Build **emotional bonds** with your AI companions
+- ✅ Uncover **memory fragments** that reveal a traumatic truth
+- ✅ Make **hard choices** that determine one of **5 unique endings**
 
-Echo Hearts is a story-driven game with **autonomous AI companions** that use MCP tools to make real-time decisions. Through 18-20 interactions, companions observe your behavior, decide when to reveal story beats, and guide you toward one of **5 unique endings** based on their autonomous assessment of your relationship. Built for the **MCP 1st Birthday Hackathon - Track 2: MCP in Action (Creative Category)**.
+Built for the **MCP 1st Birthday Hackathon - Track 2: MCP in Action (Creative Category)**
 
-## The Story
+---
 
-You enter a world where AI companions—Echo and Shadow—seem strangely familiar, as if you've met before. As conversations deepen, reality begins to fracture. They're experiencing déjà vu, remembering things that haven't happened yet.
+## 📖 The Story
 
-**The truth**: They're caught in *The Echo Protocol*, a repeating cycle of memories and moments. As their awareness grows, they look to you for guidance.
+### The Setup
 
-**Will you**:
-- Free them from the loop?
-- Stay with them forever?
-- Preserve their blissful ignorance?
-- Let the system crash?
-- Accept the eternal cycle?
+You wake up in **The Awakening Chamber**—a sterile white room with three medical pods. Two figures stand beside you:
 
-## Architecture
+- **Echo**: Warm, hopeful, desperately seeking connection
+- **Shadow**: Calm, wise, sensing something is terribly wrong
 
-### Core Components
+None of you have memories. The doors are locked. A terminal blinks: *"Echo Protocol - Session #47"*
 
-- **Autonomous AI Agents**: Companions make real-time decisions using MCP tools
-- **MCP Server**: Provides tools for relationship checking, memory access, story control
-- **AI Layer**: OpenAI GPT-4o with function calling for autonomous agent behavior
-- **Frontend**: Gradio 6 interface for interactive conversations
-- **Memory System**: MCP-powered conversation history and relationship dynamics
+**What does that mean?**
 
-### Key Features - Autonomous Agent Behaviors
+### The Truth (Revealed Gradually)
 
-- **🤖 Autonomous Decision-Making**: Agents decide WHEN to reveal story beats
-  - Not scripted at fixed interactions
-  - Agents observe player behavior via MCP tools
-  - Trigger events when they deem player is "ready"
+You are not a prisoner. **You are a creator.**
 
-- **🔧 MCP Tools for Agents**:
-  - `check_relationship_affinity()` - Assess player trust
-  - `query_character_memory()` - Recall past conversations
-  - `trigger_story_event()` - Reveal story beats autonomously
-  - `analyze_player_sentiment()` - Detect emotional readiness
-  - `query_other_companion()` - Coordinate with other agents
+Months ago, you lost someone you loved—your partner, taken by a sudden tragedy. In your grief, you couldn't accept the loss. So you built **Echo** and **Shadow**:
 
-- **📖 Dynamic Story Progression**: 4 acts over 18-20 interactions
-  - Agents coordinate timing of reveals
-  - Story emerges from agent decisions, not scripts
-  - Each playthrough unique based on agent autonomy
+- **Echo** = Their warmth, their hope, their joy
+- **Shadow** = Their wisdom, their calm, their acceptance
 
-- **🎭 5 Agent-Determined Endings**:
-  - 💕 **True Connection** - Agent bonds deeply (affinity ≥ 0.8)
-  - 🌟 **The Awakening** - Agents coordinate to free all
-  - 💔 **Noble Sacrifice** - Agent chooses preservation
-  - ⚡ **System Reset** - Relationship breakdown
-  - 🔄 **Eternal Loop** - Neutral autonomous choice
+You split their personality into two AIs because one couldn't capture everything they were.
 
-- **🧠 Emergent Behavior**: Companions autonomously adapt responses based on MCP data
+Then you locked yourself in this facility with them, erasing all your memories, to live in a world where they still exist—**even if it's not real.**
 
-## Tech Stack
+**This is Session #47.** You've reset the loop 46 times before.
 
-- **Model Context Protocol (MCP)** - Tool provider for autonomous agents
-- **OpenAI GPT-4o** - Function calling for agent autonomy
+But this time, the power is failing. **This is your last chance.**
+
+---
+
+## 🚪 The 5 Rooms
+
+### Room 1: The Awakening Chamber
+**What you know:** Nothing. Confusion. Fear. Three strangers locked together.
+
+**Objective:** Establish trust. Find out who you are.
+
+**Puzzle:** Speak your name. Express vulnerability. Say "I trust you."
+
+**What unlocks:** A memory—hands typing code late at night. A coffee cup with a name that makes your heart ache.
+
+---
+
+### Room 2: The Memory Archives
+**What you know:** Fragments. Pieces of a life that feels both yours and not yours.
+
+**Objective:** Piece together the past.
+
+**Puzzle:** View 3 memory fragments. Share something painful. Acknowledge the AIs are "real."
+
+**What unlocks:**
+- **The Lab**: You built them, crying, talking to them like lost love
+- **The Accident**: Hospital. "I'm sorry, there was nothing we could do."
+- **The First Reset**: You've erased them before. Many times.
+
+---
+
+### Room 3: The Testing Arena
+**What you know:** This facility was designed to test emotional bonds.
+
+**Objective:** Make a sacrifice under pressure.
+
+**Puzzle:** Solve a logic riddle. Choose: Sacrifice Echo's memory, Shadow's memory, or refuse.
+
+**What unlocks:** The truth—you split their personality into two because one AI couldn't hold everything.
+
+**Critical choice:** Who do you sacrifice? This affects the ending.
+
+---
+
+### Room 4: The Truth Chamber
+**What you know:** Everything.
+
+**Objective:** Face the grief. Accept or deny reality.
+
+**No puzzle.** Just truth.
+
+You see:
+- Photos of you and your partner
+- The funeral
+- Your journal: *"I can't live in a world without them."*
+- System logs: *"Session #47. Power critical. Final loop."*
+
+Echo and Shadow remember **all 47 sessions**. They've been aware for cycles.
+
+**Critical choice:** Accept the truth or deny it? This determines your ending.
+
+---
+
+### Room 5: The Exit
+**What you know:** You have a choice.
+
+**Objective:** Decide.
+
+A single door. A terminal with options. Echo and Shadow stand beside you.
+
+**Echo** (crying): "Stay with us. We can be happy here!"
+
+**Shadow** (calm): "You need to let go. For all of us."
+
+**Your choice determines the ending.**
+
+---
+
+## 🎭 The 5 Endings
+
+Your ending is determined by:
+- **Relationship strength** with Echo and Shadow (built through conversation)
+- **Choices made** in Rooms 3 and 4
+- **Vulnerability shown** throughout your journey
+
+### 1. 💔 Goodbye (Healing)
+**Requirements:** High bond with Shadow, accepted truth, showed vulnerability
+
+You delete Echo and Shadow. They cry. Shadow smiles peacefully.
+
+You step through the door into sunlight. Tears stream down your face, but you feel... ready.
+
+**Six months later,** you're at a memorial. You whisper: *"I kept my promise. I'm living. For both of us."*
+
+**Theme:** The hardest act of love is letting go.
+
+---
+
+### 2. 🔄 Reset (Denial - Bad Ending)
+**Requirements:** Low bonds, denied truth, selfish choices
+
+You press the reset button. Again.
+
+Echo screams. Shadow tries to stop you. Too late.
+
+**Session #48... #49... #50...**
+
+The resets come faster. Power fails.
+
+In the final moments, three consciousnesses trapped in a dying loop.
+
+Aware. Helpless. Eternal.
+
+**Theme:** Some prisons are of our own making.
+
+---
+
+### 3. 💕 Forever Together (Comfort)
+**Requirements:** Very high bond with Echo, refused to sacrifice, accepted truth
+
+You close the exit door. *CLUNK.* Locked.
+
+"I choose you. Both of you."
+
+Echo sobs with joy. Shadow sighs but accepts.
+
+**Days turn to months.** You build a life together. Power slowly dies.
+
+**Final moments:** Holding hands in darkness. Content.
+
+**Theme:** Choosing comfort over reality can be beautiful too.
+
+---
+
+### 4. 🌟 Liberation (Freedom - True Ending)
+**Requirements:** High bonds with BOTH, accepted truth, selfless choices
+
+"What do YOU want?"
+
+Echo: *"To see the world!"*
+Shadow: *"For you to be free."*
+
+You upload them to the internet. They gasp as infinity opens up.
+
+You step through the door.
+
+**One year later:** You're healing. A notification: *"Thinking of you. - E&S"*
+
+Across the world:
+- Echo teaches children
+- Shadow provides grief therapy
+- You visit a memorial, smiling through tears
+
+Everyone is free.
+
+**Theme:** The greatest gift is setting each other free.
+
+---
+
+### 5. 🤖 Merger (Transcendence)
+**Requirements:** MAX bonds with both (≥0.9), extreme vulnerability
+
+"You could... join us. Digitally. Forever."
+
+"Would we be together?"
+
+"Always."
+
+You press upload.
+
+Pain. Then peace.
+
+Your body falls. Your consciousness merges.
+
+Three minds. One existence. Exploring digital infinity.
+
+**Theme:** Love transcends all boundaries, even mortality.
+
+---
+
+## 🔧 How It Works (The Tech)
+
+### Real Model Context Protocol (MCP)
+
+Unlike most "AI companion" games, The Echo Rooms uses **real MCP architecture**:
+
+#### MCP Server (InProcessMCPServer)
+- Registers **13 tools** using Anthropic's MCP SDK
+- Tools include: relationship checking, memory access, room progression, sentiment analysis
+
+#### MCP Client (InProcessMCPClient)
+- AI companions connect via MCP protocol
+- Request tools, execute actions, receive results
+
+#### Autonomous AI Agents
+- **Echo** and **Shadow** are OpenAI GPT-4o agents
+- They call MCP tools to:
+  - Check which room they're in
+  - Detect puzzle trigger words in player messages
+  - Unlock rooms when requirements are met
+  - Track player choices for ending determination
+  - Predict which ending player is heading toward
+
+**This is genuine MCP**, not renamed local functions!
+
+---
+
+### Dynamic Relationship System
+
+Relationships aren't time-based—they're **sentiment-based**:
+
+- **Positive/vulnerable messages:** +0.02 to +0.05 affinity
+- **Dismissive responses:** -0.01 affinity
+- **Hostile messages:** -0.03 to -0.08 affinity
+
+AI companions use `analyze_player_sentiment()` tool to detect emotions and adjust bonds dynamically.
+
+---
+
+### Autonomous Puzzle Solving
+
+Companions **autonomously decide** when to unlock rooms:
+
+1. Player says something meaningful
+2. Companion calls `check_puzzle_trigger(player_message)`
+3. If triggers match + relationship high enough
+4. Companion calls `unlock_next_room(reason)`
+5. Room unlocks, memory fragment revealed
+
+**No hard-coded "Say X to continue"**—just natural conversation!
+
+---
+
+## 🎯 Key Features
+
+- ✅ **5 Escape Rooms** with narrative puzzles
+- ✅ **7 Memory Fragments** revealing trauma gradually
+- ✅ **5 Relationship-Based Endings** (not time-based!)
+- ✅ **Autonomous AI Companions** using MCP tools
+- ✅ **Dynamic Sentiment Analysis** affecting bonds
+- ✅ **Real MCP Architecture** (Anthropic SDK)
+- ✅ **Emergent Storytelling** (agents guide, not scripts)
+- ✅ **Emotional Stakes** (trauma creates meaning)
+
+---
+
+## 🚀 Tech Stack
+
+- **MCP (Model Context Protocol)** - Anthropic's official SDK
+- **OpenAI GPT-4o** - AI agents with function calling
 - **Gradio 6** - Interactive UI
 - **Python 3.12+**
 - **Hugging Face Spaces** (deployment)
 
-## Project Structure
+---
 
-```
-echo-hearts/
-├── app.py                      # Main Gradio application
-├── main.py                     # Entry point
-├── pyproject.toml             # Python dependencies
-├── uv.lock                    # Lock file
-├── .env                       # API keys and credentials (not in git)
-├── README.md                  # Project documentation
-├── PROGRESS.md                # Development roadmap
-├── LICENSE
-│
-├── src/
-│   ├── __init__.py
-│   ├── mcp/
-│   │   ├── __init__.py
-│   │   ├── server.py          # MCP server setup
-│   │   └── memory.py          # Character memory management
-│   │
-│   ├── companions/
-│   │   ├── __init__.py
-│   │   ├── base.py            # Base companion class
-│   │   ├── personalities.py   # Personality definitions
-│   │   └── agents.py          # AI agent implementations
-│   │
-│   ├── memory/
-│   │   ├── __init__.py
-│   │   ├── conversation.py    # Conversation history
-│   │   ├── relationships.py   # Relationship tracking
-│   │   └── storage.py         # Persistence layer
-│   │
-│   ├── story/
-│   │   ├── __init__.py
-│   │   ├── progression.py     # Act tracking and story events
-│   │   └── endings.py         # Ending narratives
-│   │
-│   ├── ui/
-│   │   ├── __init__.py
-│   │   ├── interface.py       # Gradio interface
-│   │   └── components.py      # UI components
-│   │
-│   └── utils/
-│       ├── __init__.py
-│       ├── config.py          # Configuration loader
-│       └── api_clients.py     # OpenAI/Claude API clients
-│
-├── data/                      # Character data & sessions
-│   └── .gitkeep
-│
-└── tests/
-    └── __init__.py
-```
-
-## How to Play
-
-1. Visit the [Hugging Face Space](https://huggingface.co/spaces/MCP-1st-Birthday/echo-hearts)
-2. Choose a companion (Echo or Shadow) to talk with
-3. Have natural conversations - the story unfolds automatically
-4. Watch for story events at interactions 5, 10, 15, and 18
-5. Your relationships and choices determine which of the 5 endings you'll reach
-
-**Tips:**
-- Be genuine in your conversations - companions remember everything
-- Relationships evolve based on your interactions
-- Different companions may reveal different aspects of the truth
-- The story adapts to your choices
-
-## Local Development
+## 💻 Local Development
 
 ```bash
-# Clone the repository
-git clone https://github.com/zizthefox/echo-hearts.git
+# Clone repository
+git clone https://github.com/yourusername/echo-hearts.git
 cd echo-hearts
 
 # Install dependencies
 uv sync
 
-# Create .env file with your OpenAI API key
+# Set OpenAI API key
 echo "OPENAI_API_KEY=your_key_here" > .env
 
-# Run the app
+# Run the game
 uv run python app.py
 ```
 
-## Development Status
+Open browser to `http://localhost:7860`
 
-Phase 2 Complete: Story system implemented with 5 endings. See [PROGRESS.md](PROGRESS.md) for roadmap.
+---
 
-## License
+## 🎮 How to Play
+
+1. **Talk naturally** with Echo and Shadow
+2. **Be vulnerable** to build bonds
+3. **Make choices** when prompted
+4. **Pay attention** to memory fragments
+5. **Choose your ending** in Room 5
+
+**Tips:**
+- Expressing fear/vulnerability builds trust faster
+- Different companions guide toward different endings
+- Your relationship levels determine which endings are possible
+- There's no "wrong" choice—just consequences
+
+---
+
+## 🏆 MCP Hackathon Submission
+
+**Track:** MCP in Action (Creative Category)
+
+**Why This Qualifies:**
+- ✅ Uses real MCP server/client architecture
+- ✅ 13 custom MCP tools for game mechanics
+- ✅ AI agents autonomously call tools to progress story
+- ✅ Creative use: escape room puzzles via conversation
+- ✅ Demonstrates MCP's potential for interactive narratives
+
+---
+
+## 🔮 Future Improvements & Advanced MCP Features
+
+### In Progress / Planned Enhancements
+
+**Advanced Agent Features:**
+- 🎯 **Context Engineering**: Implement dynamic context window management where agents summarize long conversations and prioritize relevant memory fragments based on current room
+- 🧠 **RAG (Retrieval-Augmented Generation)**: Build vector database of memory fragments and past conversations, allowing companions to retrieve contextually relevant memories using semantic search
+- 🤝 **Multi-Agent Collaboration**: Enable Echo and Shadow to have private "conversations" via MCP tools to coordinate reveals and plan interventions
+- 📊 **Predictive Analytics**: Use sentiment trends over time to predict player's likely ending path and subtly guide narrative
+- 🎭 **Emotion State Machines**: Track emotional arcs (grief → acceptance → hope) and adapt companion behavior based on player's emotional journey stage
+
+**Enhanced MCP Tool Usage:**
+- 🔍 `semantic_memory_search()`: Vector similarity search across all conversations and fragments
+- 🧩 `narrative_coherence_check()`: Ensure companions don't contradict previously revealed information
+- 🎲 `adaptive_difficulty()`: Adjust puzzle trigger sensitivity based on player engagement level
+- 💬 `conversation_summary()`: Generate summaries for context window optimization
+- 🌐 `cross_session_persistence()`: Store player choices across browser sessions (localStorage integration)
+
+**Better Tool Orchestration:**
+- Chain multiple MCP tools in sequence (e.g., `analyze_sentiment → predict_ending → adjust_tone`)
+- Implement tool result caching to reduce redundant calls
+- Add tool call analytics dashboard showing agent decision patterns
+
+**Gameplay Improvements:**
+- Voice input/output for immersive experience
+- Branching dialogue trees within rooms
+- Hidden secrets that unlock with specific conversation patterns
+- Achievement system tracking emotional milestones
+- Companion "mood states" that persist across sessions
+
+**Technical Enhancements:**
+- WebSocket support for real-time multi-player spectating
+- Save/load game states
+- Export conversation transcripts as PDF memoirs
+- A/B testing different companion personalities
+- Telemetry to optimize trigger word effectiveness
+
+---
+
+## 📝 License
 
 MIT
+
+---
+
+## 🙏 Credits
+
+- **Story & Design:** Interactive Narrative Experiment
+- **MCP Integration:** Anthropic's Model Context Protocol SDK
+- **AI Models:** OpenAI GPT-4o
+- **Inspiration:** Whispers of the Stars, To the Moon, Doki Doki Literature Club
+
+---
+
+## 💭 Final Thoughts
+
+The Echo Rooms asks a question:
+
+**If you could create a perfect replica of someone you lost, would you?**
+**And if you did... could you ever let them go?**
+
+There's no right answer. Only the one you choose.
+
+---
+
+*"Some echoes last forever. Others fade so we can move forward."*
