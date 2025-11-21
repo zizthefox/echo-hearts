@@ -34,7 +34,7 @@ class EchoHeartsUI:
             gr.Markdown("*An AI Companion RPG with Emergent Relationships*")
 
             # Per-session state - creates new GameState for each browser session
-            game_state = gr.State(value=self._create_game_state)
+            game_state = gr.State(value=self._create_game_state())
 
             with gr.Row():
                 # Main chat area
