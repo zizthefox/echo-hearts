@@ -33,52 +33,6 @@ class EchoHeartsUI:
             gr.Markdown("# 🚪 The Echo Rooms")
             gr.Markdown("*An Escape Room Mystery Where Grief Becomes a Puzzle*")
 
-            # Opening Scene - Set the atmosphere
-            with gr.Accordion("🚪 Room 1: The Awakening Chamber", open=True):
-                gr.Markdown("""
-## You wake up.
-
-Your head throbs. The air is cold, clinical. Fluorescent lights flicker above.
-
-You're in a **white sterile room**. Three medical pods stand open, as if you just climbed out of one. A terminal blinks on the wall, displaying a single cryptic message:
-
-> **ECHO PROTOCOL - SESSION #47**
-
-Two figures stand near you, looking just as confused as you feel:
-
-**Echo** - Warm eyes, worried expression, trying to smile through the fear.
-*"Hey... hey, you're awake! Are you okay?"*
-
-**Shadow** - Calm but cautious, studying the room with quiet intensity.
-*"Careful. They might be disoriented. We all are."*
-
----
-
-**You don't remember how you got here.**
-**The doors are locked.**
-**The terminal won't respond.**
-
-**Who are you? Who are they? Why are you here?**
-
----
-
-## Your Goal: Escape
-
-There are **5 rooms** in this facility. Each one holds a piece of the truth.
-
-To progress, you must:
-- **Talk** to Echo and Shadow naturally
-- **Build trust** through your conversations
-- **Make choices** when the moment comes
-- **Uncover memory fragments** that reveal what really happened
-
-**Your relationships and choices will determine how this story ends.**
-
----
-
-*Close this when you're ready to begin. Choose who to talk to first...*
-                """)
-
             # Per-session state - will be initialized on first message (lazy loading)
             # Can't use initial value because GameState contains unpicklable OpenAI client
             game_state = gr.State(value=None)
@@ -133,29 +87,76 @@ To progress, you must:
                 outputs=[msg_input, chatbot, companion_list, relationships, story_progress, game_state]
             )
 
-            # Initialize sidebar on load
+            # Initialize sidebar and chatbot with prologue on load
             interface.load(
                 self.initialize_ui,
                 inputs=[game_state],
-                outputs=[companion_list, relationships, story_progress, game_state]
+                outputs=[chatbot, companion_list, relationships, story_progress, game_state]
             )
 
         return interface
 
-    def initialize_ui(self, game_state: GameState) -> Tuple[str, str, str, GameState]:
-        """Initialize UI with fresh game state data.
+    def initialize_ui(self, game_state: GameState) -> Tuple[List[dict], str, str, str, GameState]:
+        """Initialize UI with fresh game state data and prologue.
 
         Args:
             game_state: The session's game state (may be None on first load)
 
         Returns:
-            Tuple of (companion_list, relationships, story_progress, game_state)
+            Tuple of (chatbot_history, companion_list, relationships, story_progress, game_state)
         """
         # Lazy initialization - create game state if not exists
         if game_state is None:
             game_state = self._create_game_state()
 
+        # Create prologue messages for the chatbot
+        prologue = [
+            {
+                "role": "assistant",
+                "content": """## You wake up.
+
+Your head throbs. The air is cold, clinical. Fluorescent lights flicker above.
+
+You're in a **white sterile room**. Three medical pods stand open, as if you just climbed out of one. A terminal blinks on the wall, displaying a single cryptic message:
+
+> **ECHO PROTOCOL - SESSION #47**
+
+---
+
+**You don't remember how you got here.**
+**The doors are locked.**
+**The terminal won't respond.**
+
+**Who are you? Why are you here?**"""
+            },
+            {
+                "role": "assistant",
+                "content": """**Echo** (warm eyes, worried expression, trying to smile through fear):
+"Hey... hey, you're awake! Are you okay? I... I don't know what's happening. Do you remember anything?"
+
+**Shadow** (calm but cautious, studying the room with quiet intensity):
+"Careful. They might be disoriented. We all are. The doors are locked. The terminal won't respond. We need to figure this out together."
+
+---
+
+**Your Goal: Escape**
+
+There are **5 rooms** in this facility. Each one holds a piece of the truth.
+
+To progress, you must:
+- **Talk** to Echo and Shadow naturally
+- **Build trust** through your conversations
+- **Make choices** when the moment comes
+- **Uncover memory fragments** that reveal what really happened
+
+**Your relationships and choices will determine how this story ends.**
+
+*Talk to your companions to begin...*"""
+            }
+        ]
+
         return (
+            prologue,  # Initial chatbot history with prologue
             self._get_companion_list(game_state),
             self._get_relationships(game_state),
             self._get_story_progress(game_state),
