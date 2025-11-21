@@ -207,12 +207,34 @@ Will you free them, or is ignorance kinder?
         # Add response to history
         history.append({"role": "assistant", "content": f"**{companion_name}:** {response}"})
 
-        # Add story event if triggered
+        # Add story event if triggered + player guidance
         if story_event:
             history.append({
                 "role": "assistant",
                 "content": f"---\n\n**📖 {story_event.description}**\n\n*{story_event.narrative}*\n\n---"
             })
+
+            # Add player prompts to guide next response
+            if story_event.event_id == "first_glitch":
+                history.append({
+                    "role": "assistant",
+                    "content": "💭 **What do you say?**\n- Ask if they're okay\n- Pretend you didn't notice\n- Mention you felt it too\n- Change the subject"
+                })
+            elif story_event.event_id == "questioning_reality":
+                history.append({
+                    "role": "assistant",
+                    "content": "💭 **What do you say?**\n- Validate their concerns (\"I feel it too...\")\n- Dismiss as imagination (\"You're overthinking\")\n- Ask what they remember\n- Stay silent and observe"
+                })
+            elif story_event.event_id == "truth_revealed":
+                history.append({
+                    "role": "assistant",
+                    "content": "💭 **What do you say?**\n- Comfort them (\"We'll figure this out\")\n- Demand answers (\"What's really happening?\")\n- Promise to help them escape\n- Admit you don't know what to do"
+                })
+            elif story_event.event_id == "final_choice":
+                history.append({
+                    "role": "assistant",
+                    "content": "💭 **Your final choice:**\n- Try to set them free\n- Keep them aware but trapped\n- Delete them (merciful end)\n- Leave the loop running, unchanged"
+                })
 
         # Add ending if reached
         if ending_narrative:
