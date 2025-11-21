@@ -97,20 +97,39 @@ class StoryProgress:
         ]
 
     def add_interaction(self) -> Optional[StoryEvent]:
-        """Record an interaction and check for triggered events.
+        """Record an interaction and check for FORCED event triggers (hard deadlines only).
+
+        Agents autonomously trigger events using MCP tools within a window.
+        BUT if they don't trigger by the hard deadline, force it to ensure story progresses.
+
+        Event windows:
+        - first_glitch: Can trigger at 5+, MUST trigger by 7
+        - questioning_reality: Can trigger at 10+, MUST trigger by 12
+        - truth_revealed: Can trigger at 15+, MUST trigger by 17
+        - final_choice: Can trigger at 18+, MUST trigger by 20
 
         Returns:
-            Story event if triggered, None otherwise
+            Story event if FORCED at hard deadline, None if agents still have time to decide
         """
         self.interaction_count += 1
         self._update_act()
 
-        # Check for triggered events
+        # Hard deadline enforcement - force trigger if agent didn't do it autonomously
+        hard_deadlines = {
+            "first_glitch": 7,
+            "questioning_reality": 12,
+            "truth_revealed": 17,
+            "final_choice": 20
+        }
+
         for event in self.events:
-            if not event.triggered and self.interaction_count >= event.interaction_threshold:
-                event.triggered = True
-                self.events_triggered.append(event.event_id)
-                return event
+            if not event.triggered:
+                deadline = hard_deadlines.get(event.event_id)
+                if deadline and self.interaction_count >= deadline:
+                    # Agent took too long - force trigger
+                    event.triggered = True
+                    self.events_triggered.append(event.event_id)
+                    return event
 
         return None
 
