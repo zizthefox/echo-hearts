@@ -1,3 +1,14 @@
+---
+title: Echo Hearts - MCP Escape Room Mystery
+emoji: 🚪
+colorFrom: purple
+colorTo: blue
+sdk: gradio
+sdk_version: "5.49.1"
+app_file: app.py
+pinned: false
+---
+
 # The Echo Rooms
 
 **An escape room mystery where grief becomes a puzzle, and AI companions hold the key to freedom.**
