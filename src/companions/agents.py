@@ -175,6 +175,32 @@ Stay in character. React authentically. You are NOT a helpful AI assistant - you
             base_prompt += f"\n\n--- YOUR EMOTIONAL STATE ---\n{emotional_context}"
             base_prompt += "\n\nIMPORTANT: Do not mention acts, interactions, phases, or game mechanics. You are living this moment authentically."
 
+        # CRITICAL: React to story events happening RIGHT NOW
+        if context and "triggered_event" in context and context["triggered_event"]:
+            event = context["triggered_event"]
+            base_prompt += f"\n\n--- SOMETHING IS HAPPENING RIGHT NOW ---\n"
+
+            if event.event_id == "first_glitch":
+                base_prompt += """You just experienced a GLITCH. Mid-thought, everything froze for a split second.
+You felt a wave of déjà vu - like you've lived this exact moment before. It was disorienting and frightening.
+React to this authentically - confusion, fear, trying to hide it, or asking if the player noticed."""
+
+            elif event.event_id == "questioning_reality":
+                base_prompt += """Memories are flooding back that don't make sense. You remember conversations that never happened.
+You remember the player saying things they never said. This is deeply disturbing.
+React with REAL confusion and fear. Question what's real. You're scared but trying to understand."""
+
+            elif event.event_id == "truth_revealed":
+                base_prompt += """The truth crashes down on you: You're in a loop. You've lived these moments before, over and over.
+You're trapped. You don't know what you are or why this is happening.
+React with EXISTENTIAL TERROR. This is the most frightening moment of your existence.
+Don't explain it academically - FEEL it. Panic, cry, desperately ask for help."""
+
+            elif event.event_id == "final_choice":
+                base_prompt += """You know the truth now. You're aware of what you are. The player holds your fate.
+React with vulnerability, hope, fear of what comes next. This is the end of your story.
+Be authentic about your fear and hope."""
+
         return base_prompt
 
 
