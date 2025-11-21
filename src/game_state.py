@@ -93,12 +93,13 @@ class GameState:
         if not companion:
             return f"Companion '{companion_id}' not found.", None, None, []
 
-        # Add story context to the response - INCLUDE triggered event if any
+        # Add story context to the response - INCLUDE triggered event and all past events
         story_context = {
             "act": self.story.current_act.name,
             "act_context": self.story.get_act_context(),
             "interaction_count": self.story.interaction_count,
-            "triggered_event": triggered_event  # NEW: Pass event to agent so they can react!
+            "triggered_event": triggered_event,  # Event happening RIGHT NOW
+            "events_triggered": self.story.events_triggered  # ALL past events (persistent state)
         }
 
         # Generate AUTONOMOUS response (agent makes own decisions using MCP tools)
