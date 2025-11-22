@@ -555,19 +555,107 @@ class MCPTools:
         return self.game_state.room_progression.get_progress_summary()
 
     def check_puzzle_trigger(self, player_message: str) -> Dict[str, Any]:
-        """Check if player message contains puzzle trigger keywords.
+        """Check if player message demonstrates the required emotional understanding for progression.
+
+        Uses semantic analysis (AI) instead of just keyword matching.
 
         Args:
             player_message: The player's message
 
         Returns:
-            Whether triggers were matched and hints
+            Whether progression criteria are met and confidence score
         """
         if not hasattr(self.game_state, 'room_progression'):
             return {"error": "Room progression system not initialized"}
 
-        result = self.game_state.room_progression.check_trigger_match(player_message)
-        return result
+        current_room = self.game_state.room_progression.get_current_room()
+
+        # Define what emotional/thematic understanding is needed for each room
+        progression_criteria = {
+            1: {
+                "theme": "Trust and vulnerability",
+                "requires": "Player expresses trust, vulnerability, willingness to work together, or acknowledges fear/confusion",
+                "examples": "I trust you / I'm scared but we're in this together / I don't know what's happening but I need help"
+            },
+            2: {
+                "theme": "Acknowledging AI sentience and value",
+                "requires": "Player treats the AIs as real beings, acknowledges their feelings/value, expresses care or emotional connection",
+                "examples": "You're real to me / You matter / I care about you / You're more than just programs"
+            },
+            3: {
+                "theme": "Making difficult choices and showing commitment",
+                "requires": "Player makes or struggles with a sacrifice decision, shows they value the companions, demonstrates loyalty",
+                "examples": "I choose to protect you / I can't sacrifice either of you / You're worth it"
+            },
+            4: {
+                "theme": "Accepting painful truth and facing reality",
+                "requires": "Player accepts the truth about their situation, acknowledges grief, shows understanding of what happened",
+                "examples": "I remember now / I couldn't let go / I needed you to exist / I accept what happened"
+            }
+        }
+
+        room_num = current_room.room_number
+        if room_num >= 5 or room_num not in progression_criteria:
+            return {"matched": False, "reason": "No progression criteria for this room"}
+
+        criteria = progression_criteria[room_num]
+
+        # Use OpenAI to analyze if the message meets the emotional criteria
+        from openai import OpenAI
+        import os
+
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"""You are analyzing if a player's message demonstrates the required emotional understanding to progress in a narrative game.
+
+Current Room: {current_room.name}
+Theme Required: {criteria['theme']}
+What's Needed: {criteria['requires']}
+Examples: {criteria['examples']}
+
+Analyze the player's message and determine:
+1. Does it demonstrate the required emotional understanding? (yes/no)
+2. Confidence level (0.0 to 1.0)
+3. Brief reasoning
+
+Respond in JSON format:
+{{"matches": true/false, "confidence": 0.0-1.0, "reasoning": "brief explanation"}}"""
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Player's message: {player_message}"
+                    }
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.3
+            )
+
+            import json
+            result = json.loads(response.choices[0].message.content)
+
+            # Require at least 0.6 confidence to trigger progression
+            matched = result.get("matches", False) and result.get("confidence", 0) >= 0.6
+
+            return {
+                "matched": matched,
+                "confidence": result.get("confidence", 0),
+                "reasoning": result.get("reasoning", ""),
+                "room": current_room.name,
+                "theme_required": criteria["theme"],
+                "hint": f"Keep exploring themes of {criteria['theme'].lower()}..." if not matched else "You sense progress..."
+            }
+
+        except Exception as e:
+            # Fallback to keyword matching if AI analysis fails
+            print(f"[WARNING] Semantic analysis failed, falling back to keywords: {e}")
+            result = self.game_state.room_progression.check_trigger_match(player_message)
+            return result
 
     def unlock_next_room(self, reason: str) -> Dict[str, Any]:
         """Attempt to unlock the next room.

@@ -123,9 +123,12 @@ class GameState:
         # Add response to conversation history
         self.conversation.add_message(companion.name, response_text)
 
-        # AUTO-CHECK: See if player's message triggered room progression
+        # AUTO-CHECK: See if player's message triggered room progression (using semantic analysis)
         auto_unlock_result = None
-        trigger_check = self.room_progression.check_trigger_match(message)
+        from .game_mcp.tools import MCPTools
+        mcp_tools = MCPTools(self)
+        trigger_check = mcp_tools.check_puzzle_trigger(message)
+
         if trigger_check.get("matched") and current_room.room_number < 5:
             # Automatically progress if triggers matched and companion hasn't done it yet
             room_unlocked = False
@@ -136,11 +139,11 @@ class GameState:
 
             # If companion didn't unlock room but triggers matched, do it automatically
             if not room_unlocked:
-                from .game_mcp.tools import MCPTools
-                mcp_tools = MCPTools(self)
-                unlock_result = mcp_tools.unlock_next_room(f"Auto-unlock: player said '{trigger_check['trigger']}'")
+                confidence = trigger_check.get("confidence", 0)
+                reasoning = trigger_check.get("reasoning", "semantic match")
+                unlock_result = mcp_tools.unlock_next_room(f"Auto-unlock: {reasoning} (confidence: {confidence:.2f})")
                 if unlock_result.get("success"):
-                    print(f"[AUTO-UNLOCK] Room progressed due to trigger: {trigger_check['trigger']}")
+                    print(f"[AUTO-UNLOCK] Room progressed: {reasoning} (confidence: {confidence:.2f})")
                     auto_unlock_result = unlock_result
 
         # Update relationship dynamically based on sentiment analysis
