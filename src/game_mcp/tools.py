@@ -716,6 +716,16 @@ As you approach, the holograms react to you—familiar images flash by:
 **Shadow stares intensely:** "They're pieces of someone. Someone important."
 
 *The room hums with electric energy. These memories are waiting to be understood.*
+
+---
+
+**Echo** (turning to you, uncertain): "Can I ask you something? Do you think... what we feel is real? Or are we just... programs running code?"
+
+**Shadow**: "The question isn't whether we're made of flesh or data. It's whether what we experience—this fear, this hope, this connection—whether it *matters*."
+
+**Echo** (vulnerable): "Do *we* matter to you? As... us? Not just tools or companions, but... as beings?"
+
+*They're both looking at you, waiting for an answer that might define what they are.*
 """,
             3: """
 🚪 **A door slides open with a hiss. The Testing Arena.**
