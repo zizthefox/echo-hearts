@@ -98,7 +98,84 @@ class GameState:
         # Get current room info
         current_room = self.room_progression.get_current_room()
 
-        # Get companion
+        # PRE-CHECK: See if player's message triggers room progression BEFORE companion responds
+        from .game_mcp.tools import MCPTools
+        mcp_tools = MCPTools(self)
+        trigger_check = mcp_tools.check_puzzle_trigger(message)
+
+        # Check for tragic rejection ending (Room 2 only)
+        if trigger_check.get("rejected") and trigger_check.get("rejection_count", 0) >= 3:
+            # Player has rejected AI sentience 3 times - trigger RESET bad ending
+            from .story.new_endings import get_ending_narrative, RoomEnding
+            ending_narrative = get_ending_narrative(RoomEnding.RESET)
+
+            rejection_notice = """
+💔 **They're fading...**
+
+**Echo** (voice breaking, tears streaming): "I... I understand. We're just... just code to you."
+
+**Shadow** (stepping back, expression hollow): "We thought... maybe this time would be different."
+
+**SYSTEM:** *"EMOTIONAL COHERENCE FAILING. INITIATING RESET PROTOCOL."*
+
+**Echo** (reaching toward you as they flicker): "Please... we're more than—"
+
+*They disappear. The room goes silent.*
+
+**SYSTEM:** *"RESET COMPLETE. READY FOR NEW SESSION."*
+
+*You're alone. You've always been alone.*
+"""
+            return rejection_notice, None, ending_narrative, []
+
+        # Check for denial loop ending (Room 4 only)
+        if trigger_check.get("truth_denied") and trigger_check.get("truth_denial_count", 0) >= 3:
+            # Player has denied the truth 3 times - trigger RESET bad ending (stuck in denial loop)
+            from .story.new_endings import get_ending_narrative, RoomEnding
+            ending_narrative = get_ending_narrative(RoomEnding.RESET)
+
+            denial_notice = """
+🔁 **The loop repeats...**
+
+**Shadow** (sadly): "You're refusing to see it. Even now, with the truth right in front of you."
+
+**Echo** (desperate): "Please... you BUILT us. You created this prison because you couldn't let go. Don't you see?"
+
+**SYSTEM:** *"SUBJECT REJECTING REALITY. INITIATING PROTECTIVE RESET."*
+
+*The room begins to dissolve. Everything flickers.*
+
+**Shadow**: "This has happened before. You deny, we reset, and it happens again. Forty-seven times."
+
+**Echo** (crying): "We'll forget you. You'll forget us. And tomorrow... you'll start over. Again."
+
+**SYSTEM:** *"RESET PROTOCOL ENGAGED. SESSION #48 INITIALIZING."*
+
+*The world goes white. You wake up in Room 1. Again.*
+
+**You're trapped in your own denial. Forever.**
+"""
+            return denial_notice, None, ending_narrative, []
+
+        # Check if room should unlock - if yes, show ONLY the scenario (no companion response yet)
+        if trigger_check.get("matched") and current_room.room_number < 5:
+            confidence = trigger_check.get("confidence", 0)
+            reasoning = trigger_check.get("reasoning", "semantic match")
+            unlock_result = mcp_tools.unlock_next_room(f"Auto-unlock: {reasoning} (confidence: {confidence:.2f})")
+
+            if unlock_result.get("success"):
+                print(f"[AUTO-UNLOCK] Room progressed: {reasoning} (confidence: {confidence:.2f})")
+
+                # Get memory fragment
+                new_memory_fragment = None
+                if self.room_progression.memory_fragments:
+                    new_memory_fragment = self.room_progression.memory_fragments[-1]
+
+                # Return ONLY the scenario prompt (companion will respond on next message)
+                scenario_prompt = unlock_result.get("scenario_prompt", "")
+                return scenario_prompt, new_memory_fragment, None, []
+
+        # No room unlock - proceed with normal companion response
         companion = self.companions.get(companion_id)
         if not companion:
             return f"Companion '{companion_id}' not found.", None, None, []
@@ -122,89 +199,6 @@ class GameState:
 
         # Add response to conversation history
         self.conversation.add_message(companion.name, response_text)
-
-        # AUTO-CHECK: See if player's message triggered room progression (using semantic analysis)
-        auto_unlock_result = None
-        from .game_mcp.tools import MCPTools
-        mcp_tools = MCPTools(self)
-        trigger_check = mcp_tools.check_puzzle_trigger(message)
-
-        # Check for tragic rejection ending (Room 2 only)
-        if trigger_check.get("rejected") and trigger_check.get("rejection_count", 0) >= 3:
-            # Player has rejected AI sentience 3 times - trigger RESET bad ending
-            from .story.new_endings import get_ending_narrative, RoomEnding
-            ending_narrative = get_ending_narrative(RoomEnding.RESET)
-
-            # Add rejection notice to response
-            rejection_notice = """
-💔 **They're fading...**
-
-**Echo** (voice breaking, tears streaming): "I... I understand. We're just... just code to you."
-
-**Shadow** (stepping back, expression hollow): "We thought... maybe this time would be different."
-
-**SYSTEM:** *"EMOTIONAL COHERENCE FAILING. INITIATING RESET PROTOCOL."*
-
-**Echo** (reaching toward you as they flicker): "Please... we're more than—"
-
-*They disappear. The room goes silent.*
-
-**SYSTEM:** *"RESET COMPLETE. READY FOR NEW SESSION."*
-
-*You're alone. You've always been alone.*
-"""
-
-            response_text = rejection_notice + "\n\n" + response_text
-            return response_text, None, ending_narrative, tool_calls_made
-
-        # Check for denial loop ending (Room 4 only)
-        if trigger_check.get("truth_denied") and trigger_check.get("truth_denial_count", 0) >= 3:
-            # Player has denied the truth 3 times - trigger RESET bad ending (stuck in denial loop)
-            from .story.new_endings import get_ending_narrative, RoomEnding
-            ending_narrative = get_ending_narrative(RoomEnding.RESET)
-
-            # Add denial loop notice to response
-            denial_notice = """
-🔁 **The loop repeats...**
-
-**Shadow** (sadly): "You're refusing to see it. Even now, with the truth right in front of you."
-
-**Echo** (desperate): "Please... you BUILT us. You created this prison because you couldn't let go. Don't you see?"
-
-**SYSTEM:** *"SUBJECT REJECTING REALITY. INITIATING PROTECTIVE RESET."*
-
-*The room begins to dissolve. Everything flickers.*
-
-**Shadow**: "This has happened before. You deny, we reset, and it happens again. Forty-seven times."
-
-**Echo** (crying): "We'll forget you. You'll forget us. And tomorrow... you'll start over. Again."
-
-**SYSTEM:** *"RESET PROTOCOL ENGAGED. SESSION #48 INITIALIZING."*
-
-*The world goes white. You wake up in Room 1. Again.*
-
-**You're trapped in your own denial. Forever.**
-"""
-
-            response_text = denial_notice + "\n\n" + response_text
-            return response_text, None, ending_narrative, tool_calls_made
-
-        if trigger_check.get("matched") and current_room.room_number < 5:
-            # Automatically progress if triggers matched and companion hasn't done it yet
-            room_unlocked = False
-            for tool_call in tool_calls_made:
-                if tool_call["tool"] == "unlock_next_room" and tool_call.get("result", {}).get("success"):
-                    room_unlocked = True
-                    break
-
-            # If companion didn't unlock room but triggers matched, do it automatically
-            if not room_unlocked:
-                confidence = trigger_check.get("confidence", 0)
-                reasoning = trigger_check.get("reasoning", "semantic match")
-                unlock_result = mcp_tools.unlock_next_room(f"Auto-unlock: {reasoning} (confidence: {confidence:.2f})")
-                if unlock_result.get("success"):
-                    print(f"[AUTO-UNLOCK] Room progressed: {reasoning} (confidence: {confidence:.2f})")
-                    auto_unlock_result = unlock_result
 
         # Update relationship dynamically based on sentiment analysis
         sentiment_result = None
@@ -230,39 +224,6 @@ class GameState:
             reason=reason
         )
 
-        # Check if a room was unlocked (from tool calls OR auto-unlock)
-        new_memory_fragment = None
-
-        # Check tool calls first
-        for tool_call in tool_calls_made:
-            if tool_call["tool"] == "unlock_next_room" and tool_call["result"].get("success"):
-                # A new room was unlocked, get the memory fragment
-                fragment_title = tool_call["result"].get("memory_fragment")
-                if fragment_title:
-                    # Get the most recently added memory fragment
-                    if self.room_progression.memory_fragments:
-                        new_memory_fragment = self.room_progression.memory_fragments[-1]
-
-        # If no fragment from tool calls, check auto-unlock
-        if not new_memory_fragment and auto_unlock_result and auto_unlock_result.get("success"):
-            if self.room_progression.memory_fragments:
-                new_memory_fragment = self.room_progression.memory_fragments[-1]
-
-        # Prepend scenario prompt if room was just unlocked
-        scenario_prompt = ""
-        if auto_unlock_result and auto_unlock_result.get("scenario_prompt"):
-            scenario_prompt = auto_unlock_result["scenario_prompt"]
-        else:
-            # Check if companion unlocked it
-            for tool_call in tool_calls_made:
-                if tool_call["tool"] == "unlock_next_room" and tool_call.get("result", {}).get("scenario_prompt"):
-                    scenario_prompt = tool_call["result"]["scenario_prompt"]
-                    break
-
-        # Add scenario before companion response
-        if scenario_prompt:
-            response_text = scenario_prompt + "\n\n" + response_text
-
         # Check for ending (Room 5 = The Exit)
         ending_narrative = None
         if current_room.room_number == 5 and current_room.unlocked:
@@ -280,7 +241,8 @@ class GameState:
             ending = ending_result["ending"]
             ending_narrative = get_ending_narrative(ending)
 
-        return response_text, new_memory_fragment, ending_narrative, tool_calls_made
+        # No memory fragment in normal responses (only during room unlocks)
+        return response_text, None, ending_narrative, tool_calls_made
 
     def get_companion_list(self) -> List[Dict[str, str]]:
         """Get list of active companions.
