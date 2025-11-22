@@ -188,6 +188,21 @@ class GameState:
             if self.room_progression.memory_fragments:
                 new_memory_fragment = self.room_progression.memory_fragments[-1]
 
+        # Prepend scenario prompt if room was just unlocked
+        scenario_prompt = ""
+        if auto_unlock_result and auto_unlock_result.get("scenario_prompt"):
+            scenario_prompt = auto_unlock_result["scenario_prompt"]
+        else:
+            # Check if companion unlocked it
+            for tool_call in tool_calls_made:
+                if tool_call["tool"] == "unlock_next_room" and tool_call.get("result", {}).get("scenario_prompt"):
+                    scenario_prompt = tool_call["result"]["scenario_prompt"]
+                    break
+
+        # Add scenario before companion response
+        if scenario_prompt:
+            response_text = scenario_prompt + "\n\n" + response_text
+
         # Check for ending (Room 5 = The Exit)
         ending_narrative = None
         if current_room.room_number == 5 and current_room.unlocked:
