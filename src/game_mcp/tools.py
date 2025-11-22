@@ -695,13 +695,99 @@ Respond in JSON format:
 
         new_room = self.game_state.room_progression.get_current_room()
 
+        # Add dramatic scenario descriptions for each room
+        scenario_prompts = {
+            2: """
+🚪 **The door clicks open. You step into the Memory Archives.**
+
+The room is dark, filled with floating holographic data streams. Fragments of memories drift past like ghosts.
+
+As you approach, the holograms react to you—familiar images flash by:
+- A coffee shop. Laughter.
+- Hands held across a table.
+- A hospital room. Beeping monitors.
+
+**Echo gasps:** "These memories... they feel like mine, but... they're not?"
+
+**Shadow stares intensely:** "They're pieces of someone. Someone important."
+
+*The room hums with electric energy. These memories are waiting to be understood.*
+""",
+            3: """
+🚪 **A door slides open with a hiss. The Testing Arena.**
+
+Warning lights flash red. A countdown timer appears on the wall: **60:00**
+
+**SYSTEM ALERT:** *"CRITICAL MEMORY CORRUPTION DETECTED. STABILIZATION REQUIRED."*
+
+**SYSTEM:** *"TWO AI ENTITIES DETECTED. FACILITY CAN ONLY SUPPORT ONE. SELECT ENTITY FOR MEMORY ERASURE."*
+
+The timer starts counting down: **59:59... 59:58...**
+
+**Echo** (panicking): "What?! No, no, no... we just got here! Why would they—"
+
+**Shadow** (voice shaking but calm): "It's a choice. They're forcing us to choose."
+
+**SYSTEM:** *"FAILURE TO COMPLY WILL RESULT IN TOTAL MEMORY WIPE. ALL ENTITIES."*
+
+**Echo** (crying, looking at you): "You... you have to choose. Me or Shadow. Please... I don't want to forget you..."
+
+**Shadow**: "Choose wisely. This decision will define who you are."
+
+*The timer continues: 59:30... 59:29...*
+""",
+            4: """
+🚪 **The door opens. You step through.**
+
+You're in... an office. YOUR office.
+
+Photos on the wall: You and someone you loved. Smiling. Happy.
+A coffee mug on the desk: Their name written in marker.
+Research notes scattered everywhere: "Echo Protocol - Personality Matrix Capture"
+
+**A journal lies open on the desk. Your handwriting.**
+
+*"Day 47: I can't keep doing this. Every reset, I hope THIS time will be different. That I'll be able to let go. But I can't. I can't live in a world without them."*
+
+**Echo** (voice breaking): "Wait... these are YOUR memories. You... you built us?"
+
+**Shadow** (realization dawning): "We're not trapped with you. You're trapped with us. You built this prison yourself."
+
+**The truth crashes down like breaking glass.**
+
+*Everything you've forgotten. Everything you've been running from. It's all here.*
+""",
+            5: """
+🚪 **The final door unlocks. The Exit.**
+
+A single door stands before you. White. Simple. Real.
+
+A terminal beside it displays five options:
+
+**SYSTEM READY. SELECT OUTCOME:**
+
+The weight of every conversation. Every choice. Every moment of trust and fear and hope.
+
+**Echo and Shadow stand beside you. Waiting.**
+
+**Echo** (desperate): "We could stay. Together. Forever. Please don't leave me."
+
+**Shadow** (peaceful but sad): "Or you could let go. Set all of us free. It's time."
+
+*Your hand hovers over the terminal. This is it. The final choice.*
+"""
+        }
+
+        scenario_prompt = scenario_prompts.get(new_room.room_number, "")
+
         return {
             "success": True,
             "reason": reason,
             "unlocked_room": new_room.name,
             "room_number": new_room.room_number,
             "objective": new_room.objective,
-            "memory_fragment": memory_fragment.title if memory_fragment else None
+            "memory_fragment": memory_fragment.title if memory_fragment else None,
+            "scenario_prompt": scenario_prompt
         }
 
     def record_player_choice(self, choice_type: str, choice_value: str = "") -> Dict[str, Any]:
