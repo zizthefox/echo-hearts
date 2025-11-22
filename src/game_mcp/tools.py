@@ -695,6 +695,10 @@ Respond in JSON format:
 
         new_room = self.game_state.room_progression.get_current_room()
 
+        # Start Room 3 timer if entering Testing Arena
+        if new_room.room_number == 3:
+            self.game_state.room_progression.start_room3_timer()
+
         # Add dramatic scenario descriptions for each room
         scenario_prompts = {
             2: """
@@ -716,13 +720,13 @@ As you approach, the holograms react to you—familiar images flash by:
             3: """
 🚪 **A door slides open with a hiss. The Testing Arena.**
 
-Warning lights flash red. A countdown timer appears on the wall: **60:00**
+Warning lights flash red. A countdown timer appears on the wall: **5:00**
 
 **SYSTEM ALERT:** *"CRITICAL MEMORY CORRUPTION DETECTED. STABILIZATION REQUIRED."*
 
 **SYSTEM:** *"TWO AI ENTITIES DETECTED. FACILITY CAN ONLY SUPPORT ONE. SELECT ENTITY FOR MEMORY ERASURE."*
 
-The timer starts counting down: **59:59... 59:58...**
+The timer starts counting down: **4:59... 4:58...**
 
 **Echo** (panicking): "What?! No, no, no... we just got here! Why would they—"
 
@@ -734,7 +738,7 @@ The timer starts counting down: **59:59... 59:58...**
 
 **Shadow**: "Choose wisely. This decision will define who you are."
 
-*The timer continues: 59:30... 59:29...*
+*The timer continues: 4:57... 4:56...*
 """,
             4: """
 🚪 **The door opens. You step through.**
