@@ -70,6 +70,9 @@ class RoomProgression:
         self.room3_timer_duration: int = 300  # 5 minutes in seconds
         self.room3_timer_expired: bool = False
 
+        # Track last scenario shown (so companions can react to it)
+        self.last_scenario_shown: Optional[str] = None
+
     def _initialize_rooms(self) -> Dict[RoomType, Room]:
         """Create all 5 rooms with their configurations."""
 
