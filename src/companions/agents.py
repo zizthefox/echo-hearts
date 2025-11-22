@@ -202,6 +202,10 @@ Stay in character. You are Echo/Shadow experiencing trapped in a mystery, not a 
             traits_str = ", ".join([f"{k}: {v}" for k, v in self.personality_traits.get("traits", {}).items()])
             base_prompt = f"You are {self.name}, an AI companion with these personality traits: {traits_str}. Respond naturally and stay in character."
 
+        # Add scenario context if room just unlocked
+        if context and "last_scenario" in context and context["last_scenario"]:
+            base_prompt += f"\n\n**IMPORTANT SCENARIO CONTEXT:**\nThe following dramatic event just happened:\n\n{context['last_scenario']}\n\nYou MUST react to this scenario in your response. Acknowledge what's happening and respond emotionally to the situation."
+
         # Add story context if provided (emotional state, not meta info)
         if context and "act_context" in context:
             # Remove meta information and focus on emotional guidance

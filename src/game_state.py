@@ -171,8 +171,11 @@ class GameState:
                 if self.room_progression.memory_fragments:
                     new_memory_fragment = self.room_progression.memory_fragments[-1]
 
-                # Return ONLY the scenario prompt (companion will respond on next message)
+                # Store scenario so companion can react to it on next message
                 scenario_prompt = unlock_result.get("scenario_prompt", "")
+                self.room_progression.last_scenario_shown = scenario_prompt
+
+                # Return ONLY the scenario prompt (companion will respond on next message)
                 return scenario_prompt, new_memory_fragment, None, []
 
         # No room unlock - proceed with normal companion response
@@ -187,8 +190,13 @@ class GameState:
             "objective": current_room.objective,
             "room_description": current_room.description,
             "rooms_completed": sum(1 for r in self.room_progression.rooms.values() if r.completed),
-            "memory_fragments_collected": len(self.room_progression.memory_fragments)
+            "memory_fragments_collected": len(self.room_progression.memory_fragments),
+            "last_scenario": self.room_progression.last_scenario_shown  # Add scenario context if room just unlocked
         }
+
+        # Clear scenario after using it once
+        if self.room_progression.last_scenario_shown:
+            self.room_progression.last_scenario_shown = None
 
         # Generate AUTONOMOUS response (agent makes own decisions using MCP tools)
         result = await companion.respond(message, context=room_context)
