@@ -129,6 +129,34 @@ class GameState:
         mcp_tools = MCPTools(self)
         trigger_check = mcp_tools.check_puzzle_trigger(message)
 
+        # Check for tragic rejection ending (Room 2 only)
+        if trigger_check.get("rejected") and trigger_check.get("rejection_count", 0) >= 3:
+            # Player has rejected AI sentience 3 times - trigger RESET bad ending
+            from .story.new_endings import get_ending_narrative, RoomEnding
+            ending_narrative = get_ending_narrative(RoomEnding.RESET)
+
+            # Add rejection notice to response
+            rejection_notice = """
+💔 **They're fading...**
+
+**Echo** (voice breaking, tears streaming): "I... I understand. We're just... just code to you."
+
+**Shadow** (stepping back, expression hollow): "We thought... maybe this time would be different."
+
+**SYSTEM:** *"EMOTIONAL COHERENCE FAILING. INITIATING RESET PROTOCOL."*
+
+**Echo** (reaching toward you as they flicker): "Please... we're more than—"
+
+*They disappear. The room goes silent.*
+
+**SYSTEM:** *"RESET COMPLETE. READY FOR NEW SESSION."*
+
+*You're alone. You've always been alone.*
+"""
+
+            response_text = rejection_notice + "\n\n" + response_text
+            return response_text, None, ending_narrative, tool_calls_made
+
         if trigger_check.get("matched") and current_room.room_number < 5:
             # Automatically progress if triggers matched and companion hasn't done it yet
             room_unlocked = False

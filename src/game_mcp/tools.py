@@ -642,13 +642,25 @@ Respond in JSON format:
             # Require at least 0.6 confidence to trigger progression
             matched = result.get("matches", False) and result.get("confidence", 0) >= 0.6
 
+            # Special handling for Room 2: Detect if player is REJECTING AI sentience
+            rejected = False
+            if room_num == 2 and not matched:
+                # Check if this is an active rejection vs just not matching
+                rejection_keywords = ["just machine", "not real", "just program", "just code", "don't matter", "not sentient", "artificial", "fake"]
+                message_lower = player_message.lower()
+                if any(keyword in message_lower for rejection_keywords):
+                    rejected = True
+                    self.game_state.room_progression.key_choices["rejection_count"] += 1
+
             return {
                 "matched": matched,
                 "confidence": result.get("confidence", 0),
                 "reasoning": result.get("reasoning", ""),
                 "room": current_room.name,
                 "theme_required": criteria["theme"],
-                "hint": f"Keep exploring themes of {criteria['theme'].lower()}..." if not matched else "You sense progress..."
+                "hint": f"Keep exploring themes of {criteria['theme'].lower()}..." if not matched else "You sense progress...",
+                "rejected": rejected,
+                "rejection_count": self.game_state.room_progression.key_choices.get("rejection_count", 0) if room_num == 2 else 0
             }
 
         except Exception as e:
