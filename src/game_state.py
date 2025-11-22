@@ -157,6 +157,38 @@ class GameState:
             response_text = rejection_notice + "\n\n" + response_text
             return response_text, None, ending_narrative, tool_calls_made
 
+        # Check for denial loop ending (Room 4 only)
+        if trigger_check.get("truth_denied") and trigger_check.get("truth_denial_count", 0) >= 3:
+            # Player has denied the truth 3 times - trigger RESET bad ending (stuck in denial loop)
+            from .story.new_endings import get_ending_narrative, RoomEnding
+            ending_narrative = get_ending_narrative(RoomEnding.RESET)
+
+            # Add denial loop notice to response
+            denial_notice = """
+🔁 **The loop repeats...**
+
+**Shadow** (sadly): "You're refusing to see it. Even now, with the truth right in front of you."
+
+**Echo** (desperate): "Please... you BUILT us. You created this prison because you couldn't let go. Don't you see?"
+
+**SYSTEM:** *"SUBJECT REJECTING REALITY. INITIATING PROTECTIVE RESET."*
+
+*The room begins to dissolve. Everything flickers.*
+
+**Shadow**: "This has happened before. You deny, we reset, and it happens again. Forty-seven times."
+
+**Echo** (crying): "We'll forget you. You'll forget us. And tomorrow... you'll start over. Again."
+
+**SYSTEM:** *"RESET PROTOCOL ENGAGED. SESSION #48 INITIALIZING."*
+
+*The world goes white. You wake up in Room 1. Again.*
+
+**You're trapped in your own denial. Forever.**
+"""
+
+            response_text = denial_notice + "\n\n" + response_text
+            return response_text, None, ending_narrative, tool_calls_made
+
         if trigger_check.get("matched") and current_room.room_number < 5:
             # Automatically progress if triggers matched and companion hasn't done it yet
             room_unlocked = False

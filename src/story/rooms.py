@@ -60,7 +60,8 @@ class RoomProgression:
             "vulnerability_count": 0,
             "trust_established": False,
             "acknowledged_ai_sentience": False,
-            "rejection_count": 0,  # How many times player denied AI sentience
+            "rejection_count": 0,  # How many times player denied AI sentience (Room 2)
+            "truth_denial_count": 0,  # How many times player denied the truth (Room 4)
         }
 
         # Room 3 timer state
