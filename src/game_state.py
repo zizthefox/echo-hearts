@@ -197,7 +197,8 @@ class GameState:
         if not companion:
             return f"Companion '{companion_id}' not found.", None, None, []
 
-        # Add room context to the response
+        # Add room context to the response (capture scenario before clearing)
+        last_scenario = self.room_progression.last_scenario_shown
         room_context = {
             "current_room": current_room.name,
             "room_number": current_room.room_number,
@@ -205,15 +206,15 @@ class GameState:
             "room_description": current_room.description,
             "rooms_completed": sum(1 for r in self.room_progression.rooms.values() if r.completed),
             "memory_fragments_collected": len(self.room_progression.memory_fragments),
-            "last_scenario": self.room_progression.last_scenario_shown  # Add scenario context if room just unlocked
+            "last_scenario": last_scenario  # Add scenario context if room just unlocked
         }
-
-        # Clear scenario after using it once
-        if self.room_progression.last_scenario_shown:
-            self.room_progression.last_scenario_shown = None
 
         # Generate AUTONOMOUS response (agent makes own decisions using MCP tools)
         result = await companion.respond(message, context=room_context)
+
+        # Clear scenario AFTER companion has used it
+        if last_scenario:
+            self.room_progression.last_scenario_shown = None
 
         # Extract response and tool usage
         response_text = result.get("response", "") if isinstance(result, dict) else result
