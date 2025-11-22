@@ -1,6 +1,7 @@
 """Game state management."""
 
 import asyncio
+import logging
 from typing import Dict, List, Optional, Tuple
 from .game_mcp.in_process_mcp import InProcessMCPServer, InProcessMCPClient
 from .companions.agents import OpenAICompanion
@@ -10,6 +11,8 @@ from .memory.relationships import RelationshipTracker
 from .story.rooms import RoomProgression, MemoryFragment
 from .story.new_endings import determine_ending_from_relationships, get_ending_narrative, RoomEnding
 from .utils.config import config
+
+logger = logging.getLogger(__name__)
 
 
 class GameState:
@@ -40,12 +43,12 @@ class GameState:
     async def _initialize_mcp(self):
         """Initialize the MCP client connection."""
         await self.mcp_client.initialize()
-        print(f"[MCP] Server initialized with {len(self.mcp_client.available_tools)} tools")
+        logger.info(f"[MCP] Server initialized with {len(self.mcp_client.available_tools)} tools")
 
     def _initialize_companions(self):
         """Initialize default companion characters."""
         if not config.openai_api_key:
-            print("Warning: No OpenAI API key found. Companions will not work.")
+            logger.warning("No OpenAI API key found. Companions will not work.")
             return
 
         # Create two initial companions
@@ -178,7 +181,7 @@ class GameState:
             unlock_result = mcp_tools.unlock_next_room(f"Auto-unlock: {reasoning} (confidence: {confidence:.2f})")
 
             if unlock_result.get("success"):
-                print(f"[AUTO-UNLOCK] Room progressed: {reasoning} (confidence: {confidence:.2f})")
+                logger.info(f"[AUTO-UNLOCK] Room progressed: {reasoning} (confidence: {confidence:.2f})")
 
                 # Get memory fragment
                 new_memory_fragment = None
@@ -188,6 +191,9 @@ class GameState:
                 # Store scenario so companion can react to it on next message
                 scenario_prompt = unlock_result.get("scenario_prompt", "")
                 self.room_progression.last_scenario_shown = scenario_prompt
+
+                logger.info(f"[UNLOCK] Room unlocked! Storing scenario (length: {len(scenario_prompt)} chars)")
+                logger.debug(f"[UNLOCK] GameState ID: {id(self)}, RoomProgression ID: {id(self.room_progression)}")
 
                 # Return ONLY the scenario prompt (companion will respond on next message)
                 return scenario_prompt, new_memory_fragment, None, []
@@ -199,6 +205,12 @@ class GameState:
 
         # Add room context to the response (capture scenario before clearing)
         last_scenario = self.room_progression.last_scenario_shown
+
+        if last_scenario:
+            logger.info(f"[SCENARIO] Passing scenario to companion (length: {len(last_scenario)} chars)")
+        else:
+            logger.info("[SCENARIO] No scenario to pass (last_scenario is None)")
+
         room_context = {
             "current_room": current_room.name,
             "room_number": current_room.room_number,
@@ -289,3 +301,26 @@ class GameState:
             Dictionary of companion_id to affinity scores
         """
         return self.relationships.get_all_relationships("player")
+
+    def __getstate__(self):
+        """Custom pickle support - exclude unpicklable objects.
+
+        This allows Gradio's gr.State to persist GameState across requests.
+        """
+        state = self.__dict__.copy()
+        # Remove unpicklable objects
+        state['mcp_server'] = None
+        state['mcp_client'] = None
+        state['companions'] = {}  # Will be recreated
+        return state
+
+    def __setstate__(self, state):
+        """Custom unpickle support - restore GameState from pickled data."""
+        self.__dict__.update(state)
+
+        # Recreate MCP infrastructure
+        self.mcp_server = InProcessMCPServer(self, name=f"echo-hearts-{self.session_id}")
+        self.mcp_client = InProcessMCPClient(self.mcp_server)
+
+        # Recreate companions
+        self._initialize_companions()

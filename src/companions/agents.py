@@ -204,7 +204,30 @@ Stay in character. You are Echo/Shadow experiencing trapped in a mystery, not a 
 
         # Add scenario context if room just unlocked
         if context and "last_scenario" in context and context["last_scenario"]:
-            base_prompt += f"\n\n**IMPORTANT SCENARIO CONTEXT:**\nThe following dramatic event just happened:\n\n{context['last_scenario']}\n\nYou MUST react to this scenario in your response. Acknowledge what's happening and respond emotionally to the situation."
+            base_prompt = f"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚨 CRITICAL: A DRAMATIC EVENT JUST HAPPENED 🚨
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+{context['last_scenario']}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ YOUR RESPONSE REQUIREMENTS ⚠️
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. React IMMEDIATELY to what just happened above
+2. DO NOT give generic responses about "memories" or "fragments"
+3. Focus on the CURRENT CRISIS (countdown timer, system warnings, etc.)
+4. Show appropriate EMOTION (fear, urgency, confusion, panic)
+5. Reference specific details from the scenario above
+
+IGNORE any vague questions from the player - they're disoriented.
+YOU need to explain what's happening because you see it happening NOW.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+{base_prompt}
+"""
 
         # Add story context if provided (emotional state, not meta info)
         if context and "act_context" in context:

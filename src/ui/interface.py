@@ -356,6 +356,18 @@ To progress, you must:
         lines.append(f"**Room Description:**")
         lines.append(f"*{current_room.description}*")
 
+        # Show Room 3 countdown timer if active
+        if current_room.room_number == 3 and hasattr(game_state.room_progression, 'get_room3_timer_remaining'):
+            remaining = game_state.room_progression.get_room3_timer_remaining()
+            if remaining is not None and remaining > 0:
+                minutes = remaining // 60
+                seconds = remaining % 60
+                lines.append(f"")
+                lines.append(f"⏰ **COUNTDOWN TIMER: {minutes}:{seconds:02d}**")
+            elif remaining == 0:
+                lines.append(f"")
+                lines.append(f"⏰ **TIME EXPIRED**")
+
         return "\n".join(lines)
 
 
