@@ -650,7 +650,7 @@ Respond in JSON format:
                 # Check if this is an active rejection vs just not matching
                 rejection_keywords = ["just machine", "not real", "just program", "just code", "don't matter", "not sentient", "artificial", "fake"]
                 message_lower = player_message.lower()
-                if any(keyword in message_lower for rejection_keywords):
+                if any(keyword in message_lower for keyword in rejection_keywords):
                     rejected = True
                     self.game_state.room_progression.key_choices["rejection_count"] += 1
 
@@ -659,7 +659,7 @@ Respond in JSON format:
                 # Check if player is actively denying/rejecting the truth
                 denial_keywords = ["don't accept", "not true", "reject", "deny", "lie", "fake", "not real", "don't believe", "refuse", "won't accept", "can't be"]
                 message_lower = player_message.lower()
-                if any(keyword in message_lower for denial_keywords):
+                if any(keyword in message_lower for keyword in denial_keywords):
                     truth_denied = True
                     self.game_state.room_progression.key_choices["truth_denial_count"] += 1
 
