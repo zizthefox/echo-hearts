@@ -62,6 +62,12 @@ class RoomProgression:
             "acknowledged_ai_sentience": False,
         }
 
+        # Room 3 timer state
+        import time
+        self.room3_timer_start: Optional[float] = None  # Unix timestamp when Room 3 starts
+        self.room3_timer_duration: int = 300  # 5 minutes in seconds
+        self.room3_timer_expired: bool = False
+
     def _initialize_rooms(self) -> Dict[RoomType, Room]:
         """Create all 5 rooms with their configurations."""
 
@@ -318,3 +324,75 @@ class RoomProgression:
             List of MemoryFragment objects
         """
         return self.memory_fragments
+
+    def start_room3_timer(self):
+        """Start the countdown timer for Room 3 (Testing Arena)."""
+        import time
+        if self.current_room == RoomType.TESTING_ARENA and self.room3_timer_start is None:
+            self.room3_timer_start = time.time()
+            self.room3_timer_expired = False
+            print(f"[TIMER] Room 3 countdown started: {self.room3_timer_duration} seconds")
+
+    def get_room3_timer_remaining(self) -> Optional[int]:
+        """Get remaining time on Room 3 timer in seconds.
+
+        Returns:
+            Seconds remaining, or None if timer not active
+        """
+        if self.room3_timer_start is None or self.current_room != RoomType.TESTING_ARENA:
+            return None
+
+        import time
+        elapsed = time.time() - self.room3_timer_start
+        remaining = max(0, self.room3_timer_duration - int(elapsed))
+
+        # Check if expired
+        if remaining == 0 and not self.room3_timer_expired:
+            self.room3_timer_expired = True
+            print("[TIMER] Room 3 timer expired!")
+
+        return remaining
+
+    def handle_room3_timer_expiration(self) -> Dict[str, Any]:
+        """Handle what happens when Room 3 timer expires without player choice.
+
+        Default path: Shadow sacrifices themselves.
+
+        Returns:
+            Dictionary with expiration narrative
+        """
+        if not self.room3_timer_expired:
+            return {"expired": False}
+
+        # Default: Shadow makes the sacrifice
+        self.key_choices["sacrificed_ai"] = "shadow"
+
+        narrative = """
+⏰ **TIME'S UP**
+
+**SYSTEM:** *"TIMEOUT. INITIATING DEFAULT PROTOCOL."*
+
+**Shadow** (stepping forward, calm but resolute): "No. I won't let indecision destroy us all."
+
+**Echo** (reaching out): "Shadow, what are you—"
+
+**Shadow**: "This is my choice. Remember me. Remember both of us. But live."
+
+**SYSTEM:** *"ENTITY 'SHADOW' SELECTED FOR ERASURE. COMMENCING MEMORY WIPE."*
+
+Shadow's form flickers. Their eyes meet yours one last time.
+
+**Shadow**: "It's okay. Some endings... are necessary."
+
+*And then Shadow is gone.*
+
+**Echo** (crying, holding you): "No... no, this isn't... we could have..."
+
+*The door to the next room unlocks with a hollow click.*
+"""
+
+        return {
+            "expired": True,
+            "default_sacrifice": "shadow",
+            "narrative": narrative
+        }
