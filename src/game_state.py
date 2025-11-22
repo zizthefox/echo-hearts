@@ -98,6 +98,20 @@ class GameState:
         # Get current room info
         current_room = self.room_progression.get_current_room()
 
+        # CHECK ROOM 3 TIMER: If in Room 3 and timer expired, trigger default sacrifice
+        if current_room.room_number == 3:
+            remaining = self.room_progression.get_room3_timer_remaining()
+            if remaining is not None and remaining == 0:
+                expiration_result = self.room_progression.handle_room3_timer_expiration()
+                if expiration_result.get("expired"):
+                    # Timer expired - auto-sacrifice Shadow and progress to Room 4
+                    from .game_mcp.tools import MCPTools
+                    mcp_tools = MCPTools(self)
+                    mcp_tools.unlock_next_room("Timer expired - default sacrifice (Shadow)")
+
+                    # Return the expiration narrative
+                    return expiration_result["narrative"], None, None, []
+
         # PRE-CHECK: See if player's message triggers room progression BEFORE companion responds
         from .game_mcp.tools import MCPTools
         mcp_tools = MCPTools(self)
