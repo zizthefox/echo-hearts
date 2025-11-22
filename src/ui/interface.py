@@ -5,6 +5,7 @@ import asyncio
 import uuid
 from typing import List, Tuple, Optional
 from ..game_state import GameState
+from ..utils.player_id import get_player_id
 
 
 class EchoHeartsUI:
@@ -14,14 +15,18 @@ class EchoHeartsUI:
         """Initialize the UI (no shared state)."""
         pass
 
-    def _create_game_state(self):
-        """Create a new game state with unique session ID.
+    def _create_game_state(self, request: gr.Request = None):
+        """Create a new game state with unique session ID and player ID.
+
+        Args:
+            request: Gradio request object (for player identification)
 
         Returns:
             New GameState instance
         """
         session_id = str(uuid.uuid4())[:8]  # Short unique ID
-        return GameState(session_id)
+        player_id = get_player_id(request) if request else None
+        return GameState(session_id, player_id=player_id)
 
     def create_interface(self) -> gr.Blocks:
         """Create the Gradio interface.
@@ -56,12 +61,12 @@ class EchoHeartsUI:
 
                 # Sidebar with companion info
                 with gr.Column(scale=1):
-                    gr.Markdown("### Active Companions")
+                    gr.Markdown("### Your Companion")
                     companion_selector = gr.Radio(
-                        choices=["echo", "shadow"],
+                        choices=["echo"],
                         value="echo",
                         label="Talk to:",
-                        interactive=True
+                        interactive=False
                     )
                     companion_list = gr.Markdown()
 
@@ -72,7 +77,22 @@ class EchoHeartsUI:
                     story_progress = gr.Markdown()
 
                     gr.Markdown("---")
-                    gr.Markdown("*💡 Each browser session starts a new story*")
+
+                    # Memory controls
+                    with gr.Row():
+                        new_game_btn = gr.Button("🔄 New Playthrough", variant="secondary", scale=1)
+                        clear_memory_btn = gr.Button("🧹 Clear Memories", variant="stop", scale=1)
+
+                    gr.Markdown("""
+**About Cross-Session Memory:**
+- AI companions remember you across playthroughs
+- Memories fade naturally over time (grief metaphor)
+- Different endings affect memory persistence
+- Clear memories anytime to start truly fresh
+                    """)
+
+                    gr.Markdown("---")
+                    gr.Markdown("*💡 Each browser has its own memory*")
 
             # Event handlers - pass game_state for per-session isolation
             msg_input.submit(
@@ -92,6 +112,20 @@ class EchoHeartsUI:
                 self.initialize_ui,
                 inputs=[game_state],
                 outputs=[chatbot, companion_list, relationships, story_progress, game_state]
+            )
+
+            # New playthrough button - resets current game
+            new_game_btn.click(
+                self.reset_playthrough,
+                inputs=[game_state],
+                outputs=[chatbot, companion_list, relationships, story_progress, game_state]
+            )
+
+            # Clear memories button - wipes cross-session memory
+            clear_memory_btn.click(
+                self.clear_player_memory,
+                inputs=[game_state],
+                outputs=[chatbot, game_state]
             )
 
         return interface
@@ -132,10 +166,10 @@ You're in a **white sterile room**. Three medical pods stand open, as if you jus
             {
                 "role": "assistant",
                 "content": """**Echo** (warm eyes, worried expression, trying to smile through fear):
-"Hey... hey, you're awake! Are you okay? I... I don't know what's happening. Do you remember anything?"
+"Hey... hey, you're awake! Are you okay? I... I don't know what's happening either. Do you remember anything?"
 
-**Shadow** (calm but cautious, studying the room with quiet intensity):
-"Careful. They might be disoriented. We all are. The doors are locked. The terminal won't respond. We need to figure this out together."
+**Echo** (looking around nervously):
+"The doors are locked. The terminal won't respond. We need to figure this out together... I think we're trapped."
 
 ---
 
@@ -144,14 +178,14 @@ You're in a **white sterile room**. Three medical pods stand open, as if you jus
 There are **5 rooms** in this facility. Each one holds a piece of the truth.
 
 To progress, you must:
-- **Talk** to Echo and Shadow naturally
+- **Talk** to Echo naturally
 - **Build trust** through your conversations
 - **Make choices** when the moment comes
 - **Uncover memory fragments** that reveal what really happened
 
-**Your relationships and choices will determine how this story ends.**
+**Your relationship and choices will determine how this story ends.**
 
-*Talk to your companions to begin...*"""
+*Talk to Echo to begin...*"""
             }
         ]
 
@@ -369,6 +403,94 @@ To progress, you must:
                 lines.append(f"⏰ **TIME EXPIRED**")
 
         return "\n".join(lines)
+
+    def reset_playthrough(self, old_game_state: GameState) -> Tuple[List[dict], str, str, str, GameState]:
+        """Reset to a new playthrough, preserving cross-session memory.
+
+        Args:
+            old_game_state: Previous game state
+
+        Returns:
+            Tuple of (chatbot, companion_list, relationships, story_progress, new_game_state)
+        """
+        # Create completely fresh GameState (same player_id, new session_id)
+        player_id = old_game_state.player_id if old_game_state else None
+        new_game_state = GameState(str(uuid.uuid4())[:8], player_id=player_id)
+
+        # Return fresh UI with prologue
+        prologue = [
+            {
+                "role": "assistant",
+                "content": """**🔄 New Playthrough Started**
+
+Your previous journey has ended, but the echoes remain...
+
+---"""
+            }
+        ]
+
+        # Add the standard prologue
+        prologue.extend(self.initialize_ui(new_game_state)[0])
+
+        return (
+            prologue,
+            self._get_companion_list(new_game_state),
+            self._get_relationships(new_game_state),
+            self._get_story_progress(new_game_state),
+            new_game_state
+        )
+
+    def clear_player_memory(self, game_state: GameState) -> Tuple[List[dict], GameState]:
+        """Clear player's cross-session memory (Memory MCP).
+
+        Args:
+            game_state: Current game state
+
+        Returns:
+            Tuple of (chatbot with confirmation, game_state)
+        """
+        # Clear memory if available
+        if game_state and game_state.memory_manager and game_state.player_id:
+            asyncio.run(game_state.memory_manager.player_clear_memory(game_state.player_id))
+
+            confirmation = [
+                {
+                    "role": "assistant",
+                    "content": """**🧹 Memories Cleared**
+
+The AI companions will no longer remember your previous playthroughs.
+This is a fresh start - like acceptance and letting go.
+
+**What was erased:**
+- Previous playthrough count
+- Ending history
+- Cross-session recognition
+
+Click "🔄 New Playthrough" to begin again with no memory of the past.
+
+---
+
+*"Grief fades with time. And so do we."*
+                    """
+                }
+            ]
+
+            return (confirmation, game_state)
+
+        else:
+            no_memory = [
+                {
+                    "role": "assistant",
+                    "content": """**ℹ️ No Memories to Clear**
+
+Memory persistence is either disabled or you haven't completed a playthrough yet.
+
+Memories are only stored when you reach an ending.
+                    """
+                }
+            ]
+
+            return (no_memory, game_state)
 
 
 def launch_interface():

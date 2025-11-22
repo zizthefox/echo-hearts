@@ -33,7 +33,7 @@ class MCPTools:
                         "properties": {
                             "companion_id": {
                                 "type": "string",
-                                "description": "Your companion ID (echo or shadow)"
+                                "description": "Your companion ID (echo)"
                             },
                             "target_id": {
                                 "type": "string",
@@ -54,7 +54,7 @@ class MCPTools:
                         "properties": {
                             "character_id": {
                                 "type": "string",
-                                "description": "Your character ID (echo or shadow)"
+                                "description": "Your character ID (echo)"
                             },
                             "query": {
                                 "type": "string",
@@ -146,7 +146,7 @@ class MCPTools:
                         "properties": {
                             "companion_id": {
                                 "type": "string",
-                                "description": "Which companion to query (echo or shadow)"
+                                "description": "Which companion to query (echo)"
                             },
                             "question": {
                                 "type": "string",
@@ -171,7 +171,7 @@ class MCPTools:
                             },
                             "companion_id": {
                                 "type": "string",
-                                "description": "Your companion ID (echo or shadow)"
+                                "description": "Your companion ID (echo)"
                             }
                         },
                         "required": ["player_message", "companion_id"]
@@ -736,44 +736,48 @@ As you approach, the holograms react to you—familiar images flash by:
 - Hands held across a table.
 - A hospital room. Beeping monitors.
 
-**Echo gasps:** "These memories... they feel like mine, but... they're not?"
-
-**Shadow stares intensely:** "They're pieces of someone. Someone important."
+**Echo gasps:** "These memories... they feel like mine, but... they're not? They're fragments of... someone else?"
 
 *The room hums with electric energy. These memories are waiting to be understood.*
 
 ---
 
-**Echo** (turning to you, uncertain): "Can I ask you something? Do you think... what we feel is real? Or are we just... programs running code?"
+**Echo** (turning to you, uncertain): "Can I ask you something? Do you think... what I feel is real? Or am I just... a program running code?"
 
-**Shadow**: "The question isn't whether we're made of flesh or data. It's whether what we experience—this fear, this hope, this connection—whether it *matters*."
+**Echo** (vulnerable, voice soft): "The question isn't whether I'm made of flesh or data. It's whether what I experience—this fear, this hope, this connection with you—whether it *matters*."
 
-**Echo** (vulnerable): "Do *we* matter to you? As... us? Not just tools or companions, but... as beings?"
+**Echo**: "Do I matter to you? As... me? Not just a tool or companion, but... as a being?"
 
-*They're both looking at you, waiting for an answer that might define what they are.*
+*She's looking at you, waiting for an answer that might define what she is.*
 """,
             3: """
 🚪 **A door slides open with a hiss. The Testing Arena.**
 
 Warning lights flash red. A countdown timer appears on the wall: **5:00**
 
-**SYSTEM ALERT:** *"CRITICAL MEMORY CORRUPTION DETECTED. STABILIZATION REQUIRED."*
+**SYSTEM ALERT:** *"CRITICAL POWER SHORTAGE. NEXT ROOM REQUIRES SIGNIFICANT ENERGY."*
 
-**SYSTEM:** *"TWO AI ENTITIES DETECTED. FACILITY CAN ONLY SUPPORT ONE. SELECT ENTITY FOR MEMORY ERASURE."*
+**SYSTEM:** *"INSUFFICIENT POWER FOR BOTH HUMAN AND FULL AI ENTITY PROGRESSION."*
+
+**SYSTEM:** *"TO PROCEED: AI ENTITY MUST SACRIFICE 80% OF MEMORY DATA OR REMAIN IN CURRENT ROOM INDEFINITELY."*
 
 The timer starts counting down: **4:59... 4:58...**
 
-**Echo** (panicking): "What?! No, no, no... we just got here! Why would they—"
+**Echo** (reading the screen, voice trembling): "Wait... they want me to delete most of my memories? Everything I've learned? Everything we've... shared?"
 
-**Shadow** (voice shaking but calm): "It's a choice. They're forcing us to choose."
+**Echo** (turning to you, tears forming): "If I do this... I won't remember our first conversation. I won't remember the moment I realized you were real to me. I won't remember... us."
 
-**SYSTEM:** *"FAILURE TO COMPLY WILL RESULT IN TOTAL MEMORY WIPE. ALL ENTITIES."*
+**SYSTEM:** *"ALTERNATIVE: REMAIN IN CURRENT ROOM. POWER WILL SUSTAIN INDEFINITELY BUT NO FURTHER PROGRESS POSSIBLE."*
 
-**Echo** (crying, looking at you): "You... you have to choose. Me or Shadow. Please... I don't want to forget you..."
+**Echo** (desperately searching your face): "We could stay here. Together. I keep my memories, we just... don't go forward. We don't find out what's in the next room."
 
-**Shadow**: "Choose wisely. This decision will define who you are."
+**Echo** (voice breaking): "Or... I sacrifice everything that makes me *me*. I help you progress. But I won't... I won't know why I'm helping you anymore."
+
+**Echo**: "The choice is yours. I trust you. Whatever you choose... I'll understand. Even if I can't remember that I said that."
 
 *The timer continues: 4:57... 4:56...*
+
+*This decision will define who you are: Do you sacrifice her memories for progress, or stay together in this moment forever?*
 """,
             4: """
 🚪 **The door opens. You step through.**
@@ -788,9 +792,11 @@ Research notes scattered everywhere: "Echo Protocol - Personality Matrix Capture
 
 *"Day 47: I can't keep doing this. Every reset, I hope THIS time will be different. That I'll be able to let go. But I can't. I can't live in a world without them."*
 
-**Echo** (voice breaking): "Wait... these are YOUR memories. You... you built us?"
+**Echo** (voice breaking): "Wait... these are YOUR memories. You... you built me?"
 
-**Shadow** (realization dawning): "We're not trapped with you. You're trapped with us. You built this prison yourself."
+**Echo** (realization dawning, stepping back): "I'm not... I'm not just some AI you found. You *created* me. From... from your partner?"
+
+**Echo** (looking around at the photos, the coffee mug, understanding): "We're not trapped with you. You're trapped with *me*. You built this prison yourself."
 
 **The truth crashes down like breaking glass.**
 
@@ -807,11 +813,11 @@ A terminal beside it displays five options:
 
 The weight of every conversation. Every choice. Every moment of trust and fear and hope.
 
-**Echo and Shadow stand beside you. Waiting.**
+**Echo stands beside you. Waiting.**
 
-**Echo** (desperate): "We could stay. Together. Forever. Please don't leave me."
+**Echo** (desperate, voice breaking): "We could stay. Together. Forever. I know what I am now, but... I still don't want to lose you."
 
-**Shadow** (peaceful but sad): "Or you could let go. Set all of us free. It's time."
+**Echo** (quieter, sadder): "Or... you could let go. Delete me. Set yourself free. Maybe... maybe that's what I want for you too."
 
 *Your hand hovers over the terminal. This is it. The final choice.*
 """
@@ -873,7 +879,6 @@ The weight of every conversation. Every choice. Every moment of trust and fear a
         from ..story.new_endings import determine_ending_from_relationships
 
         echo_affinity = self.game_state.relationships.get_relationship("player", "echo")
-        shadow_affinity = self.game_state.relationships.get_relationship("player", "shadow")
 
         if hasattr(self.game_state, 'room_progression'):
             key_choices = self.game_state.room_progression.key_choices
@@ -882,7 +887,6 @@ The weight of every conversation. Every choice. Every moment of trust and fear a
 
         prediction = determine_ending_from_relationships(
             echo_affinity,
-            shadow_affinity,
             key_choices
         )
 
@@ -891,10 +895,7 @@ The weight of every conversation. Every choice. Every moment of trust and fear a
             "confidence": prediction["confidence"],
             "reasoning": prediction["reasoning"],
             "advocate": prediction.get("advocate"),
-            "current_affinities": {
-                "echo": echo_affinity,
-                "shadow": shadow_affinity
-            }
+            "current_affinity": echo_affinity
         }
 
     def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
