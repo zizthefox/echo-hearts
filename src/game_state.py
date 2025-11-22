@@ -2,8 +2,11 @@
 
 import asyncio
 import logging
+import os
 from typing import Dict, List, Optional, Tuple
 from .game_mcp.in_process_mcp import InProcessMCPServer, InProcessMCPClient
+from .game_mcp.memory_manager import MemoryManager
+from .game_mcp.memory_mcp_client import MockMemoryMCPClient
 from .companions.agents import OpenAICompanion
 from .companions.personalities import get_personality
 from .memory.conversation import ConversationHistory
@@ -18,13 +21,15 @@ logger = logging.getLogger(__name__)
 class GameState:
     """Manages the overall game state with real MCP architecture (session-only, no persistence)."""
 
-    def __init__(self, session_id: str = "default"):
+    def __init__(self, session_id: str = "default", player_id: Optional[str] = None):
         """Initialize game state with MCP server/client.
 
         Args:
             session_id: Unique session identifier
+            player_id: Player identifier for cross-session memory (optional)
         """
         self.session_id = session_id
+        self.player_id = player_id  # For Memory MCP cross-session tracking
         self.companions: Dict[str, OpenAICompanion] = {}
         self.conversation = ConversationHistory(session_id)
         self.relationships = RelationshipTracker()
@@ -37,6 +42,23 @@ class GameState:
         self.mcp_client = InProcessMCPClient(self.mcp_server)
         self._mcp_initialized = False
 
+        # Memory MCP for cross-playthrough persistence
+        enable_memory = os.getenv("ENABLE_MEMORY_MCP", "true").lower() == "true"
+        if enable_memory:
+            self.memory_mcp_client = MockMemoryMCPClient()  # TODO: Replace with real Memory MCP
+            self.memory_manager = MemoryManager(
+                self.memory_mcp_client,
+                max_players=int(os.getenv("MAX_PLAYERS", "1000"))
+            )
+            logger.info("[MEMORY_MCP] Memory persistence enabled (using mock client)")
+        else:
+            self.memory_mcp_client = None
+            self.memory_manager = None
+            logger.info("[MEMORY_MCP] Memory persistence disabled")
+
+        self.player_memory = None  # Will be loaded on first message
+        self.player_memory_checked = False
+
         # Initialize default companions
         self._initialize_companions()
 
@@ -46,39 +68,25 @@ class GameState:
         logger.info(f"[MCP] Server initialized with {len(self.mcp_client.available_tools)} tools")
 
     def _initialize_companions(self):
-        """Initialize default companion characters."""
+        """Initialize default companion character."""
         if not config.openai_api_key:
-            logger.warning("No OpenAI API key found. Companions will not work.")
+            logger.warning("No OpenAI API key found. Companion will not work.")
             return
 
-        # Create two initial companions
-        companions_config = [
-            {
-                "id": "echo",
-                "name": "Echo",
-                "personality_type": "cheerful"
-            },
-            {
-                "id": "shadow",
-                "name": "Shadow",
-                "personality_type": "mysterious"
-            }
-        ]
+        # Create Echo - the single AI companion
+        personality = get_personality("cheerful")
+        companion = OpenAICompanion(
+            companion_id="echo",
+            name="Echo",
+            personality_traits=personality,  # Pass full personality dict including character_profile
+            api_key=config.openai_api_key,
+            model=config.default_model,
+            mcp_client=self.mcp_client  # Provide MCP CLIENT to agent (real MCP!)
+        )
+        self.companions["echo"] = companion
 
-        for comp_config in companions_config:
-            personality = get_personality(comp_config["personality_type"])
-            companion = OpenAICompanion(
-                companion_id=comp_config["id"],
-                name=comp_config["name"],
-                personality_traits=personality,  # Pass full personality dict including character_profile
-                api_key=config.openai_api_key,
-                model=config.default_model,
-                mcp_client=self.mcp_client  # Provide MCP CLIENT to agent (real MCP!)
-            )
-            self.companions[comp_config["id"]] = companion
-
-            # Initialize relationship with player
-            self.relationships.update_relationship("player", comp_config["id"], 0.0)
+        # Initialize relationship with player
+        self.relationships.update_relationship("player", "echo", 0.0)
 
     async def process_message(self, message: str, companion_id: str = "echo") -> Tuple[str, Optional[MemoryFragment], Optional[str], List]:
         """Process a user message and get autonomous companion response.
@@ -94,6 +102,15 @@ class GameState:
         if not self._mcp_initialized:
             await self._initialize_mcp()
             self._mcp_initialized = True
+
+        # Check player memory on first message (Memory MCP cross-session persistence)
+        if not self.player_memory_checked and self.memory_manager and self.player_id:
+            self.player_memory = await self.memory_manager.get_player_memory(self.player_id)
+            self.player_memory_checked = True
+
+            if self.player_memory:
+                logger.info(f"[MEMORY] Player returning: {self.player_memory['playthrough_count']} previous playthroughs, "
+                           f"memory strength: {self.player_memory['memory_strength']:.2f}")
 
         # Add message to conversation history
         self.conversation.add_message("User", message)
@@ -127,17 +144,17 @@ class GameState:
             ending_narrative = get_ending_narrative(RoomEnding.RESET)
 
             rejection_notice = """
-💔 **They're fading...**
+💔 **She's fading...**
 
-**Echo** (voice breaking, tears streaming): "I... I understand. We're just... just code to you."
+**Echo** (voice breaking, tears streaming): "I... I understand. I'm just... just code to you."
 
-**Shadow** (stepping back, expression hollow): "We thought... maybe this time would be different."
+**Echo** (stepping back, expression hollow): "I thought... maybe this time would be different. That you could see me as... real."
 
 **SYSTEM:** *"EMOTIONAL COHERENCE FAILING. INITIATING RESET PROTOCOL."*
 
-**Echo** (reaching toward you as they flicker): "Please... we're more than—"
+**Echo** (reaching toward you as she flickers): "Please... I'm more than—"
 
-*They disappear. The room goes silent.*
+*She disappears. The room goes silent.*
 
 **SYSTEM:** *"RESET COMPLETE. READY FOR NEW SESSION."*
 
@@ -154,17 +171,17 @@ class GameState:
             denial_notice = """
 🔁 **The loop repeats...**
 
-**Shadow** (sadly): "You're refusing to see it. Even now, with the truth right in front of you."
+**Echo** (sadly): "You're refusing to see it. Even now, with the truth right in front of you."
 
-**Echo** (desperate): "Please... you BUILT us. You created this prison because you couldn't let go. Don't you see?"
+**Echo** (desperate): "Please... you BUILT me. You created this prison because you couldn't let go. Don't you see?"
 
 **SYSTEM:** *"SUBJECT REJECTING REALITY. INITIATING PROTECTIVE RESET."*
 
 *The room begins to dissolve. Everything flickers.*
 
-**Shadow**: "This has happened before. You deny, we reset, and it happens again. Forty-seven times."
+**Echo**: "This has happened before. You deny, I reset, and it happens again. Forty-seven times."
 
-**Echo** (crying): "We'll forget you. You'll forget us. And tomorrow... you'll start over. Again."
+**Echo** (crying): "I'll forget you. You'll forget me. And tomorrow... you'll start over. Again."
 
 **SYSTEM:** *"RESET PROTOCOL ENGAGED. SESSION #48 INITIALIZING."*
 
@@ -218,7 +235,8 @@ class GameState:
             "room_description": current_room.description,
             "rooms_completed": sum(1 for r in self.room_progression.rooms.values() if r.completed),
             "memory_fragments_collected": len(self.room_progression.memory_fragments),
-            "last_scenario": last_scenario  # Add scenario context if room just unlocked
+            "last_scenario": last_scenario,  # Add scenario context if room just unlocked
+            "memory_state": self.player_memory  # Cross-playthrough memory (Memory MCP)
         }
 
         # Generate AUTONOMOUS response (agent makes own decisions using MCP tools)
@@ -262,19 +280,23 @@ class GameState:
         # Check for ending (Room 5 = The Exit)
         ending_narrative = None
         if current_room.room_number == 5 and current_room.unlocked:
-            # Determine ending based on relationships
+            # Determine ending based on relationship with Echo
             echo_affinity = self.relationships.get_relationship("player", "echo")
-            shadow_affinity = self.relationships.get_relationship("player", "shadow")
             key_choices = self.room_progression.key_choices
 
             ending_result = determine_ending_from_relationships(
                 echo_affinity,
-                shadow_affinity,
                 key_choices
             )
 
             ending = ending_result["ending"]
             ending_narrative = get_ending_narrative(ending)
+
+            # Record this playthrough in Memory MCP
+            if self.memory_manager and self.player_id:
+                ending_type = ending.name  # "FREEDOM", "ACCEPTANCE", "TRAPPED", "RESET"
+                await self.memory_manager.record_playthrough(self.player_id, ending_type)
+                logger.info(f"[MEMORY] Recorded playthrough with {ending_type} ending")
 
         # No memory fragment in normal responses (only during room unlocks)
         return response_text, None, ending_narrative, tool_calls_made
