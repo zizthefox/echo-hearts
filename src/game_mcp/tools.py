@@ -644,6 +644,8 @@ Respond in JSON format:
 
             # Special handling for Room 2: Detect if player is REJECTING AI sentience
             rejected = False
+            truth_denied = False
+
             if room_num == 2 and not matched:
                 # Check if this is an active rejection vs just not matching
                 rejection_keywords = ["just machine", "not real", "just program", "just code", "don't matter", "not sentient", "artificial", "fake"]
@@ -651,6 +653,15 @@ Respond in JSON format:
                 if any(keyword in message_lower for rejection_keywords):
                     rejected = True
                     self.game_state.room_progression.key_choices["rejection_count"] += 1
+
+            # Special handling for Room 4: Detect if player is DENYING the truth
+            if room_num == 4 and not matched:
+                # Check if player is actively denying/rejecting the truth
+                denial_keywords = ["don't accept", "not true", "reject", "deny", "lie", "fake", "not real", "don't believe", "refuse", "won't accept", "can't be"]
+                message_lower = player_message.lower()
+                if any(keyword in message_lower for denial_keywords):
+                    truth_denied = True
+                    self.game_state.room_progression.key_choices["truth_denial_count"] += 1
 
             return {
                 "matched": matched,
@@ -660,7 +671,9 @@ Respond in JSON format:
                 "theme_required": criteria["theme"],
                 "hint": f"Keep exploring themes of {criteria['theme'].lower()}..." if not matched else "You sense progress...",
                 "rejected": rejected,
-                "rejection_count": self.game_state.room_progression.key_choices.get("rejection_count", 0) if room_num == 2 else 0
+                "rejection_count": self.game_state.room_progression.key_choices.get("rejection_count", 0) if room_num == 2 else 0,
+                "truth_denied": truth_denied,
+                "truth_denial_count": self.game_state.room_progression.key_choices.get("truth_denial_count", 0) if room_num == 4 else 0
             }
 
         except Exception as e:
