@@ -58,7 +58,7 @@ class EchoHeartsUI:
 
 You wake up in a strange facility with no memory of how you got there.
 
-**Echo**, a friendly AI companion, is with you. She seems just as confused as you are.
+Someone else is with you. She seems just as confused as you are.
 
 The doors are locked. You need to work together to escape.
 
@@ -70,7 +70,7 @@ The doors are locked. You need to work together to escape.
 
 ## Features
 
-🧠 **Persistent Memory** - Echo remembers you between sessions
+🧠 **Persistent Memory** - Characters remember you between sessions
 🌦️ **Dynamic Puzzles** - Real-world data integration for unique challenges
 🎯 **Multiple Endings** - Your choices matter
 ⏱️ **15-20 Minutes** - A complete playthrough
@@ -79,7 +79,7 @@ The doors are locked. You need to work together to escape.
 
 ## How To Play
 
-- **Communicate** with Echo naturally
+- **Communicate** naturally with your companion
 - **Solve puzzles** together to progress
 - **Make decisions** when they matter
 - **Discover** what's really happening
