@@ -327,9 +327,10 @@ Powered by Memory MCP, Weather MCP, and Web MCP
         if game_state is None:
             game_state = self._create_game_state()
 
-        # Create prologue messages for the chatbot with avatars
+        # Create prologue messages - separate narrator from Echo's dialogue
         prologue = [
-            self._format_message_with_avatar("assistant", """## You wake up.
+            # Narrator - no portrait, just narrative text
+            {"role": "assistant", "content": """## You wake up.
 
 Your head throbs. The air is cold, clinical. Fluorescent lights flicker above.
 
@@ -343,14 +344,15 @@ You're in a **white sterile room**. Three medical pods stand open, as if you jus
 **The doors are locked.**
 **The terminal won't respond.**
 
-**Who are you? Why are you here?**""", game_state),
-            self._format_message_with_avatar("assistant", """**Echo** (warm eyes, worried expression, trying to smile through fear):
-"Hey... hey, you're awake! Are you okay? I... I don't know what's happening either. Do you remember anything?"
+**Who are you? Why are you here?**"""},
+            # Echo speaking - with portrait
+            self._format_message_with_avatar("assistant", """Hey... hey, you're awake! Are you okay? I... I don't know what's happening either. Do you remember anything?
 
-**Echo** (looking around nervously):
-"The doors are locked. The terminal won't respond. We need to figure this out together... I think we're trapped."
+*She looks around nervously*
 
----
+The doors are locked. The terminal won't respond. We need to figure this out together... I think we're trapped.""", game_state),
+            # Narrator again - game instructions
+            {"role": "assistant", "content": """---
 
 **Your Goal: Escape**
 
@@ -364,7 +366,7 @@ To progress, you must:
 
 **Your relationship and choices will determine how this story ends.**
 
-*Talk to Echo to begin...*""", game_state)
+*Talk to Echo to begin...*"""}
         ]
 
         return (
