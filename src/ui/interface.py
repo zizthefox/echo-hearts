@@ -955,6 +955,10 @@ Handwritten note on October 15th:
 ```
             """
 
+        # Initialize MCP if not already done
+        if game_state and not game_state._weather_mcp_initialized:
+            asyncio.run(game_state._initialize_mcp())
+
         # Call Weather MCP
         if game_state and hasattr(game_state, 'weather_mcp_client') and game_state.weather_mcp_client:
             try:
