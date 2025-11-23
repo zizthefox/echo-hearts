@@ -136,22 +136,38 @@ Powered by Memory MCP, Weather MCP, and Web MCP
                     main_menu_btn = gr.Button("🏠 Main Menu", variant="secondary", scale=0, size="sm")
 
                 with gr.Row():
-                    # Main chat area
+                    # Main game area - visual novel style
                     with gr.Column(scale=3):
-                        chatbot = gr.Chatbot(
-                            label="Conversation",
-                            height=500,
-                            type="messages",
-                            avatar_images=(None, "data/echo_avatar.png")  # (user_avatar, assistant_avatar)
+                        # Character portrait display (large, Persona 5 style)
+                        character_portrait = gr.Image(
+                            value="data/echo_avatar.png",
+                            label=None,
+                            show_label=False,
+                            height=400,
+                            width=300,
+                            interactive=False,
+                            show_download_button=False,
+                            container=False,
+                            elem_classes=["character-portrait"]
                         )
 
+                        # Dialogue history (scrollable)
+                        chatbot = gr.Chatbot(
+                            label="Conversation",
+                            height=300,
+                            type="messages",
+                            show_label=False
+                        )
+
+                        # Input area at bottom (visual novel style)
                         with gr.Row():
                             msg_input = gr.Textbox(
                                 label="Your message",
                                 placeholder="Talk to Echo...",
-                                scale=4
+                                scale=4,
+                                show_label=False
                             )
-                            send_btn = gr.Button("Send", scale=1, variant="primary")
+                            send_btn = gr.Button("▶ Send", scale=1, variant="primary")
 
                     # Sidebar with companion info
                     with gr.Column(scale=1):
