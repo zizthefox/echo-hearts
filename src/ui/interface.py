@@ -56,42 +56,37 @@ class EchoHeartsUI:
 
 ## About The Game
 
-You wake up in a sterile white room with no memory of how you got there.
+You wake up in a strange facility with no memory of how you got there.
 
-Echo, an AI companion, is with you. The doors are locked. A terminal displays: **"ECHO PROTOCOL - SESSION #47"**
+**Echo**, a friendly AI companion, is with you. She seems just as confused as you are.
 
-Together, you must escape through **5 mysterious rooms**, each holding fragments of a buried truth.
+The doors are locked. You need to work together to escape.
 
-**But this isn't just an escape room...**
+**Navigate 5 rooms. Solve puzzles. Uncover the truth.**
 
-This is a mystery about:
-- 🔍 **Investigation** - Piece together clues and uncover the truth
-- 🤝 **Collaboration** - Work with Echo to solve puzzles
-- 🧩 **Memory Fragments** - Discover what really happened
-- 🚪 **Escape** - Navigate 5 rooms to reach freedom
+*Simple, right?*
 
 ---
 
 ## Features
 
-🧠 **Cross-Playthrough Memory** - Echo remembers previous sessions via Memory MCP
-🌦️ **Real-World Data** - Weather and web scraping power emotional puzzles
-🎯 **6 Different Endings** - Based on your choices and relationship with Echo
-⏱️ **15-20 Minutes** - A complete emotional journey
+🧠 **Persistent Memory** - Echo remembers you between sessions
+🌦️ **Dynamic Puzzles** - Real-world data integration for unique challenges
+🎯 **Multiple Endings** - Your choices matter
+⏱️ **15-20 Minutes** - A complete playthrough
 
 ---
 
 ## How To Play
 
-- **Talk naturally** with Echo to build trust
-- **Make choices** that reflect your values
-- **Solve puzzles** using external data (weather, web archives, traffic studies)
-- **Uncover memory fragments** to piece together the truth
-- **Reach an ending** - then decide if you want to play again
+- **Communicate** with Echo naturally
+- **Solve puzzles** together to progress
+- **Make decisions** when they matter
+- **Discover** what's really happening
 
 ---
 
-**⚠️ Content Warning:** This game explores emotional themes and mystery elements. Player discretion advised.
+**⚠️ Note:** This game is best experienced without spoilers. Some players may find certain themes emotionally intense.
 
 ---
                 """)
