@@ -54,7 +54,7 @@ class EchoHeartsUI:
                     with gr.Row():
                         msg_input = gr.Textbox(
                             label="Your message",
-                            placeholder="Talk to your companions...",
+                            placeholder="Talk to Echo...",
                             scale=4
                         )
                         send_btn = gr.Button("Send", scale=1, variant="primary")
@@ -62,12 +62,6 @@ class EchoHeartsUI:
                 # Sidebar with companion info
                 with gr.Column(scale=1):
                     gr.Markdown("### Your Companion")
-                    companion_selector = gr.Radio(
-                        choices=["echo"],
-                        value="echo",
-                        label="Talk to:",
-                        interactive=False
-                    )
                     companion_list = gr.Markdown()
 
                     gr.Markdown("### Relationships")
@@ -85,7 +79,7 @@ class EchoHeartsUI:
 
                     gr.Markdown("""
 **About Cross-Session Memory:**
-- AI companions remember you across playthroughs
+- Echo remembers you across playthroughs
 - Memories fade naturally over time (grief metaphor)
 - Different endings affect memory persistence
 - Clear memories anytime to start truly fresh
@@ -97,13 +91,13 @@ class EchoHeartsUI:
             # Event handlers - pass game_state for per-session isolation
             msg_input.submit(
                 self.handle_message,
-                inputs=[msg_input, chatbot, companion_selector, game_state],
+                inputs=[msg_input, chatbot, game_state],
                 outputs=[msg_input, chatbot, companion_list, relationships, story_progress, game_state]
             )
 
             send_btn.click(
                 self.handle_message,
-                inputs=[msg_input, chatbot, companion_selector, game_state],
+                inputs=[msg_input, chatbot, game_state],
                 outputs=[msg_input, chatbot, companion_list, relationships, story_progress, game_state]
             )
 
@@ -201,7 +195,6 @@ To progress, you must:
         self,
         message: str,
         history: List[dict],
-        companion_id: str,
         game_state: GameState
     ) -> Tuple[str, List[dict], str, str, str, GameState]:
         """Handle incoming message from user.
@@ -209,7 +202,6 @@ To progress, you must:
         Args:
             message: User's message
             history: Chat history
-            companion_id: Active companion ID
             game_state: Session game state (may be None on first message)
 
         Returns:
@@ -226,13 +218,14 @@ To progress, you must:
         history.append({"role": "user", "content": message})
 
         # Process message through game state (async) - returns (response, event, ending, tool_calls)
+        # Always talk to Echo (the only companion)
         response, story_event, ending_narrative, tool_calls_made = asyncio.run(
-            game_state.process_message(message, companion_id)
+            game_state.process_message(message, "echo")
         )
 
-        # Get companion name
-        companion = game_state.companions.get(companion_id)
-        companion_name = companion.name if companion else "Companion"
+        # Get companion name (always Echo)
+        companion = game_state.companions.get("echo")
+        companion_name = companion.name if companion else "Echo"
 
         # Show agent reasoning (tool usage) if any
         if tool_calls_made:
@@ -458,7 +451,7 @@ Your previous journey has ended, but the echoes remain...
                     "role": "assistant",
                     "content": """**🧹 Memories Cleared**
 
-The AI companions will no longer remember your previous playthroughs.
+Echo will no longer remember your previous playthroughs.
 This is a fresh start - like acceptance and letting go.
 
 **What was erased:**
@@ -470,7 +463,7 @@ Click "🔄 New Playthrough" to begin again with no memory of the past.
 
 ---
 
-*"Grief fades with time. And so do we."*
+*"Grief fades with time. And so do I."*
                     """
                 }
             ]

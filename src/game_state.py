@@ -7,6 +7,8 @@ from typing import Dict, List, Optional, Tuple
 from .game_mcp.in_process_mcp import InProcessMCPServer, InProcessMCPClient
 from .game_mcp.memory_manager import MemoryManager
 from .game_mcp.memory_mcp_client import MockMemoryMCPClient
+from .game_mcp.weather_mcp_client import MockWeatherMCPClient, connect_to_weather_mcp
+from .game_mcp.web_mcp_client import MockWebMCPClient, connect_to_web_mcp
 from .companions.agents import OpenAICompanion
 from .companions.personalities import get_personality
 from .memory.conversation import ConversationHistory
@@ -59,13 +61,33 @@ class GameState:
         self.player_memory = None  # Will be loaded on first message
         self.player_memory_checked = False
 
+        # Weather MCP for historical weather data (Room 1 & 2 puzzles)
+        self.weather_mcp_client = None
+        self._weather_mcp_initialized = False
+
+        # Web MCP for scraping blogs, news, social media (Room 2 & 3 puzzles)
+        self.web_mcp_client = None
+        self._web_mcp_initialized = False
+
         # Initialize default companions
         self._initialize_companions()
 
     async def _initialize_mcp(self):
-        """Initialize the MCP client connection."""
+        """Initialize all MCP client connections."""
         await self.mcp_client.initialize()
-        logger.info(f"[MCP] Server initialized with {len(self.mcp_client.available_tools)} tools")
+        logger.info(f"[MCP] Game MCP server initialized with {len(self.mcp_client.available_tools)} tools")
+
+        # Initialize Weather MCP
+        if not self._weather_mcp_initialized:
+            self.weather_mcp_client = await connect_to_weather_mcp()
+            self._weather_mcp_initialized = True
+            logger.info("[WEATHER_MCP] Weather MCP client initialized")
+
+        # Initialize Web MCP
+        if not self._web_mcp_initialized:
+            self.web_mcp_client = await connect_to_web_mcp()
+            self._web_mcp_initialized = True
+            logger.info("[WEB_MCP] Web MCP client initialized")
 
     def _initialize_companions(self):
         """Initialize default companion character."""
