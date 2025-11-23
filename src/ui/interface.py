@@ -54,6 +54,8 @@ class EchoHeartsUI:
 
 ---
 
+<div style="text-align: center; padding: 20px;">
+
 ## About The Game
 
 You wake up in a strange facility with no memory of how you got there.
@@ -65,6 +67,8 @@ The doors are locked. You need to work together to escape.
 **Navigate 5 rooms. Solve puzzles. Uncover the truth.**
 
 *Simple, right?*
+
+</div>
 
 ---
 
