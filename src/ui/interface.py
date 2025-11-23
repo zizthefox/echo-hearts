@@ -158,10 +158,18 @@ The doors are locked. You need to work together to escape.
 
 ## How To Play
 
-- **Communicate** naturally with your companion
+**Your Goal: Escape**
+
+There are **5 rooms** in this facility. Each one holds a piece of the truth.
+
+To progress, you must:
+- **Talk** naturally with your companion
+- **Build trust** through your conversations
+- **Make choices** when the moment comes
 - **Solve puzzles** together to progress
-- **Make decisions** when they matter
-- **Discover** what's really happening
+- **Uncover memory fragments** that reveal what really happened
+
+**Your relationship and choices will determine how this story ends.**
 
 ---
 
@@ -350,23 +358,7 @@ You're in a **white sterile room**. Three medical pods stand open, as if you jus
 
 *She looks around nervously*
 
-The doors are locked. The terminal won't respond. We need to figure this out together... I think we're trapped.""", game_state),
-            # Narrator again - game instructions
-            {"role": "assistant", "content": """---
-
-**Your Goal: Escape**
-
-There are **5 rooms** in this facility. Each one holds a piece of the truth.
-
-To progress, you must:
-- **Talk** to Echo naturally
-- **Build trust** through your conversations
-- **Make choices** when the moment comes
-- **Uncover memory fragments** that reveal what really happened
-
-**Your relationship and choices will determine how this story ends.**
-
-*Talk to Echo to begin...*"""}
+The doors are locked. The terminal won't respond. We need to figure this out together... I think we're trapped.""", game_state)
         ]
 
         return (
