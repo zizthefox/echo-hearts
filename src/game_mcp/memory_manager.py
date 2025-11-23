@@ -1,9 +1,11 @@
-"""Memory MCP integration with time-based decay for cross-playthrough persistence.
+"""Memory MCP integration for cross-playthrough persistence.
 
-This implements a grief metaphor through memory decay:
-- Memories fade naturally over time (minutes/hours)
-- Different endings affect decay rates
-- Players can choose to let go (clear memories)
+Memory Behavior:
+- Memories persist ONLY during incomplete playthroughs
+- Reaching ANY ending immediately clears all memories
+- Each complete playthrough is a fresh start
+- Incomplete playthroughs decay after 2 hours (player quit mid-game)
+- Players can manually clear memories anytime
 """
 
 import logging
@@ -155,24 +157,15 @@ class MemoryManager:
             first_seen = datetime.now().isoformat()
             logger.info(f"[MEMORY] Player {player_id[:8]} first playthrough")
 
-        # Map affinity ending to decay type if needed
-        if ending_type in ENDING_TO_DECAY_TYPE:
-            decay_type = ENDING_TO_DECAY_TYPE[ending_type]
-            logger.info(f"[MEMORY] Mapped ending '{ending_type}' → decay type '{decay_type}'")
-        else:
-            decay_type = ending_type  # Already a decay type or None
-
-        # Determine decay rate based on ending
-        if decay_type:
-            decay_minutes = getattr(self.decay_config, decay_type, self.decay_config.DEFAULT)
-        else:
-            decay_minutes = self.decay_config.DEFAULT
-
-        # Special case: FREEDOM ending = immediate delete (LIBERATION → FREEDOM)
-        if decay_type == "FREEDOM":
-            logger.info(f"[MEMORY] Player {player_id[:8]} chose {ending_type} (FREEDOM) - deleting all memories")
+        # NEW BEHAVIOR: Any ending clears memory immediately for fresh playthrough
+        if ending_type:
+            logger.info(f"[MEMORY] Player {player_id[:8]} reached ending '{ending_type}' - clearing all memories for fresh start")
             await self._delete_player_memory(player_id)
             return
+
+        # Only incomplete playthroughs persist (no ending reached)
+        # This allows memory to carry forward during a single playthrough session
+        decay_minutes = self.decay_config.DEFAULT
 
         # Create/update entity in Memory MCP
         try:
@@ -186,13 +179,13 @@ class MemoryManager:
                             f"first_seen: {first_seen}",
                             f"last_seen: {datetime.now().isoformat()}",
                             f"playthrough_count: {playthrough_count}",
-                            f"last_ending: {ending_type or 'INCOMPLETE'}",
+                            f"last_ending: INCOMPLETE",
                             f"decay_rate_minutes: {decay_minutes}"
                         ]
                     }]
                 }
             )
-            logger.info(f"[MEMORY] Stored memory for player {player_id[:8]} (decay: {decay_minutes}min)")
+            logger.info(f"[MEMORY] Stored incomplete playthrough for player {player_id[:8]} (decay: {decay_minutes}min)")
         except Exception as e:
             logger.error(f"[MEMORY] Error storing playthrough: {e}")
 
