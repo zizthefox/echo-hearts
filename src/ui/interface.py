@@ -57,7 +57,7 @@ class EchoHeartsUI:
                     # Create visual novel style message with large portrait
                     html_content = f"""
 <div style="display: flex; gap: 20px; align-items: flex-start; margin: 10px 0;">
-    <img src="data:image/png;base64,{img_data}" style="width: 300px; height: 400px; border-radius: 15px; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+    <img src="data:image/png;base64,{img_data}" style="width: 250px; height: 250px; border-radius: 15px; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
     <div style="flex-grow: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border-left: 4px solid #667eea;">
         <div style="color: #667eea; font-weight: bold; font-size: 1.2em; margin-bottom: 10px;">Echo</div>
         <div style="font-size: 1.1em; line-height: 1.6;">{content}</div>
