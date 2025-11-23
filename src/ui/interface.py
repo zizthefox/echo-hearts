@@ -29,7 +29,7 @@ class EchoHeartsUI:
         return GameState(session_id, player_id=player_id)
 
     def _format_message_with_avatar(self, role: str, content: str, game_state: GameState) -> dict:
-        """Format a message with avatar if available.
+        """Format a message with large visual novel style portrait.
 
         Args:
             role: Message role (user/assistant)
@@ -37,19 +37,32 @@ class EchoHeartsUI:
             game_state: Current game state
 
         Returns:
-            Message dict with optional metadata
+            Message dict with HTML-embedded portrait for visual novel style
         """
-        message = {"role": role, "content": content}
+        # For user messages, just return plain content
+        if role == "user":
+            return {"role": role, "content": content}
 
-        # Add Echo's avatar for assistant messages
+        # For Echo's messages, embed large portrait in HTML
         if role == "assistant" and game_state and "echo" in game_state.companions:
             avatar_path = game_state.companions["echo"].avatar_path
             if avatar_path:
                 import os
                 if os.path.exists(avatar_path):
-                    message["metadata"] = {"title": "Echo", "avatar": avatar_path}
+                    # Create visual novel style message with large portrait
+                    html_content = f"""
+<div style="display: flex; gap: 20px; align-items: flex-start; margin: 10px 0;">
+    <img src="file/{avatar_path}" style="width: 300px; height: 400px; border-radius: 15px; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+    <div style="flex-grow: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border-left: 4px solid #667eea;">
+        <div style="color: #667eea; font-weight: bold; font-size: 1.2em; margin-bottom: 10px;">Echo</div>
+        <div style="font-size: 1.1em; line-height: 1.6;">{content}</div>
+    </div>
+</div>
+"""
+                    return {"role": role, "content": html_content}
 
-        return message
+        # Fallback to plain message
+        return {"role": role, "content": content}
 
     def create_interface(self) -> gr.Blocks:
         """Create the Gradio interface.
@@ -172,15 +185,14 @@ Powered by Memory MCP, Weather MCP, and Web MCP
                 with gr.Row():
                     # Main game area - visual novel style
                     with gr.Column(scale=3):
-                        # Dialogue display with large character portraits
+                        # Dialogue display with large character portraits (HTML-embedded)
                         chatbot = gr.Chatbot(
                             label="Conversation",
                             height=600,
                             type="messages",
                             show_label=False,
-                            avatar_images=(None, "data/echo_avatar.png"),
-                            render_markdown=True,
-                            bubble_full_width=False
+                            render_markdown=False,  # Use HTML rendering instead
+                            bubble_full_width=True
                         )
 
                         # Input area at bottom (visual novel style)
