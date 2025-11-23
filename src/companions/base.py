@@ -8,17 +8,19 @@ from ..game_mcp.memory import CharacterMemory
 class Companion(ABC):
     """Base class for AI companions."""
 
-    def __init__(self, companion_id: str, name: str, personality_traits: Dict[str, Any]):
+    def __init__(self, companion_id: str, name: str, personality_traits: Dict[str, Any], avatar_path: Optional[str] = None):
         """Initialize a companion.
 
         Args:
             companion_id: Unique identifier
             name: Companion's name
             personality_traits: Dictionary of personality characteristics
+            avatar_path: Path to character avatar image (optional)
         """
         self.companion_id = companion_id
         self.name = name
         self.personality_traits = personality_traits
+        self.avatar_path = avatar_path
         self.memory = CharacterMemory(companion_id)
         self.relationships: Dict[str, float] = {}  # companion_id -> affinity score
 

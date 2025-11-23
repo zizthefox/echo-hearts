@@ -103,7 +103,8 @@ class GameState:
             personality_traits=personality,  # Pass full personality dict including character_profile
             api_key=config.openai_api_key,
             model=config.default_model,
-            mcp_client=self.mcp_client  # Provide MCP CLIENT to agent (real MCP!)
+            mcp_client=self.mcp_client,  # Provide MCP CLIENT to agent (real MCP!)
+            avatar_path="data/echo_avatar.png"  # Character portrait
         )
         self.companions["echo"] = companion
 

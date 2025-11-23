@@ -8,7 +8,7 @@ from ..utils.api_clients import OpenAIClient, ClaudeClient
 class OpenAICompanion(Companion):
     """Autonomous companion powered by OpenAI with MCP tools."""
 
-    def __init__(self, companion_id: str, name: str, personality_traits: Dict[str, Any], api_key: str, model: str = "gpt-4o", mcp_client=None):
+    def __init__(self, companion_id: str, name: str, personality_traits: Dict[str, Any], api_key: str, model: str = "gpt-4o", mcp_client=None, avatar_path: Optional[str] = None):
         """Initialize an OpenAI-powered autonomous companion with MCP.
 
         Args:
@@ -18,8 +18,9 @@ class OpenAICompanion(Companion):
             api_key: OpenAI API key
             model: Model to use (default: gpt-4o)
             mcp_client: InProcessMCPClient instance for TRUE MCP communication
+            avatar_path: Path to character avatar image (optional)
         """
-        super().__init__(companion_id, name, personality_traits)
+        super().__init__(companion_id, name, personality_traits, avatar_path)
         self.client = OpenAIClient(api_key=api_key, model=model)
         self.mcp_client = mcp_client  # REAL MCP CLIENT
         self.tool_use_history = []  # Track tool usage for reasoning display

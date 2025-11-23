@@ -28,6 +28,29 @@ class EchoHeartsUI:
         player_id = get_player_id(request) if request else None
         return GameState(session_id, player_id=player_id)
 
+    def _format_message_with_avatar(self, role: str, content: str, game_state: GameState) -> dict:
+        """Format a message with avatar if available.
+
+        Args:
+            role: Message role (user/assistant)
+            content: Message content
+            game_state: Current game state
+
+        Returns:
+            Message dict with optional metadata
+        """
+        message = {"role": role, "content": content}
+
+        # Add Echo's avatar for assistant messages
+        if role == "assistant" and game_state and "echo" in game_state.companions:
+            avatar_path = game_state.companions["echo"].avatar_path
+            if avatar_path:
+                import os
+                if os.path.exists(avatar_path):
+                    message["metadata"] = {"title": "Echo", "avatar": avatar_path}
+
+        return message
+
     def create_interface(self) -> gr.Blocks:
         """Create the Gradio interface.
 
@@ -245,6 +268,11 @@ Powered by Memory MCP, Weather MCP, and Web MCP
         # Lazy initialization - create game state if not exists
         if game_state is None:
             game_state = self._create_game_state()
+
+        # Get Echo's avatar path
+        echo_avatar = None
+        if "echo" in game_state.companions:
+            echo_avatar = game_state.companions["echo"].avatar_path
 
         # Create prologue messages for the chatbot
         prologue = [
