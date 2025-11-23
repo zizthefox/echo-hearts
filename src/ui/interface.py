@@ -57,7 +57,25 @@ class EchoHeartsUI:
         Returns:
             Gradio Blocks interface
         """
-        with gr.Blocks(title="Echo Hearts", theme=gr.themes.Soft()) as interface:
+        with gr.Blocks(title="Echo Hearts", theme=gr.themes.Soft(), css="""
+            /* Make Echo's avatar large like visual novel */
+            .message-row.bot img {
+                width: 200px !important;
+                height: 200px !important;
+                border-radius: 10px !important;
+                object-fit: cover !important;
+            }
+
+            /* Remove circular clipping */
+            .avatar-container {
+                border-radius: 10px !important;
+            }
+
+            /* Make chat bubbles wider for visual novel feel */
+            .message.bot {
+                max-width: 80% !important;
+            }
+        """) as interface:
             # Per-session state - will be initialized on first message (lazy loading)
             # Can't use initial value because GameState contains unpicklable OpenAI client
             game_state = gr.State(value=None)
@@ -138,25 +156,15 @@ Powered by Memory MCP, Weather MCP, and Web MCP
                 with gr.Row():
                     # Main game area - visual novel style
                     with gr.Column(scale=3):
-                        # Character portrait display (large, Persona 5 style)
-                        character_portrait = gr.Image(
-                            value="data/echo_avatar.png",
-                            label=None,
-                            show_label=False,
-                            height=400,
-                            width=300,
-                            interactive=False,
-                            show_download_button=False,
-                            container=False,
-                            elem_classes=["character-portrait"]
-                        )
-
-                        # Dialogue history (scrollable)
+                        # Dialogue display with large character portraits
                         chatbot = gr.Chatbot(
                             label="Conversation",
-                            height=300,
+                            height=600,
                             type="messages",
-                            show_label=False
+                            show_label=False,
+                            avatar_images=(None, "data/echo_avatar.png"),
+                            render_markdown=True,
+                            bubble_full_width=False
                         )
 
                         # Input area at bottom (visual novel style)
