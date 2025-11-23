@@ -34,7 +34,7 @@ class EchoHeartsUI:
         Returns:
             Gradio Blocks interface
         """
-        with gr.Blocks(title="The Echo Rooms", theme=gr.themes.Soft()) as interface:
+        with gr.Blocks(title="Echo Hearts", theme=gr.themes.Soft()) as interface:
             # Per-session state - will be initialized on first message (lazy loading)
             # Can't use initial value because GameState contains unpicklable OpenAI client
             game_state = gr.State(value=None)
@@ -43,10 +43,10 @@ class EchoHeartsUI:
             # Landing Page (visible by default)
             with gr.Column(visible=True) as landing_page:
                 gr.Markdown("""
-# 🚪 THE ECHO ROOMS
+# 💕 ECHO HEARTS
 
 <div style="text-align: center; font-size: 1.2em; font-style: italic; margin: 20px 0;">
-An Interactive Narrative About Love, Loss, and Letting Go
+A Mystery Escape Room - Investigate, Collaborate, and Escape the Unknown
 </div>
 
 ---
@@ -61,11 +61,11 @@ Together, you must escape through **5 mysterious rooms**, each holding fragments
 
 **But this isn't just an escape room...**
 
-This is a story about:
-- 💔 **Grief** - Processing unbearable loss
-- 🤖 **AI Sentience** - What makes someone "real"?
-- 🔁 **Memory** - Echo remembers you across playthroughs
-- 🎭 **Choice** - Your relationship determines the ending
+This is a mystery about:
+- 🔍 **Investigation** - Piece together clues and uncover the truth
+- 🤝 **Collaboration** - Work with Echo to solve puzzles
+- 🧩 **Memory Fragments** - Discover what really happened
+- 🚪 **Escape** - Navigate 5 rooms to reach freedom
 
 ---
 
@@ -88,7 +88,7 @@ This is a story about:
 
 ---
 
-**⚠️ Content Warning:** This game explores themes of grief, loss, and guilt. Player discretion advised.
+**⚠️ Content Warning:** This game explores emotional themes and mystery elements. Player discretion advised.
 
 ---
                 """)
@@ -106,8 +106,8 @@ Powered by Memory MCP, Weather MCP, and Web MCP
 
             # Game Interface (hidden by default)
             with gr.Column(visible=False) as game_interface:
-                gr.Markdown("# 🚪 The Echo Rooms")
-                gr.Markdown("*An Escape Room Mystery Where Grief Becomes a Puzzle*")
+                gr.Markdown("# 💕 Echo Hearts")
+                gr.Markdown("*A Mystery Escape Room - Work Together to Uncover the Truth*")
 
                 with gr.Row():
                     # Main chat area
