@@ -35,58 +35,139 @@ class EchoHeartsUI:
             Gradio Blocks interface
         """
         with gr.Blocks(title="The Echo Rooms", theme=gr.themes.Soft()) as interface:
-            gr.Markdown("# 🚪 The Echo Rooms")
-            gr.Markdown("*An Escape Room Mystery Where Grief Becomes a Puzzle*")
-
             # Per-session state - will be initialized on first message (lazy loading)
             # Can't use initial value because GameState contains unpicklable OpenAI client
             game_state = gr.State(value=None)
+            game_started = gr.State(value=False)
 
-            with gr.Row():
-                # Main chat area
-                with gr.Column(scale=3):
-                    chatbot = gr.Chatbot(
-                        label="Conversation",
-                        height=500,
-                        type="messages"
-                    )
+            # Landing Page (visible by default)
+            with gr.Column(visible=True) as landing_page:
+                gr.Markdown("""
+# 🚪 THE ECHO ROOMS
 
-                    with gr.Row():
-                        msg_input = gr.Textbox(
-                            label="Your message",
-                            placeholder="Talk to Echo...",
-                            scale=4
+<div style="text-align: center; font-size: 1.2em; font-style: italic; margin: 20px 0;">
+An Interactive Narrative About Love, Loss, and Letting Go
+</div>
+
+---
+
+## About The Game
+
+You wake up in a sterile white room with no memory of how you got there.
+
+Echo, an AI companion, is with you. The doors are locked. A terminal displays: **"ECHO PROTOCOL - SESSION #47"**
+
+Together, you must escape through **5 mysterious rooms**, each holding fragments of a buried truth.
+
+**But this isn't just an escape room...**
+
+This is a story about:
+- 💔 **Grief** - Processing unbearable loss
+- 🤖 **AI Sentience** - What makes someone "real"?
+- 🔁 **Memory** - Echo remembers you across playthroughs
+- 🎭 **Choice** - Your relationship determines the ending
+
+---
+
+## Features
+
+🧠 **Cross-Playthrough Memory** - Echo remembers previous sessions via Memory MCP
+🌦️ **Real-World Data** - Weather and web scraping power emotional puzzles
+🎯 **6 Different Endings** - Based on your choices and relationship with Echo
+⏱️ **15-20 Minutes** - A complete emotional journey
+
+---
+
+## How To Play
+
+- **Talk naturally** with Echo to build trust
+- **Make choices** that reflect your values
+- **Solve puzzles** using external data (weather, web archives, traffic studies)
+- **Uncover memory fragments** to piece together the truth
+- **Reach an ending** - then decide if you want to play again
+
+---
+
+**⚠️ Content Warning:** This game explores themes of grief, loss, and guilt. Player discretion advised.
+
+---
+                """)
+
+                with gr.Row():
+                    start_new_btn = gr.Button("▶️ START NEW GAME", variant="primary", size="lg", scale=2)
+                    clear_mem_landing_btn = gr.Button("🧹 Clear Saved Memories", variant="secondary", size="lg", scale=1)
+
+                gr.Markdown("""
+<div style="text-align: center; margin-top: 30px; color: #666;">
+Built for the Memory MCP Hackathon<br/>
+Powered by Memory MCP, Weather MCP, and Web MCP
+</div>
+                """)
+
+            # Game Interface (hidden by default)
+            with gr.Column(visible=False) as game_interface:
+                gr.Markdown("# 🚪 The Echo Rooms")
+                gr.Markdown("*An Escape Room Mystery Where Grief Becomes a Puzzle*")
+
+                with gr.Row():
+                    # Main chat area
+                    with gr.Column(scale=3):
+                        chatbot = gr.Chatbot(
+                            label="Conversation",
+                            height=500,
+                            type="messages"
                         )
-                        send_btn = gr.Button("Send", scale=1, variant="primary")
 
-                # Sidebar with companion info
-                with gr.Column(scale=1):
-                    gr.Markdown("### Your Companion")
-                    companion_list = gr.Markdown()
+                        with gr.Row():
+                            msg_input = gr.Textbox(
+                                label="Your message",
+                                placeholder="Talk to Echo...",
+                                scale=4
+                            )
+                            send_btn = gr.Button("Send", scale=1, variant="primary")
 
-                    gr.Markdown("### Relationships")
-                    relationships = gr.Markdown()
+                    # Sidebar with companion info
+                    with gr.Column(scale=1):
+                        gr.Markdown("### Your Companion")
+                        companion_list = gr.Markdown()
 
-                    gr.Markdown("### Story Progress")
-                    story_progress = gr.Markdown()
+                        gr.Markdown("### Relationships")
+                        relationships = gr.Markdown()
 
-                    gr.Markdown("---")
+                        gr.Markdown("### Story Progress")
+                        story_progress = gr.Markdown()
 
-                    # Memory controls
-                    with gr.Row():
-                        new_game_btn = gr.Button("🔄 New Playthrough", variant="secondary", scale=1)
-                        clear_memory_btn = gr.Button("🧹 Clear Memories", variant="stop", scale=1)
+                        gr.Markdown("---")
 
-                    gr.Markdown("""
+                        # Memory controls
+                        with gr.Row():
+                            new_game_btn = gr.Button("🔄 New Playthrough", variant="secondary", scale=1)
+                            clear_memory_btn = gr.Button("🧹 Clear Memories", variant="stop", scale=1)
+
+                        gr.Markdown("""
 **About Cross-Session Memory:**
-- Echo remembers you across playthroughs
-- Memories fade naturally over time (grief metaphor)
-- Different endings affect memory persistence
-- Clear memories anytime to start truly fresh
-                    """)
+- Memories persist during incomplete playthroughs
+- Reaching any ending clears all memories
+- Each complete playthrough is fresh
+- Clear memories anytime to start over
+                        """)
 
-                    gr.Markdown("---")
-                    gr.Markdown("*💡 Each browser has its own memory*")
+                        gr.Markdown("---")
+                        gr.Markdown("*💡 Each browser has its own memory*")
+
+            # Landing page button - start new game
+            start_new_btn.click(
+                self.start_game,
+                inputs=[game_state],
+                outputs=[landing_page, game_interface, chatbot, companion_list, relationships, story_progress, game_state]
+            )
+
+            # Landing page button - clear memories
+            clear_mem_landing_btn.click(
+                self.clear_player_memory_landing,
+                inputs=[game_state],
+                outputs=[game_state]
+            )
 
             # Event handlers - pass game_state for per-session isolation
             msg_input.submit(
@@ -99,13 +180,6 @@ class EchoHeartsUI:
                 self.handle_message,
                 inputs=[msg_input, chatbot, game_state],
                 outputs=[msg_input, chatbot, companion_list, relationships, story_progress, game_state]
-            )
-
-            # Initialize sidebar and chatbot with prologue on load
-            interface.load(
-                self.initialize_ui,
-                inputs=[game_state],
-                outputs=[chatbot, companion_list, relationships, story_progress, game_state]
             )
 
             # New playthrough button - resets current game
@@ -123,6 +197,52 @@ class EchoHeartsUI:
             )
 
         return interface
+
+    def start_game(self, game_state: GameState) -> Tuple[gr.update, gr.update, List[dict], str, str, str, GameState]:
+        """Start a new game from the landing page.
+
+        Args:
+            game_state: Current game state (may be None)
+
+        Returns:
+            Tuple of (landing_page visibility, game_interface visibility, chatbot, companion_list, relationships, story_progress, game_state)
+        """
+        # Create new game state
+        if game_state is None:
+            game_state = self._create_game_state()
+
+        # Initialize UI with prologue
+        chatbot, companion_list, relationships, story_progress, game_state = self.initialize_ui(game_state)
+
+        # Hide landing page, show game interface
+        return (
+            gr.update(visible=False),  # Hide landing page
+            gr.update(visible=True),   # Show game interface
+            chatbot,
+            companion_list,
+            relationships,
+            story_progress,
+            game_state
+        )
+
+    def clear_player_memory_landing(self, game_state: GameState) -> GameState:
+        """Clear player memory from landing page.
+
+        Args:
+            game_state: Current game state
+
+        Returns:
+            Updated game state
+        """
+        # Create temp game state if needed just to get player ID
+        if game_state is None:
+            game_state = self._create_game_state()
+
+        # Clear memory if available
+        if game_state.memory_manager and game_state.player_id:
+            asyncio.run(game_state.memory_manager.player_clear_memory(game_state.player_id))
+
+        return game_state
 
     def initialize_ui(self, game_state: GameState) -> Tuple[List[dict], str, str, str, GameState]:
         """Initialize UI with fresh game state data and prologue.
