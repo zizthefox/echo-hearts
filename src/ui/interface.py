@@ -108,8 +108,9 @@ Powered by Memory MCP, Weather MCP, and Web MCP
 
             # Game Interface (hidden by default)
             with gr.Column(visible=False) as game_interface:
-                gr.Markdown("# 💕 Echo Hearts")
-                gr.Markdown("*A Mystery Escape Room - Work Together to Uncover the Truth*")
+                with gr.Row():
+                    gr.Markdown("# 💕 Echo Hearts")
+                    main_menu_btn = gr.Button("🏠 Main Menu", variant="secondary", scale=0, size="sm")
 
                 with gr.Row():
                     # Main chat area
@@ -130,32 +131,14 @@ Powered by Memory MCP, Weather MCP, and Web MCP
 
                     # Sidebar with companion info
                     with gr.Column(scale=1):
-                        gr.Markdown("### Your Companion")
+                        gr.Markdown("### Companion")
                         companion_list = gr.Markdown()
 
-                        gr.Markdown("### Relationships")
+                        gr.Markdown("### Relationship")
                         relationships = gr.Markdown()
 
                         gr.Markdown("### Story Progress")
                         story_progress = gr.Markdown()
-
-                        gr.Markdown("---")
-
-                        # Memory controls
-                        with gr.Row():
-                            new_game_btn = gr.Button("🔄 New Playthrough", variant="secondary", scale=1)
-                            clear_memory_btn = gr.Button("🧹 Clear Memories", variant="stop", scale=1)
-
-                        gr.Markdown("""
-**About Cross-Session Memory:**
-- Memories persist during incomplete playthroughs
-- Reaching any ending clears all memories
-- Each complete playthrough is fresh
-- Clear memories anytime to start over
-                        """)
-
-                        gr.Markdown("---")
-                        gr.Markdown("*💡 Each browser has its own memory*")
 
             # Landing page button - start new game
             start_new_btn.click(
@@ -171,6 +154,13 @@ Powered by Memory MCP, Weather MCP, and Web MCP
                 outputs=[game_state]
             )
 
+            # Main menu button - return to landing page
+            main_menu_btn.click(
+                self.return_to_main_menu,
+                inputs=[],
+                outputs=[landing_page, game_interface]
+            )
+
             # Event handlers - pass game_state for per-session isolation
             msg_input.submit(
                 self.handle_message,
@@ -184,21 +174,18 @@ Powered by Memory MCP, Weather MCP, and Web MCP
                 outputs=[msg_input, chatbot, companion_list, relationships, story_progress, game_state]
             )
 
-            # New playthrough button - resets current game
-            new_game_btn.click(
-                self.reset_playthrough,
-                inputs=[game_state],
-                outputs=[chatbot, companion_list, relationships, story_progress, game_state]
-            )
-
-            # Clear memories button - wipes cross-session memory
-            clear_memory_btn.click(
-                self.clear_player_memory,
-                inputs=[game_state],
-                outputs=[chatbot, game_state]
-            )
-
         return interface
+
+    def return_to_main_menu(self) -> Tuple[gr.update, gr.update]:
+        """Return to main menu from game.
+
+        Returns:
+            Tuple of (landing_page visibility, game_interface visibility)
+        """
+        return (
+            gr.update(visible=True),   # Show landing page
+            gr.update(visible=False)   # Hide game interface
+        )
 
     def start_game(self, game_state: GameState) -> Tuple[gr.update, gr.update, List[dict], str, str, str, GameState]:
         """Start a new game from the landing page.
