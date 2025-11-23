@@ -43,10 +43,13 @@ class EchoHeartsUI:
             # Landing Page (visible by default)
             with gr.Column(visible=True) as landing_page:
                 gr.Markdown("""
-# 💕 ECHO HEARTS
-
-<div style="text-align: center; font-size: 1.2em; font-style: italic; margin: 20px 0;">
-A Mystery Escape Room - Investigate, Collaborate, and Escape the Unknown
+<div style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 20px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+    <h1 style="color: white; font-size: 4em; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); letter-spacing: 0.1em;">
+        💕 ECHO HEARTS
+    </h1>
+    <p style="color: rgba(255,255,255,0.95); font-size: 1.4em; font-style: italic; margin-top: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+        A Mystery Escape Room - Investigate, Collaborate, and Escape the Unknown
+    </p>
 </div>
 
 ---
