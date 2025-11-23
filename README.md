@@ -310,6 +310,8 @@ Companions **autonomously decide** when to unlock rooms:
 - **Gradio 6** - Interactive UI
 - **Python 3.12+**
 - **Hugging Face Spaces** (deployment)
+- **Weather MCP** - Real historical weather data (OpenWeather API)
+- **Web MCP** - Archive scraping for narrative elements (planned)
 
 ---
 
@@ -323,14 +325,34 @@ cd echo-hearts
 # Install dependencies
 uv sync
 
-# Set OpenAI API key
+# Set API keys in .env
 echo "OPENAI_API_KEY=your_key_here" > .env
+echo "OPENWEATHER_API_KEY=your_weather_key_here" >> .env  # Optional, uses mock data if not set
 
 # Run the game
 uv run python app.py
 ```
 
 Open browser to `http://localhost:7860`
+
+### Weather MCP Configuration
+
+The game supports **two modes** for weather data:
+
+**Mock Mode (Default):**
+- Leave `OPENWEATHER_API_KEY` blank in `.env`
+- Uses curated historical data for puzzle dates
+- Works offline, no API costs
+- Perfect for demos and development
+
+**Real Mode (Optional):**
+- Get free API key at [openweathermap.org](https://openweathermap.org/api)
+- Add `OPENWEATHER_API_KEY=your_key` to `.env`
+- Fetches real weather for recent dates (<5 days ago)
+- Uses curated data for historical puzzle dates (2023-10-15, 2024-03-03)
+- Free tier: 1000 calls/day
+
+**Why Hybrid?** OpenWeather's free tier doesn't include historical data access (requires paid plan). We use curated puzzle answers for narrative consistency while supporting real API integration for authenticity.
 
 ---
 
