@@ -204,8 +204,9 @@ Powered by Memory MCP, Weather MCP, and Web MCP
                             height=600,
                             type="messages",
                             show_label=False,
-                            render_markdown=False,  # Use HTML rendering instead
-                            bubble_full_width=True
+                            render_markdown=True,  # Enable markdown for formatting
+                            bubble_full_width=True,
+                            sanitize_html=False  # Allow HTML for portraits
                         )
 
                         # Input area at bottom (visual novel style)
