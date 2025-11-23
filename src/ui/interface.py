@@ -58,22 +58,38 @@ class EchoHeartsUI:
             Gradio Blocks interface
         """
         with gr.Blocks(title="Echo Hearts", theme=gr.themes.Soft(), css="""
-            /* Make Echo's avatar large like visual novel */
-            .message-row.bot img {
-                width: 200px !important;
-                height: 200px !important;
-                border-radius: 10px !important;
+            /* Make Echo's avatar LARGE like visual novel - try all possible selectors */
+            .message img,
+            .bot img,
+            img.avatar-image,
+            .message-row img,
+            [role="img"],
+            .avatar img {
+                width: 250px !important;
+                height: 250px !important;
+                min-width: 250px !important;
+                min-height: 250px !important;
+                max-width: 250px !important;
+                max-height: 250px !important;
+                border-radius: 15px !important;
                 object-fit: cover !important;
             }
 
-            /* Remove circular clipping */
-            .avatar-container {
-                border-radius: 10px !important;
+            /* Make avatar containers large */
+            .avatar-container,
+            .avatar,
+            [class*="avatar"] {
+                width: 250px !important;
+                height: 250px !important;
+                min-width: 250px !important;
+                min-height: 250px !important;
+                border-radius: 15px !important;
             }
 
-            /* Make chat bubbles wider for visual novel feel */
-            .message.bot {
-                max-width: 80% !important;
+            /* Make chat bubbles wider */
+            .message,
+            .bot .message {
+                max-width: 90% !important;
             }
         """) as interface:
             # Per-session state - will be initialized on first message (lazy loading)
