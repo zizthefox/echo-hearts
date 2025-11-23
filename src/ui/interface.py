@@ -76,7 +76,112 @@ class EchoHeartsUI:
             Gradio Blocks interface
         """
         with gr.Blocks(title="Echo Hearts", theme=gr.themes.Soft(), css="""
-            /* Make Echo's avatar LARGE like visual novel - try all possible selectors */
+            /* Import retro terminal font */
+            @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+            /* Retro Terminal Aesthetic */
+            .terminal-container {
+                background-color: #0a0a0a;
+                border: 3px solid #333;
+                border-radius: 8px;
+                padding: 20px;
+                font-family: 'VT323', 'Courier New', monospace;
+                color: #00ff00;
+                text-shadow: 0 0 5px #00ff00;
+                position: relative;
+                box-shadow:
+                    0 0 20px rgba(0, 255, 0, 0.2),
+                    inset 0 0 30px rgba(0, 255, 0, 0.05);
+            }
+
+            /* CRT Scanline Effect */
+            .terminal-container::before {
+                content: " ";
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                background: linear-gradient(
+                    rgba(18, 16, 16, 0) 50%,
+                    rgba(0, 0, 0, 0.25) 50%
+                );
+                background-size: 100% 4px;
+                pointer-events: none;
+                z-index: 2;
+            }
+
+            /* Terminal Text */
+            .terminal-text {
+                font-family: 'VT323', 'Courier New', monospace;
+                color: #00ff00;
+                font-size: 20px;
+                letter-spacing: 1px;
+                line-height: 1.4;
+            }
+
+            /* Blinking Cursor */
+            @keyframes blink {
+                0%, 50% { opacity: 1; }
+                51%, 100% { opacity: 0; }
+            }
+
+            .cursor {
+                animation: blink 1s infinite;
+                color: #00ff00;
+            }
+
+            /* Terminal Button Style */
+            .terminal-btn {
+                background-color: #001a00 !important;
+                color: #00ff00 !important;
+                border: 2px solid #00ff00 !important;
+                font-family: 'VT323', monospace !important;
+                font-size: 18px !important;
+                padding: 10px 20px !important;
+                text-shadow: 0 0 5px #00ff00 !important;
+                transition: all 0.2s !important;
+            }
+
+            .terminal-btn:hover {
+                background-color: #003300 !important;
+                box-shadow: 0 0 10px #00ff00 !important;
+            }
+
+            /* Success Flash */
+            @keyframes success-flash {
+                0%, 100% { background-color: transparent; }
+                50% { background-color: rgba(0, 255, 0, 0.2); }
+            }
+
+            .success-flash {
+                animation: success-flash 0.5s;
+            }
+
+            /* Error Flash */
+            @keyframes error-flash {
+                0%, 100% { background-color: transparent; }
+                50% { background-color: rgba(255, 0, 0, 0.2); }
+            }
+
+            .error-flash {
+                animation: error-flash 0.5s;
+            }
+
+            /* Typing Animation */
+            @keyframes typing {
+                from { width: 0; }
+                to { width: 100%; }
+            }
+
+            .typing-text {
+                overflow: hidden;
+                white-space: nowrap;
+                animation: typing 2s steps(40);
+            }
+
+            /* Echo's portrait styling */
             .message img,
             .bot img,
             img.avatar-image,
@@ -93,7 +198,6 @@ class EchoHeartsUI:
                 object-fit: cover !important;
             }
 
-            /* Make avatar containers large */
             .avatar-container,
             .avatar,
             [class*="avatar"] {
@@ -104,7 +208,6 @@ class EchoHeartsUI:
                 border-radius: 15px !important;
             }
 
-            /* Make chat bubbles wider */
             .message,
             .bot .message {
                 max-width: 90% !important;
@@ -195,6 +298,42 @@ Powered by Memory MCP, Weather MCP, and Web MCP
                     gr.Markdown("# 💕 Echo Hearts")
                     main_menu_btn = gr.Button("🏠 Main Menu", variant="secondary", scale=0, size="sm")
 
+                # Interactive Room Objects Bar (Retro Terminal Style)
+                with gr.Row(elem_classes=["terminal-container"]):
+                    gr.Markdown("### 🖥️ ROOM 1: THE AWAKENING CHAMBER", elem_classes=["terminal-text"])
+
+                with gr.Row():
+                    terminal_btn = gr.Button("🖥️ TERMINAL", elem_classes=["terminal-btn"], scale=1)
+                    newspaper_btn = gr.Button("📰 NEWSPAPER", elem_classes=["terminal-btn"], scale=1)
+                    calendar_btn = gr.Button("📅 CALENDAR", elem_classes=["terminal-btn"], scale=1)
+                    weather_btn = gr.Button("🌦️ WEATHER STATION", elem_classes=["terminal-btn"], scale=1)
+
+                # Collapsible panels for clues
+                with gr.Accordion("🖥️ Terminal Display", open=False, visible=False) as terminal_panel:
+                    terminal_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                with gr.Accordion("📰 Newspaper Article", open=False, visible=False) as newspaper_panel:
+                    newspaper_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                with gr.Accordion("📅 Calendar", open=False, visible=False) as calendar_panel:
+                    calendar_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                with gr.Accordion("🌦️ Weather Query Terminal", open=False, visible=False) as weather_panel:
+                    with gr.Column(elem_classes=["terminal-container"]):
+                        gr.Markdown("```\n▓▓▓ NATIONAL WEATHER SERVICE DATABASE ▓▓▓\n```", elem_classes=["terminal-text"])
+                        weather_date = gr.Textbox(
+                            label="Enter Date (YYYY-MM-DD)",
+                            placeholder="2023-10-15",
+                            elem_classes=["terminal-text"]
+                        )
+                        weather_location = gr.Radio(
+                            label="Select Location",
+                            choices=["Seattle, WA", "Portland, OR", "Spokane, WA", "Vancouver, BC"],
+                            elem_classes=["terminal-text"]
+                        )
+                        weather_submit_btn = gr.Button("⚡ QUERY WEATHER", elem_classes=["terminal-btn"])
+                        weather_results = gr.Markdown("", elem_classes=["terminal-text"])
+
                 with gr.Row():
                     # Main game area - visual novel style
                     with gr.Column(scale=3):
@@ -262,6 +401,38 @@ Powered by Memory MCP, Weather MCP, and Web MCP
                 self.handle_message,
                 inputs=[msg_input, chatbot, game_state],
                 outputs=[msg_input, chatbot, companion_list, relationships, story_progress, game_state]
+            )
+
+            # Interactive room object handlers
+            terminal_btn.click(
+                self.show_terminal_clue,
+                inputs=[],
+                outputs=[terminal_panel, terminal_display]
+            )
+
+            newspaper_btn.click(
+                self.show_newspaper_clue,
+                inputs=[],
+                outputs=[newspaper_panel, newspaper_display]
+            )
+
+            calendar_btn.click(
+                self.show_calendar_clue,
+                inputs=[],
+                outputs=[calendar_panel, calendar_display]
+            )
+
+            weather_btn.click(
+                self.show_weather_station,
+                inputs=[],
+                outputs=[weather_panel]
+            )
+
+            # Weather query submit
+            weather_submit_btn.click(
+                self.query_weather,
+                inputs=[weather_date, weather_location, game_state],
+                outputs=[weather_results]
             )
 
         return interface
@@ -658,6 +829,186 @@ Memories are only stored when you reach an ending.
             ]
 
             return (no_memory, game_state)
+
+    def show_terminal_clue(self) -> Tuple[gr.update, str]:
+        """Display terminal clue when clicked.
+
+        Returns:
+            Tuple of (accordion visibility update, clue content)
+        """
+        terminal_content = """
+```
+███ TERMINAL ACCESS ███
+
+> SYSTEM ONLINE
+> ECHO PROTOCOL - SESSION #47
+> VOICE AUTHENTICATION REQUIRED
+>
+> SECURITY QUESTION:
+> "What was the weather on your first date?"
+>
+> HINT: Check surroundings for clues...
+> _ ▮
+```
+        """
+        return (gr.update(visible=True, open=True), terminal_content)
+
+    def show_newspaper_clue(self) -> Tuple[gr.update, str]:
+        """Display newspaper clue when clicked.
+
+        Returns:
+            Tuple of (accordion visibility update, clue content)
+        """
+        newspaper_content = """
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        SEATTLE TIMES - LIFESTYLE SECTION
+              October 16, 2023
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"RAINY DAY ROMANCE: Local Couple's First Date"
+
+Despite yesterday's light rain, Sarah met her future
+partner at Café Umbria. "The weather was perfect,"
+she said. "There's something romantic about sharing
+an umbrella on a first date..."
+
+The couple met on October 15th during an unexpected
+afternoon shower. "I was running late, and they
+offered to share their umbrella," Sarah recalled.
+
+[Rest of article torn/unreadable]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**CLUE:** Article date is October 16, mentions **"yesterday"** (October 15, 2023) had **"light rain"** in Seattle.
+        """
+        return (gr.update(visible=True, open=True), newspaper_content)
+
+    def show_calendar_clue(self) -> Tuple[gr.update, str]:
+        """Display calendar clue when clicked.
+
+        Returns:
+            Tuple of (accordion visibility update, clue content)
+        """
+        calendar_content = """
+```
+╔══════════════════════════════════════════╗
+║        OCTOBER 2023 - SEATTLE            ║
+╠══════════════════════════════════════════╣
+║  Sun  Mon  Tue  Wed  Thu  Fri  Sat      ║
+║   1    2    3    4    5    6    7       ║
+║   8    9   10   11   12   13   14       ║
+║  ⚫15⚫  16   17   18   19   20   21      ║
+║  22   23   24   25   26   27   28       ║
+║  29   30   31                            ║
+╚══════════════════════════════════════════╝
+
+Handwritten note on October 15th:
+"First date - don't forget umbrella! ⛈️"
+```
+
+**CLUE:** October 15, 2023 is circled with umbrella symbol (rain).
+        """
+        return (gr.update(visible=True, open=True), calendar_content)
+
+    def show_weather_station(self) -> gr.update:
+        """Open weather station terminal.
+
+        Returns:
+            Accordion visibility update
+        """
+        return gr.update(visible=True, open=True)
+
+    def query_weather(self, date: str, location: str, game_state: GameState) -> str:
+        """Query weather for given date and location.
+
+        Args:
+            date: Date string (YYYY-MM-DD)
+            location: Location string
+            game_state: Current game state
+
+        Returns:
+            Weather query results in terminal format
+        """
+        import asyncio
+        import re
+
+        # Validate date format
+        if not re.match(r'^\d{4}-\d{2}-\d{2}$', date):
+            return """
+```
+> ERROR: INVALID DATE FORMAT
+> Expected format: YYYY-MM-DD
+> Please try again.
+> _ ▮
+```
+            """
+
+        if not location:
+            return """
+```
+> ERROR: LOCATION REQUIRED
+> Please select a location.
+> _ ▮
+```
+            """
+
+        # Call Weather MCP
+        if game_state and hasattr(game_state, 'weather_mcp_client') and game_state.weather_mcp_client:
+            try:
+                # Extract city from location (e.g., "Seattle, WA" -> "Seattle")
+                city = location.split(',')[0].strip().lower()
+
+                weather_data = asyncio.run(
+                    game_state.weather_mcp_client.get_historical_weather(date, city)
+                )
+
+                if weather_data:
+                    return f"""
+```
+▓▓▓ QUERY COMPLETE ▓▓▓
+═══════════════════════════════════════
+DATE: {weather_data.get('date', date)}
+LOCATION: {weather_data.get('location', location)}
+
+CONDITIONS: {weather_data.get('condition', 'Unknown')}
+TEMPERATURE: {weather_data.get('temperature', 'N/A')}°F
+HUMIDITY: {weather_data.get('humidity', 'N/A')}%
+
+═══════════════════════════════════════
+✓ DATA RETRIEVED SUCCESSFULLY
+_ ▮
+```
+
+**Use this answer for the terminal authentication:**
+**"{weather_data.get('condition', 'Unknown')}"**
+                    """
+                else:
+                    return """
+```
+> ERROR: NO DATA FOUND FOR SPECIFIED DATE/LOCATION
+> Please verify your inputs.
+> _ ▮
+```
+                    """
+            except Exception as e:
+                return f"""
+```
+> ERROR: WEATHER SYSTEM FAILURE
+> {str(e)}
+> _ ▮
+```
+                """
+        else:
+            return """
+```
+> ERROR: WEATHER SYSTEM OFFLINE
+> Unable to connect to weather database.
+> _ ▮
+```
+            """
 
 
 def launch_interface():
