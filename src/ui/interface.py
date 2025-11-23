@@ -141,7 +141,8 @@ Powered by Memory MCP, Weather MCP, and Web MCP
                         chatbot = gr.Chatbot(
                             label="Conversation",
                             height=500,
-                            type="messages"
+                            type="messages",
+                            avatar_images=(None, "data/echo_avatar.png")  # (user_avatar, assistant_avatar)
                         )
 
                         with gr.Row():
