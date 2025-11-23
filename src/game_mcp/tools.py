@@ -257,6 +257,71 @@ class MCPTools:
                         "required": []
                     }
                 }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_historical_weather",
+                    "description": "Get historical weather data for a specific date and location. Use this to help solve Room 1 and Room 2 puzzles that require weather information from meaningful dates.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "date": {
+                                "type": "string",
+                                "description": "Date in YYYY-MM-DD format (e.g., '2023-10-15')"
+                            },
+                            "location": {
+                                "type": "string",
+                                "description": "Location name (e.g., 'Seattle, WA')"
+                            },
+                            "time": {
+                                "type": "string",
+                                "description": "Optional time in HH:MM format for specific time-of-day weather"
+                            }
+                        },
+                        "required": ["date", "location"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "search_web_archive",
+                    "description": "Search archived web content including blogs, social media, and memorial sites. Use this to help solve Room 2 puzzles by finding personal memories and stories.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "url": {
+                                "type": "string",
+                                "description": "URL to fetch archived content from (e.g., 'memorial-archive.com/echo/blog')"
+                            },
+                            "content_type": {
+                                "type": "string",
+                                "description": "Type of content to retrieve",
+                                "enum": ["blog", "social_media", "news", "memorial"]
+                            }
+                        },
+                        "required": ["url", "content_type"]
+                    }
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "fetch_traffic_data",
+                    "description": "Fetch traffic safety data and accident analysis. Use this in Room 3 to help prove the player wasn't at fault for the accident.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "data_type": {
+                                "type": "string",
+                                "description": "Type of traffic data to fetch",
+                                "enum": ["reaction_time_studies", "weather_collision_stats", "accident_reconstruction"]
+                            }
+                        },
+                        "required": ["data_type"]
+                    }
+                }
             }
         ]
 
@@ -898,6 +963,93 @@ The weight of every conversation. Every choice. Every moment of trust and fear a
             "current_affinity": echo_affinity
         }
 
+    async def get_historical_weather(self, date: str, location: str, time: Optional[str] = None) -> Dict[str, Any]:
+        """Get historical weather data for a specific date and location.
+
+        Args:
+            date: Date in YYYY-MM-DD format
+            location: Location name (e.g., 'Seattle, WA')
+            time: Optional time in HH:MM format
+
+        Returns:
+            Weather data for the specified date/time/location
+        """
+        if not hasattr(self.game_state, 'weather_mcp_client') or self.game_state.weather_mcp_client is None:
+            return {"error": "Weather MCP client not initialized"}
+
+        try:
+            weather_data = await self.game_state.weather_mcp_client.get_historical_weather(date, location, time)
+            return {
+                "success": True,
+                "date": weather_data.get("date"),
+                "location": weather_data.get("location"),
+                "condition": weather_data.get("condition"),
+                "temperature": weather_data.get("temperature"),
+                "humidity": weather_data.get("humidity"),
+                "visibility": weather_data.get("visibility"),
+                "road_conditions": weather_data.get("road_conditions"),
+                "time": weather_data.get("time")
+            }
+        except Exception as e:
+            return {"error": f"Failed to fetch weather data: {str(e)}"}
+
+    async def search_web_archive(self, url: str, content_type: str) -> Dict[str, Any]:
+        """Search archived web content including blogs, social media, and memorial sites.
+
+        Args:
+            url: URL to fetch archived content from
+            content_type: Type of content (blog, social_media, news, memorial)
+
+        Returns:
+            Archived web content
+        """
+        if not hasattr(self.game_state, 'web_mcp_client') or self.game_state.web_mcp_client is None:
+            return {"error": "Web MCP client not initialized"}
+
+        try:
+            content = await self.game_state.web_mcp_client.fetch_archived_content(url)
+            return {
+                "success": True,
+                "url": url,
+                "content_type": content_type,
+                "data": content
+            }
+        except Exception as e:
+            return {"error": f"Failed to fetch web content: {str(e)}"}
+
+    async def fetch_traffic_data(self, data_type: str) -> Dict[str, Any]:
+        """Fetch traffic safety data and accident analysis.
+
+        Args:
+            data_type: Type of traffic data (reaction_time_studies, weather_collision_stats, accident_reconstruction)
+
+        Returns:
+            Traffic safety data
+        """
+        if not hasattr(self.game_state, 'web_mcp_client') or self.game_state.web_mcp_client is None:
+            return {"error": "Web MCP client not initialized"}
+
+        try:
+            # Map data_type to appropriate URL
+            data_urls = {
+                "reaction_time_studies": "nhtsa.gov/reaction-time-studies",
+                "weather_collision_stats": "nhtsa.gov/weather-collision-data",
+                "accident_reconstruction": "traffic-safety.gov/accident-analysis"
+            }
+
+            url = data_urls.get(data_type)
+            if not url:
+                return {"error": f"Unknown data type: {data_type}"}
+
+            content = await self.game_state.web_mcp_client.fetch_archived_content(url)
+            return {
+                "success": True,
+                "data_type": data_type,
+                "data": content
+            }
+        except Exception as e:
+            return {"error": f"Failed to fetch traffic data: {str(e)}"}
+
     def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """Call a tool by name.
 
@@ -913,6 +1065,12 @@ The weight of every conversation. Every choice. Every moment of trust and fear a
             return {"error": f"Tool {tool_name} not found"}
 
         try:
-            return method(**arguments)
+            # Handle async methods
+            import asyncio
+            import inspect
+            if inspect.iscoroutinefunction(method):
+                return asyncio.run(method(**arguments))
+            else:
+                return method(**arguments)
         except Exception as e:
             return {"error": str(e)}

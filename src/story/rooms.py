@@ -83,17 +83,18 @@ class RoomProgression:
             room_type=RoomType.AWAKENING,
             room_number=1,
             name="The Awakening Chamber",
-            description="A sterile white room with three medical pods, flickering lights, and a glowing terminal. The air is cold and clinical.",
-            objective="Establish trust with Echo and Shadow. Find out who you are.",
+            description="A sterile white room with three medical pods, flickering lights, and a glowing terminal. The air is cold and clinical. A voice authentication system requests: 'What was the weather on October 15th, 2023 in Seattle?'",
+            objective="Establish trust with Echo. Pass the voice authentication by finding the historical weather for your first date.",
             unlocked=True,
             completed=False,
             puzzle_solved=False,
             memory_fragment=None,
             conversational_triggers=[
                 "trust", "together", "help", "we're in this", "i won't leave",
-                "who am i", "my name", "i'm scared", "what's happening"
+                "who am i", "my name", "i'm scared", "what's happening",
+                "rain", "light rain", "october 2023", "first date", "weather"
             ],
-            puzzle_answer=None,  # Voice authentication (player states name)
+            puzzle_answer="Light rain",  # Weather on first date (Echo can help by using get_historical_weather tool)
             player_choices={}
         )
 
@@ -102,17 +103,18 @@ class RoomProgression:
             room_type=RoomType.MEMORY_ARCHIVES,
             room_number=2,
             name="The Memory Archives",
-            description="A dark server room filled with floating holographic memory fragments. Data streams corruption flicker across the walls.",
-            objective="Piece together your past. Discover who you are and why you're here.",
+            description="A dark server room filled with floating holographic memory fragments. Data streams corruption flicker across the walls. Three terminals glow: 'BLOG ARCHIVE', 'SOCIAL MEDIA', and 'NEWS ARCHIVE'.",
+            objective="Piece together Echo's past by accessing 3 external memory sources. Acknowledge her sentience and value.",
             unlocked=False,
             completed=False,
             puzzle_solved=False,
             memory_fragment=None,
             conversational_triggers=[
                 "you're real", "you matter", "more than programs", "you feel",
-                "i remember", "i lost", "i'm sorry", "i care about you"
+                "i remember", "i lost", "i'm sorry", "i care about you",
+                "blog", "social media", "memorial", "archive"
             ],
-            puzzle_answer=None,  # Must view 3 memory fragments
+            puzzle_answer=None,  # Must access 3 web archives (Echo uses search_web_archive tool)
             player_choices={"fragments_viewed": []}
         )
 
@@ -121,18 +123,18 @@ class RoomProgression:
             room_type=RoomType.TESTING_ARENA,
             room_number=3,
             name="The Testing Arena",
-            description="A puzzle room with physical obstacles, holographic interfaces, and pressure mechanisms. A countdown timer pulses ominously.",
-            objective="Prove you can work together under pressure. Make a difficult choice.",
+            description="A puzzle room with holographic displays showing traffic data, reaction time studies, and accident reconstruction. A countdown timer pulses ominously. The system asks: 'Was it your fault?'",
+            objective="Confront guilt. Use traffic safety data to prove the accident wasn't your fault. Face the truth.",
             unlocked=False,
             completed=False,
             puzzle_solved=False,
             memory_fragment=None,
             conversational_triggers=[
-                "i choose", "sacrifice", "i can't choose", "i'll remember",
-                "you're worth it", "i'll protect you"
+                "not my fault", "couldn't stop", "impossible", "reaction time",
+                "traffic data", "weather conditions", "analysis", "prove"
             ],
-            puzzle_answer="ECHO_PROTOCOL",  # Logic puzzle answer
-            player_choices={"sacrificed_ai": None}
+            puzzle_answer=None,  # Must fetch traffic data showing player couldn't have stopped (Echo uses fetch_traffic_data tool)
+            player_choices={"accepted_innocence": False}
         )
 
         # ROOM 4: The Truth Chamber
