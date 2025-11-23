@@ -269,16 +269,9 @@ Powered by Memory MCP, Weather MCP, and Web MCP
         if game_state is None:
             game_state = self._create_game_state()
 
-        # Get Echo's avatar path
-        echo_avatar = None
-        if "echo" in game_state.companions:
-            echo_avatar = game_state.companions["echo"].avatar_path
-
-        # Create prologue messages for the chatbot
+        # Create prologue messages for the chatbot with avatars
         prologue = [
-            {
-                "role": "assistant",
-                "content": """## You wake up.
+            self._format_message_with_avatar("assistant", """## You wake up.
 
 Your head throbs. The air is cold, clinical. Fluorescent lights flicker above.
 
@@ -292,11 +285,8 @@ You're in a **white sterile room**. Three medical pods stand open, as if you jus
 **The doors are locked.**
 **The terminal won't respond.**
 
-**Who are you? Why are you here?**"""
-            },
-            {
-                "role": "assistant",
-                "content": """**Echo** (warm eyes, worried expression, trying to smile through fear):
+**Who are you? Why are you here?**""", game_state),
+            self._format_message_with_avatar("assistant", """**Echo** (warm eyes, worried expression, trying to smile through fear):
 "Hey... hey, you're awake! Are you okay? I... I don't know what's happening either. Do you remember anything?"
 
 **Echo** (looking around nervously):
@@ -316,8 +306,7 @@ To progress, you must:
 
 **Your relationship and choices will determine how this story ends.**
 
-*Talk to Echo to begin...*"""
-            }
+*Talk to Echo to begin...*""", game_state)
         ]
 
         return (
@@ -385,17 +374,15 @@ To progress, you must:
                 else:
                     reasoning_text += "Checked data\n"
 
-            history.append({"role": "assistant", "content": reasoning_text})
+            history.append(self._format_message_with_avatar("assistant", reasoning_text, game_state))
 
-        # Add response to history
-        history.append({"role": "assistant", "content": f"**{companion_name}:** {response}"})
+        # Add response to history with avatar
+        history.append(self._format_message_with_avatar("assistant", f"**{companion_name}:** {response}", game_state))
 
         # Add memory fragment if room was unlocked
         if story_event:  # story_event is now a MemoryFragment or None
             memory_fragment = story_event
-            history.append({
-                "role": "assistant",
-                "content": f"""---
+            fragment_content = f"""---
 
 **🔓 Room Unlocked! Memory Fragment Recovered:**
 
@@ -409,7 +396,7 @@ To progress, you must:
 
 ---
 """
-            })
+            history.append(self._format_message_with_avatar("assistant", fragment_content, game_state))
 
         # Add old story events for backwards compatibility (remove later)
         if False and story_event:
@@ -442,10 +429,7 @@ To progress, you must:
 
         # Add ending if reached
         if ending_narrative:
-            history.append({
-                "role": "assistant",
-                "content": ending_narrative
-            })
+            history.append(self._format_message_with_avatar("assistant", ending_narrative, game_state))
 
         return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state), game_state
 
