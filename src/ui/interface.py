@@ -300,7 +300,7 @@ Powered by Memory MCP, Weather MCP, and Web MCP
 
                 # Current Room Visual
                 room_image = gr.Image(
-                    value="assets/room1.png",
+                    value="assets/room1.jpg",
                     label="Current Room",
                     show_label=False,
                     height=300,
@@ -763,10 +763,10 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
             Path to room image
         """
         if not hasattr(game_state, 'room_progression'):
-            return "assets/room1.png"
+            return "assets/room1.jpg"
 
         room_number = game_state.room_progression.get_current_room().room_number
-        return f"assets/room{room_number}.png"
+        return f"assets/room{room_number}.jpg"
 
     def _get_room_title(self, game_state: GameState) -> str:
         """Get the title markdown for the current room.
