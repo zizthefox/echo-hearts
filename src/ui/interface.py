@@ -298,9 +298,20 @@ Powered by Memory MCP, Weather MCP, and Web MCP
                     gr.Markdown("# 💕 Echo Hearts")
                     main_menu_btn = gr.Button("🏠 Main Menu", variant="secondary", scale=0, size="sm")
 
+                # Current Room Visual
+                room_image = gr.Image(
+                    value="assets/room1.png",
+                    label="Current Room",
+                    show_label=False,
+                    height=300,
+                    interactive=False,
+                    show_download_button=False,
+                    container=True
+                )
+
                 # Interactive Room Objects Bar (Retro Terminal Style)
                 with gr.Row(elem_classes=["terminal-container"]):
-                    gr.Markdown("### 🖥️ ROOM 1: THE AWAKENING CHAMBER", elem_classes=["terminal-text"])
+                    room_title = gr.Markdown("### 🖥️ ROOM 1: THE AWAKENING CHAMBER", elem_classes=["terminal-text"])
 
                 with gr.Row():
                     terminal_btn = gr.Button("🖥️ TERMINAL", elem_classes=["terminal-btn"], scale=1)
@@ -394,13 +405,13 @@ Powered by Memory MCP, Weather MCP, and Web MCP
             msg_input.submit(
                 self.handle_message,
                 inputs=[msg_input, chatbot, game_state],
-                outputs=[msg_input, chatbot, companion_list, relationships, story_progress, game_state]
+                outputs=[msg_input, chatbot, companion_list, relationships, story_progress, room_image, room_title, game_state]
             )
 
             send_btn.click(
                 self.handle_message,
                 inputs=[msg_input, chatbot, game_state],
-                outputs=[msg_input, chatbot, companion_list, relationships, story_progress, game_state]
+                outputs=[msg_input, chatbot, companion_list, relationships, story_progress, room_image, room_title, game_state]
             )
 
             # Interactive room object handlers
@@ -546,7 +557,7 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
         message: str,
         history: List[dict],
         game_state: GameState
-    ) -> Tuple[str, List[dict], str, str, str, GameState]:
+    ) -> Tuple[str, List[dict], str, str, str, str, str, GameState]:
         """Handle incoming message from user.
 
         Args:
@@ -555,14 +566,14 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
             game_state: Session game state (may be None on first message)
 
         Returns:
-            Tuple of (empty input, updated history, companion list, relationships, story progress, game_state)
+            Tuple of (empty input, updated history, companion list, relationships, story progress, room_image, room_title, game_state)
         """
         # Lazy initialization - create game state on first message if not exists
         if game_state is None:
             game_state = self._create_game_state()
 
         if not message.strip():
-            return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state), game_state
+            return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), game_state
 
         # Add user message to history
         history.append({"role": "user", "content": message})
@@ -655,7 +666,7 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
         if ending_narrative:
             history.append(self._format_message_with_avatar("assistant", ending_narrative, game_state))
 
-        return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state), game_state
+        return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), game_state
 
     def _get_companion_list(self, game_state: GameState) -> str:
         """Get formatted list of active companions.
@@ -741,6 +752,44 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
                 lines.append(f"⏰ **TIME EXPIRED**")
 
         return "\n".join(lines)
+
+    def _get_room_image(self, game_state: GameState) -> str:
+        """Get the image path for the current room.
+
+        Args:
+            game_state: Session game state
+
+        Returns:
+            Path to room image
+        """
+        if not hasattr(game_state, 'room_progression'):
+            return "assets/room1.png"
+
+        room_number = game_state.room_progression.get_current_room().room_number
+        return f"assets/room{room_number}.png"
+
+    def _get_room_title(self, game_state: GameState) -> str:
+        """Get the title markdown for the current room.
+
+        Args:
+            game_state: Session game state
+
+        Returns:
+            Markdown formatted room title
+        """
+        if not hasattr(game_state, 'room_progression'):
+            return "### 🖥️ ROOM 1: THE AWAKENING CHAMBER"
+
+        current_room = game_state.room_progression.get_current_room()
+        room_icons = {
+            1: "🖥️",
+            2: "💾",
+            3: "⚠️",
+            4: "🏠",
+            5: "🚪"
+        }
+        icon = room_icons.get(current_room.room_number, "📍")
+        return f"### {icon} ROOM {current_room.room_number}: {current_room.name.upper()}"
 
     def reset_playthrough(self, old_game_state: GameState) -> Tuple[List[dict], str, str, str, GameState]:
         """Reset to a new playthrough, preserving cross-session memory.
