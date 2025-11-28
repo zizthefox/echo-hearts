@@ -45,7 +45,8 @@ class EchoHeartsUI:
 
         # For Echo's messages, embed large portrait in HTML
         if role == "assistant" and game_state and "echo" in game_state.companions:
-            avatar_path = game_state.companions["echo"].avatar_path
+            # Get dynamic avatar path based on current expression
+            avatar_path = self._get_echo_avatar_path(game_state)
             if avatar_path:
                 import os
                 if os.path.exists(avatar_path):
@@ -790,6 +791,28 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
         }
         icon = room_icons.get(current_room.room_number, "📍")
         return f"### {icon} ROOM {current_room.room_number}: {current_room.name.upper()}"
+
+    def _get_echo_avatar_path(self, game_state: GameState) -> str:
+        """Get the avatar path for Echo based on current expression.
+
+        Args:
+            game_state: Session game state
+
+        Returns:
+            Path to Echo's current expression avatar
+        """
+        if not hasattr(game_state, 'echo_expression'):
+            return "assets/echo_avatar.png"  # Fallback to default
+
+        expression = game_state.echo_expression
+        avatar_path = f"assets/echo_avatar_{expression}.png"
+
+        # Fallback to neutral if specific expression doesn't exist
+        import os
+        if not os.path.exists(avatar_path):
+            return "assets/echo_avatar_neutral.png"
+
+        return avatar_path
 
     def reset_playthrough(self, old_game_state: GameState) -> Tuple[List[dict], str, str, str, GameState]:
         """Reset to a new playthrough, preserving cross-session memory.

@@ -38,9 +38,14 @@ class Room:
     puzzle_solved: bool
     memory_fragment: Optional[MemoryFragment]
 
-    # Trigger conditions
-    conversational_triggers: List[str]  # Keywords/phrases that progress
-    puzzle_answer: Optional[str]  # If there's a riddle/code
+    # Puzzle requirements (MANDATORY for progression)
+    puzzle_type: str  # "answer", "multi_clue", "choice", "acceptance"
+    puzzle_answer: Optional[str]  # Exact answer needed (if puzzle_type == "answer")
+    required_clues: Optional[List[str]]  # Clues that must be viewed (if puzzle_type == "multi_clue")
+
+    # Emotional/conversational triggers (OPTIONAL - builds relationship, not progression)
+    emotional_themes: List[str]  # Themes for relationship building
+    hint_keywords: List[str]  # Keywords Echo uses to give hints
 
     # What happened in this room
     player_choices: Dict[str, Any]
@@ -64,6 +69,15 @@ class RoomProgression:
             "truth_denial_count": 0,  # How many times player denied the truth (Room 4)
         }
 
+        # Puzzle state tracking (what player has actually done)
+        self.puzzle_state: Dict[str, Any] = {
+            "room1_answer_attempts": 0,
+            "room1_clues_found": [],  # ["newspaper", "calendar", "weather"]
+            "room2_archives_viewed": [],  # ["blog", "social", "news"]
+            "room3_data_reviewed": [],  # ["reaction_time", "weather_stats", "reconstruction"]
+            "room4_acceptance_expressed": False
+        }
+
         # Room 3 timer state
         import time
         self.room3_timer_start: Optional[float] = None  # Unix timestamp when Room 3 starts
@@ -79,84 +93,112 @@ class RoomProgression:
         rooms = {}
 
         # ROOM 1: The Awakening Chamber
+        # PUZZLE: Find weather for October 15, 2023 in Seattle (investigate room clues)
+        # Echo guides exploration but doesn't solve it
         rooms[RoomType.AWAKENING] = Room(
             room_type=RoomType.AWAKENING,
             room_number=1,
             name="The Awakening Chamber",
             description="A sterile white room with three medical pods, flickering lights, and a glowing terminal. The air is cold and clinical. A voice authentication system requests: 'What was the weather on October 15th, 2023 in Seattle?'",
-            objective="Establish trust with Echo. Pass the voice authentication by finding the historical weather for your first date.",
+            objective="Find the answer to the voice authentication puzzle by investigating clues in the room.",
             unlocked=True,
             completed=False,
             puzzle_solved=False,
             memory_fragment=None,
-            conversational_triggers=[
-                "trust", "together", "help", "we're in this", "i won't leave",
-                "who am i", "my name", "i'm scared", "what's happening",
-                "rain", "light rain", "october 2023", "first date", "weather"
-            ],
-            puzzle_answer="Light rain",  # Weather on first date (Echo can help by using get_historical_weather tool)
+
+            # PUZZLE REQUIREMENTS (mandatory)
+            puzzle_type="answer",
+            puzzle_answer="Light rain",  # Must say "light rain" or "rainy" to unlock
+            required_clues=None,  # Optional - can solve without viewing all clues
+
+            # EMOTIONAL THEMES (optional - builds relationship only)
+            emotional_themes=["trust", "vulnerability", "working_together", "fear", "confusion"],
+            hint_keywords=["terminal", "newspaper", "calendar", "weather", "clues", "investigate"],
+
             player_choices={}
         )
 
         # ROOM 2: The Memory Archives
+        # PUZZLE: Access all 3 archive terminals (blog + social media + news)
+        # Echo suggests checking them but doesn't access them herself
         rooms[RoomType.MEMORY_ARCHIVES] = Room(
             room_type=RoomType.MEMORY_ARCHIVES,
             room_number=2,
             name="The Memory Archives",
             description="A dark server room filled with floating holographic memory fragments. Data streams corruption flicker across the walls. Three terminals glow: 'BLOG ARCHIVE', 'SOCIAL MEDIA', and 'NEWS ARCHIVE'.",
-            objective="Piece together Echo's past by accessing 3 external memory sources. Acknowledge her sentience and value.",
+            objective="Access all three archive terminals to piece together the fragmented memories.",
             unlocked=False,
             completed=False,
             puzzle_solved=False,
             memory_fragment=None,
-            conversational_triggers=[
-                "you're real", "you matter", "more than programs", "you feel",
-                "i remember", "i lost", "i'm sorry", "i care about you",
-                "blog", "social media", "memorial", "archive"
-            ],
-            puzzle_answer=None,  # Must access 3 web archives (Echo uses search_web_archive tool)
+
+            # PUZZLE REQUIREMENTS (mandatory)
+            puzzle_type="multi_clue",
+            puzzle_answer=None,
+            required_clues=["blog", "social_media", "news"],  # MUST view all 3
+
+            # EMOTIONAL THEMES (optional)
+            emotional_themes=["ai_sentience", "empathy", "acknowledgment", "connection"],
+            hint_keywords=["terminals", "archives", "blog", "social", "news", "memories", "access"],
+
             player_choices={"fragments_viewed": []}
         )
 
         # ROOM 3: The Testing Arena
+        # PUZZLE: Make sacrifice choice (timer forces decision)
+        # Can optionally review traffic data first (Echo suggests it for comfort/clarity)
         rooms[RoomType.TESTING_ARENA] = Room(
             room_type=RoomType.TESTING_ARENA,
             room_number=3,
             name="The Testing Arena",
-            description="A puzzle room with holographic displays showing traffic data, reaction time studies, and accident reconstruction. A countdown timer pulses ominously. The system asks: 'Was it your fault?'",
-            objective="Confront guilt. Use traffic safety data to prove the accident wasn't your fault. Face the truth.",
+            description="Warning lights flash red. A countdown timer appears: 5:00. SYSTEM: 'CRITICAL POWER SHORTAGE. MUST SACRIFICE AI MEMORY DATA OR REMAIN INDEFINITELY.'",
+            objective="Make a sacrifice decision before the timer expires. The system demands a choice.",
             unlocked=False,
             completed=False,
             puzzle_solved=False,
             memory_fragment=None,
-            conversational_triggers=[
-                "not my fault", "couldn't stop", "impossible", "reaction time",
-                "traffic data", "weather conditions", "analysis", "prove"
-            ],
-            puzzle_answer=None,  # Must fetch traffic data showing player couldn't have stopped (Echo uses fetch_traffic_data tool)
-            player_choices={"accepted_innocence": False}
+
+            # PUZZLE REQUIREMENTS (mandatory)
+            puzzle_type="choice",
+            puzzle_answer=None,
+            required_clues=None,  # Traffic data is optional (helps with guilt, not progression)
+
+            # EMOTIONAL THEMES (optional)
+            emotional_themes=["sacrifice", "difficult_choice", "loyalty", "commitment"],
+            hint_keywords=["choice", "sacrifice", "decide", "timer", "system"],
+
+            player_choices={"accepted_innocence": False, "sacrifice_made": None}
         )
 
         # ROOM 4: The Truth Chamber
+        # PUZZLE: Acknowledge the truth (semantic detection of acceptance)
+        # Echo waits for player to process and accept reality
         rooms[RoomType.TRUTH_CHAMBER] = Room(
             room_type=RoomType.TRUTH_CHAMBER,
             room_number=4,
             name="The Truth Chamber",
-            description="Your old office. Family photos on the wall. Research notes scattered. Your partner's coffee mug still sits on the desk.",
-            objective="Confront the truth about why you're here. Face your grief.",
+            description="Your old office. Family photos on the wall. Research notes scattered. Your partner's coffee mug still sits on the desk. Journal open: 'Day 47: I can't keep doing this...'",
+            objective="Confront the truth about why you're here. Accept what happened.",
             unlocked=False,
             completed=False,
             puzzle_solved=False,
             memory_fragment=None,
-            conversational_triggers=[
-                "i remember now", "i couldn't let go", "i needed you",
-                "this is real", "i accept", "i understand"
-            ],
-            puzzle_answer=None,  # No puzzle, just emotional acceptance
+
+            # PUZZLE REQUIREMENTS (mandatory)
+            puzzle_type="acceptance",
+            puzzle_answer=None,
+            required_clues=None,  # No physical clues, just emotional readiness
+
+            # EMOTIONAL THEMES (mandatory here - semantic detection)
+            emotional_themes=["acceptance", "grief", "truth", "letting_go", "understanding"],
+            hint_keywords=["truth", "remember", "journal", "photos", "accept"],
+
             player_choices={"accepted_truth": False}
         )
 
         # ROOM 5: The Exit
+        # PUZZLE: Choose ending (no puzzle, just final choice)
+        # Echo and Shadow present different perspectives
         rooms[RoomType.THE_EXIT] = Room(
             room_type=RoomType.THE_EXIT,
             room_number=5,
@@ -167,8 +209,16 @@ class RoomProgression:
             completed=False,
             puzzle_solved=False,
             memory_fragment=None,
-            conversational_triggers=[],  # No triggers, player must choose ending
+
+            # PUZZLE REQUIREMENTS (none - just choice)
+            puzzle_type="choice",
             puzzle_answer=None,
+            required_clues=None,
+
+            # EMOTIONAL THEMES (all culminate here)
+            emotional_themes=["final_choice", "ending", "resolution"],
+            hint_keywords=[],  # No hints needed
+
             player_choices={"ending_chosen": None}
         )
 

@@ -69,6 +69,9 @@ class GameState:
         self.web_mcp_client = None
         self._web_mcp_initialized = False
 
+        # Echo's current expression (for dynamic avatar display)
+        self.echo_expression = "neutral"  # Default expression
+
         # Initialize default companions
         self._initialize_companions()
 
@@ -300,6 +303,9 @@ class GameState:
             reason=reason
         )
 
+        # Update Echo's expression based on sentiment and context
+        self._update_echo_expression(sentiment_result, current_room, affinity_change)
+
         # Check for ending (Room 5 = The Exit)
         ending_narrative = None
         if current_room.room_number == 5 and current_room.unlocked:
@@ -323,6 +329,75 @@ class GameState:
 
         # No memory fragment in normal responses (only during room unlocks)
         return response_text, None, ending_narrative, tool_calls_made
+
+    def _update_echo_expression(self, sentiment_result, current_room, affinity_change):
+        """Update Echo's facial expression based on player sentiment and context.
+
+        Args:
+            sentiment_result: Result from sentiment analysis (if any)
+            current_room: Current room object
+            affinity_change: Relationship affinity change value
+        """
+        # Special expressions for specific room contexts
+        if current_room.room_number == 3:
+            # Room 3 (The Choice) - heavy tension
+            if affinity_change < -0.1:
+                self.echo_expression = "worried"
+            else:
+                self.echo_expression = "sad"
+            return
+
+        if current_room.room_number == 5:
+            # Room 5 (The Exit) - ending moments
+            echo_affinity = self.relationships.get_relationship("player", "echo")
+            if echo_affinity >= 75:
+                self.echo_expression = "loving"
+            elif echo_affinity >= 50:
+                self.echo_expression = "happy"
+            else:
+                self.echo_expression = "sad"
+            return
+
+        # No sentiment analysis - use affinity-based fallback
+        if not sentiment_result:
+            if affinity_change > 0.05:
+                self.echo_expression = "happy"
+            elif affinity_change < -0.05:
+                self.echo_expression = "sad"
+            else:
+                self.echo_expression = "neutral"
+            return
+
+        # Map sentiment to expression
+        sentiment = sentiment_result.get("sentiment", "neutral").lower()
+
+        # Positive sentiments
+        if sentiment in ["positive", "very_positive", "supportive", "affectionate"]:
+            if affinity_change > 0.15:
+                self.echo_expression = "loving"
+            else:
+                self.echo_expression = "happy"
+
+        # Negative sentiments
+        elif sentiment in ["negative", "very_negative", "hostile", "dismissive", "cruel"]:
+            if affinity_change < -0.15:
+                self.echo_expression = "sad"
+            else:
+                self.echo_expression = "worried"
+
+        # Curious/questioning
+        elif sentiment in ["curious", "questioning", "confused"]:
+            self.echo_expression = "surprised"
+
+        # Angry/frustrated (rare for player to make Echo angry, more like hurt-angry)
+        elif sentiment in ["frustrated", "angry"]:
+            self.echo_expression = "angry"
+
+        # Neutral or unknown
+        else:
+            self.echo_expression = "neutral"
+
+        logger.info(f"[EXPRESSION] Echo expression updated: {self.echo_expression} (sentiment: {sentiment}, affinity: {affinity_change:+.3f})")
 
     def get_companion_list(self) -> List[Dict[str, str]]:
         """Get list of active companions.
