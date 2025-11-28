@@ -5,8 +5,6 @@ import logging
 import os
 from typing import Dict, List, Optional, Tuple
 from .game_mcp.in_process_mcp import InProcessMCPServer, InProcessMCPClient
-from .game_mcp.memory_manager import MemoryManager
-from .game_mcp.memory_mcp_client import MockMemoryMCPClient
 from .game_mcp.weather_mcp_client import MockWeatherMCPClient, connect_to_weather_mcp
 from .game_mcp.web_mcp_client import MockWebMCPClient, connect_to_web_mcp
 from .companions.agents import OpenAICompanion
@@ -23,15 +21,13 @@ logger = logging.getLogger(__name__)
 class GameState:
     """Manages the overall game state with real MCP architecture (session-only, no persistence)."""
 
-    def __init__(self, session_id: str = "default", player_id: Optional[str] = None):
+    def __init__(self, session_id: str = "default"):
         """Initialize game state with MCP server/client.
 
         Args:
             session_id: Unique session identifier
-            player_id: Player identifier for cross-session memory (optional)
         """
         self.session_id = session_id
-        self.player_id = player_id  # For Memory MCP cross-session tracking
         self.companions: Dict[str, OpenAICompanion] = {}
         self.conversation = ConversationHistory(session_id)
         self.relationships = RelationshipTracker()
@@ -43,23 +39,6 @@ class GameState:
         self.mcp_server = InProcessMCPServer(self, name=f"echo-hearts-{session_id}")
         self.mcp_client = InProcessMCPClient(self.mcp_server)
         self._mcp_initialized = False
-
-        # Memory MCP for cross-playthrough persistence
-        enable_memory = os.getenv("ENABLE_MEMORY_MCP", "true").lower() == "true"
-        if enable_memory:
-            self.memory_mcp_client = MockMemoryMCPClient()  # TODO: Replace with real Memory MCP
-            self.memory_manager = MemoryManager(
-                self.memory_mcp_client,
-                max_players=int(os.getenv("MAX_PLAYERS", "1000"))
-            )
-            logger.info("[MEMORY_MCP] Memory persistence enabled (using mock client)")
-        else:
-            self.memory_mcp_client = None
-            self.memory_manager = None
-            logger.info("[MEMORY_MCP] Memory persistence disabled")
-
-        self.player_memory = None  # Will be loaded on first message
-        self.player_memory_checked = False
 
         # Weather MCP for historical weather data (Room 1 & 2 puzzles)
         self.weather_mcp_client = None
@@ -128,15 +107,6 @@ class GameState:
         if not self._mcp_initialized:
             await self._initialize_mcp()
             self._mcp_initialized = True
-
-        # Check player memory on first message (Memory MCP cross-session persistence)
-        if not self.player_memory_checked and self.memory_manager and self.player_id:
-            self.player_memory = await self.memory_manager.get_player_memory(self.player_id)
-            self.player_memory_checked = True
-
-            if self.player_memory:
-                logger.info(f"[MEMORY] Player returning: {self.player_memory['playthrough_count']} previous playthroughs, "
-                           f"memory strength: {self.player_memory['memory_strength']:.2f}")
 
         # Add message to conversation history
         self.conversation.add_message("User", message)
@@ -261,8 +231,7 @@ class GameState:
             "room_description": current_room.description,
             "rooms_completed": sum(1 for r in self.room_progression.rooms.values() if r.completed),
             "memory_fragments_collected": len(self.room_progression.memory_fragments),
-            "last_scenario": last_scenario,  # Add scenario context if room just unlocked
-            "memory_state": self.player_memory  # Cross-playthrough memory (Memory MCP)
+            "last_scenario": last_scenario  # Add scenario context if room just unlocked
         }
 
         # Generate AUTONOMOUS response (agent makes own decisions using MCP tools)
@@ -320,12 +289,6 @@ class GameState:
 
             ending = ending_result["ending"]
             ending_narrative = get_ending_narrative(ending)
-
-            # Record this playthrough in Memory MCP
-            if self.memory_manager and self.player_id:
-                ending_type = ending.name  # "FREEDOM", "ACCEPTANCE", "TRAPPED", "RESET"
-                await self.memory_manager.record_playthrough(self.player_id, ending_type)
-                logger.info(f"[MEMORY] Recorded playthrough with {ending_type} ending")
 
         # No memory fragment in normal responses (only during room unlocks)
         return response_text, None, ending_narrative, tool_calls_made

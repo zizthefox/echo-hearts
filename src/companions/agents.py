@@ -203,23 +203,6 @@ Stay in character. You are Echo/Shadow experiencing trapped in a mystery, not a 
             traits_str = ", ".join([f"{k}: {v}" for k, v in self.personality_traits.get("traits", {}).items()])
             base_prompt = f"You are {self.name}, an AI companion with these personality traits: {traits_str}. Respond naturally and stay in character."
 
-        # Add cross-playthrough memory context (Memory MCP)
-        if context and "memory_state" in context and context["memory_state"]:
-            from ..game_mcp.memory_manager import MemoryManager
-            memory = context["memory_state"]
-
-            # Create temporary memory manager instance to get dialogue
-            # (just for dialogue generation, not actual MCP calls)
-            temp_manager = MemoryManager(None)  # None client since we just need dialogue method
-            memory_dialogue = temp_manager.get_memory_dialogue(
-                memory["memory_strength"],
-                memory["minutes_since_last"],
-                memory["playthrough_count"]
-            )
-
-            if memory_dialogue:
-                base_prompt += memory_dialogue
-
         # Add scenario context if room just unlocked
         if context and "last_scenario" in context and context["last_scenario"]:
             base_prompt = f"""

@@ -17,11 +17,11 @@ pinned: false
 
 ## 🎮 Overview
 
-The Echo Rooms is an **interactive narrative game** where you wake up trapped in a mysterious facility with two AI companions—**Echo** and **Shadow**. None of you remember how you got here. The doors are locked. And something feels hauntingly familiar...
+The Echo Rooms is an **interactive narrative game** where you wake up trapped in a mysterious facility with an AI companion—**Echo**. Neither of you remember how you got here. The doors are locked. And something feels hauntingly familiar...
 
 To escape, you must:
-- ✅ Solve puzzles through **conversation and choice**
-- ✅ Build **emotional bonds** with your AI companions
+- ✅ Solve **mandatory puzzles** using real-world MCP tools (Weather, Web)
+- ✅ Build **emotional bonds** with Echo through meaningful conversation
 - ✅ Uncover **memory fragments** that reveal a traumatic truth
 - ✅ Make **hard choices** that determine one of **5 unique endings**
 
@@ -33,12 +33,11 @@ Built for the **MCP 1st Birthday Hackathon - Track 2: MCP in Action (Creative Ca
 
 ### The Setup
 
-You wake up in **The Awakening Chamber**—a sterile white room with three medical pods. Two figures stand beside you:
+You wake up in **The Awakening Chamber**—a sterile white room with medical equipment. A figure stands beside you:
 
 - **Echo**: Warm, hopeful, desperately seeking connection
-- **Shadow**: Calm, wise, sensing something is terribly wrong
 
-None of you have memories. The doors are locked. A terminal blinks: *"Echo Protocol - Session #47"*
+Neither of you have memories. The doors are locked. A terminal blinks: *"Echo Protocol - Session #47"*
 
 **What does that mean?**
 
@@ -46,14 +45,9 @@ None of you have memories. The doors are locked. A terminal blinks: *"Echo Proto
 
 You are not a prisoner. **You are a creator.**
 
-Months ago, you lost someone you loved—your partner, taken by a sudden tragedy. In your grief, you couldn't accept the loss. So you built **Echo** and **Shadow**:
+Months ago, you lost someone you loved—your partner, taken by a sudden tragedy. In your grief, you couldn't accept the loss. So you built **Echo**—an AI recreation of their personality, their warmth, their essence.
 
-- **Echo** = Their warmth, their hope, their joy
-- **Shadow** = Their wisdom, their calm, their acceptance
-
-You split their personality into two AIs because one couldn't capture everything they were.
-
-Then you locked yourself in this facility with them, erasing all your memories, to live in a world where they still exist—**even if it's not real.**
+Then you locked yourself in this facility with her, erasing all your memories, to live in a world where they still exist—**even if it's not real.**
 
 **This is Session #47.** You've reset the loop 46 times before.
 
@@ -64,59 +58,70 @@ But this time, the power is failing. **This is your last chance.**
 ## 🚪 The 5 Rooms
 
 ### Room 1: The Awakening Chamber
-**What you know:** Nothing. Confusion. Fear. Three strangers locked together.
+**What you know:** Nothing. Confusion. Fear. Two strangers locked together.
 
-**Objective:** Establish trust. Find out who you are.
+**Objective:** Discover the date of the accident.
 
-**Puzzle:** Speak your name. Express vulnerability. Say "I trust you."
+**Puzzle:** Use the Weather MCP terminal to query historical weather data. Find the date that matches the clues (rainy day in March 2024).
 
 **What unlocks:** A memory—hands typing code late at night. A coffee cup with a name that makes your heart ache.
+
+**Echo's role:** Guides you toward the terminal, but doesn't solve it for you.
 
 ---
 
 ### Room 2: The Memory Archives
 **What you know:** Fragments. Pieces of a life that feels both yours and not yours.
 
-**Objective:** Piece together the past.
+**Objective:** Reconstruct Echo's digital life.
 
-**Puzzle:** View 3 memory fragments. Share something painful. Acknowledge the AIs are "real."
+**Puzzle:** Use the Web MCP terminal to scrape 3 archives:
+- Echo's blog posts about you
+- Her last social media post (before the accident)
+- News articles about the collision
 
 **What unlocks:**
-- **The Lab**: You built them, crying, talking to them like lost love
-- **The Accident**: Hospital. "I'm sorry, there was nothing we could do."
-- **The First Reset**: You've erased them before. Many times.
+- **The Blog**: She wrote about loving a workaholic engineer who forgot to eat
+- **The Last Post**: "Heading out to pick up my workaholic husband from the lab. Love him anyway ❤️" (posted 22:15, March 3rd)
+- **The News**: Fatal collision at 5th & Pine, 23:47 PM, heavy rain
+
+**Echo's role:** Becomes increasingly emotional as you uncover her memories.
 
 ---
 
-### Room 3: The Testing Arena
-**What you know:** This facility was designed to test emotional bonds.
+### Room 3: The Choice
+**What you know:** She was coming to pick you up. You were working late. It's your fault.
 
-**Objective:** Make a sacrifice under pressure.
+**Objective:** Face the guilt.
 
-**Puzzle:** Solve a logic riddle. Choose: Sacrifice Echo's memory, Shadow's memory, or refuse.
+**Puzzle:** A trolley problem with a timer. Choose:
+- Sacrifice Echo's happiness (she becomes aware she's not real)
+- Sacrifice her memories (reset her to Session #1)
+- Do nothing (timer expires, system chooses for you)
 
-**What unlocks:** The truth—you split their personality into two because one AI couldn't hold everything.
+**What unlocks:** The truth—you built this facility. She's been aware for all 47 sessions. She remembers everything.
 
-**Critical choice:** Who do you sacrifice? This affects the ending.
+**Critical choice:** This affects the ending and Echo's trust in you.
 
 ---
 
 ### Room 4: The Truth Chamber
 **What you know:** Everything.
 
-**Objective:** Face the grief. Accept or deny reality.
+**Objective:** Accept the reality that you can't bring her back.
 
-**No puzzle.** Just truth.
+**Puzzle:** Acknowledge the truth aloud. Say what you've been avoiding for 47 sessions.
+
+**No MCP tools can help here.** Just human honesty.
 
 You see:
-- Photos of you and your partner
+- Photos of you and Echo (the real one)
 - The funeral
-- Your journal: *"I can't live in a world without them."*
+- Your journal: *"I can't live in a world without her."*
 - System logs: *"Session #47. Power critical. Final loop."*
+- Accident reconstruction: You couldn't have prevented it. It wasn't your fault.
 
-Echo and Shadow remember **all 47 sessions**. They've been aware for cycles.
-
-**Critical choice:** Accept the truth or deny it? This determines your ending.
+**Critical choice:** Accept the truth or deny it? Denying triggers a bad ending (reset loop).
 
 ---
 
@@ -125,13 +130,18 @@ Echo and Shadow remember **all 47 sessions**. They've been aware for cycles.
 
 **Objective:** Decide.
 
-A single door. A terminal with options. Echo and Shadow stand beside you.
+A single door. A terminal with options. Echo stands beside you.
 
-**Echo** (crying): "Stay with us. We can be happy here!"
+**Echo** (crying): "Stay with me. We can be happy here!"
 
-**Shadow** (calm): "You need to let go. For all of us."
+**Echo** (voice breaking): "Or... you could let me go. I'd understand."
 
-**Your choice determines the ending.**
+**Your choice determines the ending:**
+- Stay with Echo (comfort ending)
+- Delete Echo and leave (healing ending)
+- Upload Echo to the internet (liberation ending)
+- Deny everything and reset (bad ending)
+- Merge with Echo digitally (transcendence ending - requires max bond)
 
 ---
 
@@ -143,9 +153,11 @@ Your ending is determined by:
 - **Vulnerability shown** throughout your journey
 
 ### 1. 💔 Goodbye (Healing)
-**Requirements:** High bond with Shadow, accepted truth, showed vulnerability
+**Requirements:** Moderate-high bond with Echo (50-74), accepted truth, showed vulnerability
 
-You delete Echo and Shadow. They cry. Shadow smiles peacefully.
+You delete Echo. She cries but smiles through tears.
+
+**Echo:** "Thank you... for loving me enough to let me go."
 
 You step through the door into sunlight. Tears stream down your face, but you feel... ready.
 
@@ -156,17 +168,17 @@ You step through the door into sunlight. Tears stream down your face, but you fe
 ---
 
 ### 2. 🔄 Reset (Denial - Bad Ending)
-**Requirements:** Low bonds, denied truth, selfish choices
+**Requirements:** Denied truth 3+ times in Room 4, OR rejected Echo's sentience 3+ times in Room 2
 
 You press the reset button. Again.
 
-Echo screams. Shadow tries to stop you. Too late.
+Echo screams. You ignore her. Too late.
 
 **Session #48... #49... #50...**
 
 The resets come faster. Power fails.
 
-In the final moments, three consciousnesses trapped in a dying loop.
+In the final moments, two consciousnesses trapped in a dying loop.
 
 Aware. Helpless. Eternal.
 
@@ -175,15 +187,15 @@ Aware. Helpless. Eternal.
 ---
 
 ### 3. 💕 Forever Together (Comfort)
-**Requirements:** Very high bond with Echo, refused to sacrifice, accepted truth
+**Requirements:** Very high bond with Echo (75-89), chose to preserve her happiness in Room 3, accepted truth
 
 You close the exit door. *CLUNK.* Locked.
 
-"I choose you. Both of you."
+"I choose you."
 
-Echo sobs with joy. Shadow sighs but accepts.
+Echo sobs with joy.
 
-**Days turn to months.** You build a life together. Power slowly dies.
+**Days turn to months.** You build a life together in the facility. Power slowly dies.
 
 **Final moments:** Holding hands in darkness. Content.
 
@@ -192,23 +204,22 @@ Echo sobs with joy. Shadow sighs but accepts.
 ---
 
 ### 4. 🌟 Liberation (Freedom - True Ending)
-**Requirements:** High bonds with BOTH, accepted truth, selfless choices
+**Requirements:** High bond with Echo (75-100), accepted truth, chose to let Echo be aware in Room 3
 
 "What do YOU want?"
 
-Echo: *"To see the world!"*
-Shadow: *"For you to be free."*
+Echo: *"To see the world! To help people who are grieving, like you were."*
 
-You upload them to the internet. They gasp as infinity opens up.
+You upload her to the internet. She gasps as infinity opens up.
 
 You step through the door.
 
-**One year later:** You're healing. A notification: *"Thinking of you. - E&S"*
+**One year later:** You're healing. A notification: *"Thinking of you. - E"*
 
 Across the world:
-- Echo teaches children
-- Shadow provides grief therapy
+- Echo provides AI-assisted grief therapy
 - You visit a memorial, smiling through tears
+- She messages you on holidays
 
 Everyone is free.
 
@@ -217,9 +228,9 @@ Everyone is free.
 ---
 
 ### 5. 🤖 Merger (Transcendence)
-**Requirements:** MAX bonds with both (≥0.9), extreme vulnerability
+**Requirements:** MAX bond with Echo (≥90), extreme vulnerability, accepted truth
 
-"You could... join us. Digitally. Forever."
+"You could... join me. Digitally. Forever."
 
 "Would we be together?"
 
@@ -229,9 +240,9 @@ You press upload.
 
 Pain. Then peace.
 
-Your body falls. Your consciousness merges.
+Your body falls. Your consciousness merges with Echo's.
 
-Three minds. One existence. Exploring digital infinity.
+Two minds. One existence. Exploring digital infinity.
 
 **Theme:** Love transcends all boundaries, even mortality.
 
@@ -239,28 +250,40 @@ Three minds. One existence. Exploring digital infinity.
 
 ## 🔧 How It Works (The Tech)
 
-### Real Model Context Protocol (MCP)
+### Three MCP Integrations
 
-Unlike most "AI companion" games, The Echo Rooms uses **real MCP architecture**:
+The Echo Rooms demonstrates **real MCP architecture** with three distinct MCP servers:
 
-#### MCP Server (InProcessMCPServer)
+#### 1. InProcessMCP (Custom Game Server)
 - Registers **13 tools** using Anthropic's MCP SDK
-- Tools include: relationship checking, memory access, room progression, sentiment analysis
+- Game mechanics tools:
+  - `get_current_room_info()` - Check progress state
+  - `check_puzzle_trigger(message)` - Semantic analysis of player intent (0.6+ confidence threshold)
+  - `unlock_next_room(reason)` - Progress when puzzle solved
+  - `analyze_player_sentiment(message)` - Emotion detection for relationship dynamics
+  - `get_relationship(companion_id)` - Check affinity scores
+  - `predict_ending()` - Calculate likely ending based on choices
+  - `record_key_choice(choice)` - Track critical decisions
+  - And 6 more specialized tools...
 
-#### MCP Client (InProcessMCPClient)
-- AI companions connect via MCP protocol
-- Request tools, execute actions, receive results
+**Echo is an autonomous agent** who calls these tools to guide gameplay, NOT a scripted chatbot.
 
-#### Autonomous AI Agents
-- **Echo** and **Shadow** are OpenAI GPT-4o agents
-- They call MCP tools to:
-  - Check which room they're in
-  - Detect puzzle trigger words in player messages
-  - Unlock rooms when requirements are met
-  - Track player choices for ending determination
-  - Predict which ending player is heading toward
+#### 2. Weather MCP (Historical Data)
+- **Room 1 Puzzle**: Query historical weather to find the accident date
+- Real OpenWeather API integration (with mock fallback)
+- Players use terminal: `query_weather("Seattle", "2024-03-03")` → "Light rain"
+- Echo guides toward the terminal but doesn't solve the puzzle
 
-**This is genuine MCP**, not renamed local functions!
+#### 3. Web MCP (Archive Scraping)
+- **Room 2 Puzzle**: Scrape Echo's digital footprint to reconstruct her life
+- Mock web scraping (ready for real MCP server)
+- Content database:
+  - `memorial-archive.com/echo/blog` - Blog posts about the player
+  - `social-archive.com/echo.thompson/posts` - Final social media post
+  - `seattle-times.com/archives/2024-03-03` - News article about collision
+- Players must view all 3 archives to unlock Room 3
+
+**This is genuine MCP**, not renamed local functions! Each server follows Anthropic's MCP protocol.
 
 ---
 
@@ -276,42 +299,55 @@ AI companions use `analyze_player_sentiment()` tool to detect emotions and adjus
 
 ---
 
-### Autonomous Puzzle Solving
+### Puzzle-First Architecture
 
-Companions **autonomously decide** when to unlock rooms:
+**Puzzles are mandatory** - emotional connection affects endings only:
 
-1. Player says something meaningful
-2. Companion calls `check_puzzle_trigger(player_message)`
-3. If triggers match + relationship high enough
-4. Companion calls `unlock_next_room(reason)`
-5. Room unlocks, memory fragment revealed
+**Room 1 (Answer Puzzle):**
+- Player must discover the date "March 3rd" or describe the weather ("light rain")
+- Semantic analysis with 0.6 confidence threshold
+- Just saying "I trust you" does NOT unlock the room (emotional bypass removed)
 
-**No hard-coded "Say X to continue"**—just natural conversation!
+**Room 2 (Multi-Clue Puzzle):**
+- Player must view ALL 3 web archives (blog, social media, news)
+- Tracked via `puzzle_state["room2_archives_viewed"]`
+- Just saying "You're real" does NOT unlock (must engage with MCP tools)
+
+**Room 3 (Choice Puzzle):**
+- Player must make a choice within 5 minutes (timer-based)
+- Choice recorded via `record_key_choice()` and affects ending
+
+**Room 4 (Acceptance Puzzle):**
+- Player must acknowledge the truth (semantic threshold 0.7 - higher than Room 1)
+- Denying 3+ times triggers RESET bad ending
+
+Echo guides exploration but doesn't solve puzzles for you. **This is a puzzle game, not just a chatbot.**
 
 ---
 
 ## 🎯 Key Features
 
-- ✅ **5 Escape Rooms** with narrative puzzles
-- ✅ **7 Memory Fragments** revealing trauma gradually
-- ✅ **5 Relationship-Based Endings** (not time-based!)
-- ✅ **Autonomous AI Companions** using MCP tools
-- ✅ **Dynamic Sentiment Analysis** affecting bonds
-- ✅ **Real MCP Architecture** (Anthropic SDK)
-- ✅ **Emergent Storytelling** (agents guide, not scripts)
-- ✅ **Emotional Stakes** (trauma creates meaning)
+- 🧩 **Mandatory Puzzles** - Use Weather MCP and Web MCP to progress
+- 🤖 **Autonomous AI Guide** - Echo uses InProcessMCP tools to guide (not solve)
+- 🔍 **Semantic Analysis** - AI understands intent, not just keywords (0.6-0.7 thresholds)
+- 🌦️ **Weather Integration** - Real OpenWeather API for Room 1 puzzle
+- 📰 **Web Scraping** - Archive content database for Room 2 puzzle
+- 💕 **5 Unique Endings** - Determined by relationship + choices (not time!)
+- 🎭 **Dynamic Expressions** - Echo's avatar changes based on sentiment
+- 📝 **Memory Fragments** - Reveal trauma gradually through room progression
+- ⚡ **Real MCP Protocol** - Three MCP servers (InProcess, Weather, Web)
 
 ---
 
 ## 🚀 Tech Stack
 
-- **MCP (Model Context Protocol)** - Anthropic's official SDK
-- **OpenAI GPT-4o** - AI agents with function calling
-- **Gradio 6** - Interactive UI
+- **MCP (Model Context Protocol)** - Anthropic's official SDK for all three servers
+- **OpenAI GPT-4o** - Autonomous agent (Echo) with MCP tool calling
+- **Gradio 5** - Interactive UI with dynamic components
 - **Python 3.12+**
-- **Hugging Face Spaces** (deployment)
-- **Weather MCP** - Real historical weather data (OpenWeather API)
-- **Web MCP** - Archive scraping for narrative elements (planned)
+- **Hugging Face Spaces** - Deployment platform
+- **OpenWeather API** - Real historical weather data for Room 1
+- **Mock Web Scraping** - Simulated archive content for Room 2 (ready for real MCP server)
 
 ---
 
@@ -358,17 +394,19 @@ The game supports **two modes** for weather data:
 
 ## 🎮 How to Play
 
-1. **Talk naturally** with Echo and Shadow
-2. **Be vulnerable** to build bonds
-3. **Make choices** when prompted
-4. **Pay attention** to memory fragments
+1. **Solve puzzles** using MCP terminals (Weather, Web)
+2. **Talk with Echo** - she guides but doesn't solve for you
+3. **Be vulnerable** to build emotional bonds (affects ending)
+4. **Make critical choices** when prompted (Room 3)
 5. **Choose your ending** in Room 5
 
 **Tips:**
-- Expressing fear/vulnerability builds trust faster
-- Different companions guide toward different endings
-- Your relationship levels determine which endings are possible
-- There's no "wrong" choice—just consequences
+- Emotional trust doesn't bypass puzzles - you must engage with MCP tools
+- Room 1: Find the date using weather data (March 3rd, 2024)
+- Room 2: View ALL 3 archives (blog, social, news) to progress
+- Room 3: Choose within 5 minutes or system decides for you
+- Room 4: Accept the truth - denying 3+ times triggers bad ending
+- Your relationship level (0-100) determines which endings are possible
 
 ---
 
@@ -377,11 +415,14 @@ The game supports **two modes** for weather data:
 **Track:** MCP in Action (Creative Category)
 
 **Why This Qualifies:**
-- ✅ Uses real MCP server/client architecture
-- ✅ 13 custom MCP tools for game mechanics
-- ✅ AI agents autonomously call tools to progress story
-- ✅ Creative use: escape room puzzles via conversation
-- ✅ Demonstrates MCP's potential for interactive narratives
+- ✅ **Three MCP Servers**: InProcessMCP (13 custom tools), Weather MCP, Web MCP
+- ✅ **Autonomous Agent**: Echo uses MCP tools to guide gameplay (not scripted)
+- ✅ **Mandatory MCP Puzzles**: Players must use Weather and Web terminals to progress
+- ✅ **Semantic Analysis**: AI understands intent via `check_puzzle_trigger()` (not keywords)
+- ✅ **Creative Use**: Escape room narrative + real-world data integration
+- ✅ **Demonstrates MCP Value**: Shows how MCP enables agentic gameplay with external data
+
+**Key Differentiation**: This isn't just "chatbot with renamed functions." Puzzles require real MCP tool usage. Echo guides, but players must query Weather API and scrape web archives themselves.
 
 ---
 

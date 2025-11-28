@@ -5,7 +5,6 @@ import asyncio
 import uuid
 from typing import List, Tuple, Optional
 from ..game_state import GameState
-from ..utils.player_id import get_player_id
 
 
 class EchoHeartsUI:
@@ -16,17 +15,16 @@ class EchoHeartsUI:
         pass
 
     def _create_game_state(self, request: gr.Request = None):
-        """Create a new game state with unique session ID and player ID.
+        """Create a new game state with unique session ID.
 
         Args:
-            request: Gradio request object (for player identification)
+            request: Gradio request object (unused)
 
         Returns:
             New GameState instance
         """
         session_id = str(uuid.uuid4())[:8]  # Short unique ID
-        player_id = get_player_id(request) if request else None
-        return GameState(session_id, player_id=player_id)
+        return GameState(session_id)
 
     def _format_message_with_avatar(self, role: str, content: str, game_state: GameState) -> dict:
         """Format a message with large visual novel style portrait.
@@ -253,9 +251,10 @@ The doors are locked. You need to work together to escape.
 
 ## Features
 
-🧠 **Persistent Memory** - Characters remember you between sessions
-🌦️ **Dynamic Puzzles** - Real-world data integration for unique challenges
-🎯 **Multiple Endings** - Your choices matter
+🧩 **Interactive Puzzles** - Use MCP tools to solve real-world data puzzles
+🌦️ **Weather Integration** - Query historical weather to unlock rooms
+🔍 **Semantic Analysis** - AI understands your intent, not just keywords
+🎯 **Multiple Endings** - Your choices and relationship determine the outcome
 ⏱️ **15-20 Minutes** - A complete playthrough
 
 ---
@@ -284,12 +283,11 @@ To progress, you must:
 
                 with gr.Row():
                     start_new_btn = gr.Button("▶️ START NEW GAME", variant="primary", size="lg", scale=2)
-                    clear_mem_landing_btn = gr.Button("🧹 Clear Saved Memories", variant="secondary", size="lg", scale=1)
 
                 gr.Markdown("""
 <div style="text-align: center; margin-top: 30px; color: #666;">
-Built for the Memory MCP Hackathon<br/>
-Powered by Memory MCP, Weather MCP, and Web MCP
+Built for the MCP Hackathon<br/>
+Powered by InProcessMCP, Weather MCP, and Web MCP
 </div>
                 """)
 
@@ -388,12 +386,6 @@ Powered by Memory MCP, Weather MCP, and Web MCP
                 outputs=[landing_page, game_interface, chatbot, companion_list, relationships, story_progress, game_state]
             )
 
-            # Landing page button - clear memories
-            clear_mem_landing_btn.click(
-                self.clear_player_memory_landing,
-                inputs=[game_state],
-                outputs=[game_state]
-            )
 
             # Main menu button - return to landing page
             main_menu_btn.click(
@@ -415,29 +407,29 @@ Powered by Memory MCP, Weather MCP, and Web MCP
                 outputs=[msg_input, chatbot, companion_list, relationships, story_progress, room_image, room_title, game_state]
             )
 
-            # Interactive room object handlers
+            # Interactive room object handlers (wire to puzzle_state)
             terminal_btn.click(
                 self.show_terminal_clue,
-                inputs=[],
-                outputs=[terminal_panel, terminal_display]
+                inputs=[game_state],
+                outputs=[terminal_panel, terminal_display, game_state]
             )
 
             newspaper_btn.click(
                 self.show_newspaper_clue,
-                inputs=[],
-                outputs=[newspaper_panel, newspaper_display]
+                inputs=[game_state],
+                outputs=[newspaper_panel, newspaper_display, game_state]
             )
 
             calendar_btn.click(
                 self.show_calendar_clue,
-                inputs=[],
-                outputs=[calendar_panel, calendar_display]
+                inputs=[game_state],
+                outputs=[calendar_panel, calendar_display, game_state]
             )
 
             weather_btn.click(
                 self.show_weather_station,
-                inputs=[],
-                outputs=[weather_panel]
+                inputs=[game_state],
+                outputs=[weather_panel, game_state]
             )
 
             # Weather query submit
@@ -487,24 +479,6 @@ Powered by Memory MCP, Weather MCP, and Web MCP
             game_state
         )
 
-    def clear_player_memory_landing(self, game_state: GameState) -> GameState:
-        """Clear player memory from landing page.
-
-        Args:
-            game_state: Current game state
-
-        Returns:
-            Updated game state
-        """
-        # Create temp game state if needed just to get player ID
-        if game_state is None:
-            game_state = self._create_game_state()
-
-        # Clear memory if available
-        if game_state.memory_manager and game_state.player_id:
-            asyncio.run(game_state.memory_manager.player_clear_memory(game_state.player_id))
-
-        return game_state
 
     def initialize_ui(self, game_state: GameState) -> Tuple[List[dict], str, str, str, GameState]:
         """Initialize UI with fresh game state data and prologue.
@@ -815,7 +789,7 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
         return avatar_path
 
     def reset_playthrough(self, old_game_state: GameState) -> Tuple[List[dict], str, str, str, GameState]:
-        """Reset to a new playthrough, preserving cross-session memory.
+        """Reset to a new playthrough.
 
         Args:
             old_game_state: Previous game state
@@ -823,9 +797,8 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
         Returns:
             Tuple of (chatbot, companion_list, relationships, story_progress, new_game_state)
         """
-        # Create completely fresh GameState (same player_id, new session_id)
-        player_id = old_game_state.player_id if old_game_state else None
-        new_game_state = GameState(str(uuid.uuid4())[:8], player_id=player_id)
+        # Create completely fresh GameState
+        new_game_state = GameState(str(uuid.uuid4())[:8])
 
         # Return fresh UI with prologue
         prologue = [
@@ -850,64 +823,23 @@ Your previous journey has ended, but the echoes remain...
             new_game_state
         )
 
-    def clear_player_memory(self, game_state: GameState) -> Tuple[List[dict], GameState]:
-        """Clear player's cross-session memory (Memory MCP).
+
+    def show_terminal_clue(self, game_state: GameState) -> Tuple[gr.update, str, GameState]:
+        """Display terminal clue when clicked.
 
         Args:
             game_state: Current game state
 
         Returns:
-            Tuple of (chatbot with confirmation, game_state)
+            Tuple of (accordion visibility update, clue content, updated game_state)
         """
-        # Clear memory if available
-        if game_state and game_state.memory_manager and game_state.player_id:
-            asyncio.run(game_state.memory_manager.player_clear_memory(game_state.player_id))
+        # Track that terminal was viewed (not required for puzzle, just for analytics)
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 1:
+                # Terminal doesn't count as a clue, it's just the puzzle prompt
+                pass
 
-            confirmation = [
-                {
-                    "role": "assistant",
-                    "content": """**🧹 Memories Cleared**
-
-Echo will no longer remember your previous playthroughs.
-This is a fresh start - like acceptance and letting go.
-
-**What was erased:**
-- Previous playthrough count
-- Ending history
-- Cross-session recognition
-
-Click "🔄 New Playthrough" to begin again with no memory of the past.
-
----
-
-*"Grief fades with time. And so do I."*
-                    """
-                }
-            ]
-
-            return (confirmation, game_state)
-
-        else:
-            no_memory = [
-                {
-                    "role": "assistant",
-                    "content": """**ℹ️ No Memories to Clear**
-
-Memory persistence is either disabled or you haven't completed a playthrough yet.
-
-Memories are only stored when you reach an ending.
-                    """
-                }
-            ]
-
-            return (no_memory, game_state)
-
-    def show_terminal_clue(self) -> Tuple[gr.update, str]:
-        """Display terminal clue when clicked.
-
-        Returns:
-            Tuple of (accordion visibility update, clue content)
-        """
         terminal_content = """
 ```
 ███ TERMINAL ACCESS ███
@@ -923,14 +855,26 @@ Memories are only stored when you reach an ending.
 > _ ▮
 ```
         """
-        return (gr.update(visible=True, open=True), terminal_content)
+        return (gr.update(visible=True, open=True), terminal_content, game_state)
 
-    def show_newspaper_clue(self) -> Tuple[gr.update, str]:
+    def show_newspaper_clue(self, game_state: GameState) -> Tuple[gr.update, str, GameState]:
         """Display newspaper clue when clicked.
 
+        Args:
+            game_state: Current game state
+
         Returns:
-            Tuple of (accordion visibility update, clue content)
+            Tuple of (accordion visibility update, clue content, updated game_state)
         """
+        # Track that newspaper was viewed (optional clue for Room 1)
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 1:
+                clues_found = game_state.room_progression.puzzle_state.get("room1_clues_found", [])
+                if "newspaper" not in clues_found:
+                    clues_found.append("newspaper")
+                    game_state.room_progression.puzzle_state["room1_clues_found"] = clues_found
+
         newspaper_content = """
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -956,14 +900,26 @@ offered to share their umbrella," Sarah recalled.
 
 **CLUE:** Article date is October 16, mentions **"yesterday"** (October 15, 2023) had **"light rain"** in Seattle.
         """
-        return (gr.update(visible=True, open=True), newspaper_content)
+        return (gr.update(visible=True, open=True), newspaper_content, game_state)
 
-    def show_calendar_clue(self) -> Tuple[gr.update, str]:
+    def show_calendar_clue(self, game_state: GameState) -> Tuple[gr.update, str, GameState]:
         """Display calendar clue when clicked.
 
+        Args:
+            game_state: Current game state
+
         Returns:
-            Tuple of (accordion visibility update, clue content)
+            Tuple of (accordion visibility update, clue content, updated game_state)
         """
+        # Track that calendar was viewed (optional clue for Room 1)
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 1:
+                clues_found = game_state.room_progression.puzzle_state.get("room1_clues_found", [])
+                if "calendar" not in clues_found:
+                    clues_found.append("calendar")
+                    game_state.room_progression.puzzle_state["room1_clues_found"] = clues_found
+
         calendar_content = """
 ```
 ╔══════════════════════════════════════════╗
@@ -983,15 +939,27 @@ Handwritten note on October 15th:
 
 **CLUE:** October 15, 2023 is circled with umbrella symbol (rain).
         """
-        return (gr.update(visible=True, open=True), calendar_content)
+        return (gr.update(visible=True, open=True), calendar_content, game_state)
 
-    def show_weather_station(self) -> gr.update:
+    def show_weather_station(self, game_state: GameState) -> Tuple[gr.update, GameState]:
         """Open weather station terminal.
 
+        Args:
+            game_state: Current game state
+
         Returns:
-            Accordion visibility update
+            Tuple of (accordion visibility update, updated game_state)
         """
-        return gr.update(visible=True, open=True)
+        # Track that weather station was accessed (this is the MCP tool usage for Room 1)
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 1:
+                clues_found = game_state.room_progression.puzzle_state.get("room1_clues_found", [])
+                if "weather" not in clues_found:
+                    clues_found.append("weather")
+                    game_state.room_progression.puzzle_state["room1_clues_found"] = clues_found
+
+        return (gr.update(visible=True, open=True), game_state)
 
     def query_weather(self, date: str, location: str, game_state: GameState) -> str:
         """Query weather for given date and location.

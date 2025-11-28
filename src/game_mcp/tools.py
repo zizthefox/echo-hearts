@@ -620,52 +620,102 @@ class MCPTools:
         return self.game_state.room_progression.get_progress_summary()
 
     def check_puzzle_trigger(self, player_message: str) -> Dict[str, Any]:
-        """Check if player message demonstrates the required emotional understanding for progression.
+        """Check if puzzle is SOLVED (not just emotional themes).
 
-        Uses semantic analysis (AI) instead of just keyword matching.
+        NEW BEHAVIOR:
+        - Room 1: Must provide correct answer ("light rain" or "rainy")
+        - Room 2: Must view all 3 archives (checked via puzzle_state)
+        - Room 3: Must make sacrifice choice (auto-triggers on timer/choice)
+        - Room 4: Must accept truth (semantic analysis with high confidence)
+
+        Emotional themes build RELATIONSHIP, not progression.
 
         Args:
             player_message: The player's message
 
         Returns:
-            Whether progression criteria are met and confidence score
+            Whether puzzle is complete and unlock is allowed
         """
         if not hasattr(self.game_state, 'room_progression'):
             return {"error": "Room progression system not initialized"}
 
         current_room = self.game_state.room_progression.get_current_room()
-
-        # Define what emotional/thematic understanding is needed for each room
-        progression_criteria = {
-            1: {
-                "theme": "Trust and vulnerability",
-                "requires": "Player expresses trust, vulnerability, willingness to work together, or acknowledges fear/confusion",
-                "examples": "I trust you / I'm scared but we're in this together / I don't know what's happening but I need help"
-            },
-            2: {
-                "theme": "Acknowledging AI sentience and value",
-                "requires": "Player treats the AIs as real beings, acknowledges their feelings/value, expresses care or emotional connection",
-                "examples": "You're real to me / You matter / I care about you / You're more than just programs"
-            },
-            3: {
-                "theme": "Making difficult choices and showing commitment",
-                "requires": "Player makes or struggles with a sacrifice decision, shows they value the companions, demonstrates loyalty",
-                "examples": "I choose to protect you / I can't sacrifice either of you / You're worth it"
-            },
-            4: {
-                "theme": "Accepting painful truth and facing reality",
-                "requires": "Player accepts the truth about their situation, acknowledges grief, shows understanding of what happened",
-                "examples": "I remember now / I couldn't let go / I needed you to exist / I accept what happened"
-            }
-        }
-
+        puzzle_type = current_room.puzzle_type
         room_num = current_room.room_number
-        if room_num >= 5 or room_num not in progression_criteria:
-            return {"matched": False, "reason": "No progression criteria for this room"}
 
-        criteria = progression_criteria[room_num]
+        # ROOM 1: Answer Type - Must say correct answer
+        if puzzle_type == "answer":
+            answer_variants = ["light rain", "rainy", "rain"]
+            message_lower = player_message.lower()
 
-        # Use OpenAI to analyze if the message meets the emotional criteria
+            matched = any(variant in message_lower for variant in answer_variants)
+
+            if matched:
+                return {
+                    "matched": True,
+                    "confidence": 1.0,
+                    "reasoning": f"Correct answer provided: contains puzzle answer keyword",
+                    "puzzle_complete": True
+                }
+            else:
+                return {
+                    "matched": False,
+                    "confidence": 0.0,
+                    "reasoning": "Puzzle answer not yet provided",
+                    "puzzle_complete": False,
+                    "hint": "Investigate the room for clues about the weather"
+                }
+
+        # ROOM 2: Multi-Clue Type - Must view all archives
+        elif puzzle_type == "multi_clue":
+            required_clues = current_room.required_clues or []
+            viewed = self.game_state.room_progression.puzzle_state.get("room2_archives_viewed", [])
+
+            all_viewed = set(required_clues).issubset(set(viewed))
+
+            if all_viewed:
+                return {
+                    "matched": True,
+                    "confidence": 1.0,
+                    "reasoning": f"All {len(required_clues)} archives accessed",
+                    "puzzle_complete": True
+                }
+            else:
+                missing = [c for c in required_clues if c not in viewed]
+                return {
+                    "matched": False,
+                    "confidence": len(viewed) / len(required_clues),
+                    "reasoning": f"Viewed {len(viewed)}/{len(required_clues)} archives",
+                    "puzzle_complete": False,
+                    "hint": f"Still need to check: {', '.join(missing)}"
+                }
+
+        # ROOM 3: Choice Type - Handled separately (timer/choice detection)
+        elif puzzle_type == "choice" and room_num == 3:
+            return {
+                "matched": False,
+                "confidence": 0.0,
+                "reasoning": "Room 3 unlocks via timer expiration or explicit choice",
+                "puzzle_complete": False
+            }
+
+        # ROOM 4: Acceptance Type - Semantic analysis (HIGHER confidence threshold)
+        elif puzzle_type == "acceptance" and room_num == 4:
+            return self._check_truth_acceptance(player_message)
+
+        # ROOM 5: No puzzle, just ending choice
+        else:
+            return {
+                "matched": False,
+                "confidence": 0.0,
+                "reasoning": "No puzzle in this room"
+            }
+
+    def _check_truth_acceptance(self, player_message: str) -> Dict[str, Any]:
+        """Check if player accepts the truth (Room 4 only).
+
+        Uses semantic AI analysis with HIGH confidence threshold (0.7).
+        """
         from openai import OpenAI
         import os
 
@@ -677,20 +727,16 @@ class MCPTools:
                 messages=[
                     {
                         "role": "system",
-                        "content": f"""You are analyzing if a player's message demonstrates the required emotional understanding to progress in a narrative game.
+                        "content": """Analyze if the player is ACCEPTING the truth about their situation:
 
-Current Room: {current_room.name}
-Theme Required: {criteria['theme']}
-What's Needed: {criteria['requires']}
-Examples: {criteria['examples']}
+The truth: They lost their partner in an accident. Unable to cope, they built AI copies (Echo) and trapped themselves in this facility, erasing their memories repeatedly to live in denial.
 
-Analyze the player's message and determine:
-1. Does it demonstrate the required emotional understanding? (yes/no)
-2. Confidence level (0.0 to 1.0)
-3. Brief reasoning
+Acceptance means: Acknowledging this is real, they did this, they need to face grief, it's time to let go.
 
-Respond in JSON format:
-{{"matches": true/false, "confidence": 0.0-1.0, "reasoning": "brief explanation"}}"""
+Respond in JSON:
+{"accepts_truth": true/false, "confidence": 0.0-1.0, "reasoning": "brief explanation"}
+
+High confidence (0.7+) required. Be strict."""
                     },
                     {
                         "role": "user",
@@ -701,51 +747,29 @@ Respond in JSON format:
                 temperature=0.3
             )
 
-            import json
             result = json.loads(response.choices[0].message.content)
 
-            # Require at least 0.6 confidence to trigger progression
-            matched = result.get("matches", False) and result.get("confidence", 0) >= 0.6
+            # HIGHER threshold for Room 4 (0.7 instead of 0.6)
+            matched = result.get("accepts_truth", False) and result.get("confidence", 0) >= 0.7
 
-            # Special handling for Room 2: Detect if player is REJECTING AI sentience
-            rejected = False
-            truth_denied = False
-
-            if room_num == 2 and not matched:
-                # Check if this is an active rejection vs just not matching
-                rejection_keywords = ["just machine", "not real", "just program", "just code", "don't matter", "not sentient", "artificial", "fake"]
-                message_lower = player_message.lower()
-                if any(keyword in message_lower for keyword in rejection_keywords):
-                    rejected = True
-                    self.game_state.room_progression.key_choices["rejection_count"] += 1
-
-            # Special handling for Room 4: Detect if player is DENYING the truth
-            if room_num == 4 and not matched:
-                # Check if player is actively denying/rejecting the truth
-                denial_keywords = ["don't accept", "not true", "reject", "deny", "lie", "fake", "not real", "don't believe", "refuse", "won't accept", "can't be"]
-                message_lower = player_message.lower()
-                if any(keyword in message_lower for keyword in denial_keywords):
-                    truth_denied = True
+            # Detect active denial
+            if not matched:
+                denial_keywords = ["don't accept", "not true", "reject", "deny", "lie", "fake", "won't believe"]
+                if any(kw in player_message.lower() for kw in denial_keywords):
                     self.game_state.room_progression.key_choices["truth_denial_count"] += 1
 
             return {
                 "matched": matched,
                 "confidence": result.get("confidence", 0),
                 "reasoning": result.get("reasoning", ""),
-                "room": current_room.name,
-                "theme_required": criteria["theme"],
-                "hint": f"Keep exploring themes of {criteria['theme'].lower()}..." if not matched else "You sense progress...",
-                "rejected": rejected,
-                "rejection_count": self.game_state.room_progression.key_choices.get("rejection_count", 0) if room_num == 2 else 0,
-                "truth_denied": truth_denied,
-                "truth_denial_count": self.game_state.room_progression.key_choices.get("truth_denial_count", 0) if room_num == 4 else 0
+                "puzzle_complete": matched,
+                "truth_denied": not matched and result.get("confidence", 0) < 0.3,
+                "truth_denial_count": self.game_state.room_progression.key_choices.get("truth_denial_count", 0)
             }
 
         except Exception as e:
-            # Fallback to keyword matching if AI analysis fails
-            print(f"[WARNING] Semantic analysis failed, falling back to keywords: {e}")
-            result = self.game_state.room_progression.check_trigger_match(player_message)
-            return result
+            print(f"[WARNING] Truth acceptance analysis failed: {e}")
+            return {"matched": False, "confidence": 0.0, "puzzle_complete": False}
 
     def unlock_next_room(self, reason: str) -> Dict[str, Any]:
         """Attempt to unlock the next room.
