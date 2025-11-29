@@ -526,7 +526,7 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
             game_state = self._create_game_state()
 
         if not message.strip():
-            return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), game_state
+            return "", history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), game_state
 
         # Add user message to history
         history.append({"role": "user", "content": message})
@@ -619,26 +619,7 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
         if ending_narrative:
             history.append(self._format_message_with_avatar("assistant", ending_narrative, game_state))
 
-        return "", history, self._get_companion_list(game_state), self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), game_state
-
-    def _get_companion_list(self, game_state: GameState) -> str:
-        """Get formatted list of active companions.
-
-        Args:
-            game_state: Session game state
-
-        Returns:
-            Markdown formatted companion list
-        """
-        companions = game_state.get_companion_list()
-        if not companions:
-            return "*No companions available*"
-
-        lines = []
-        for comp in companions:
-            lines.append(f"**{comp['name']}** (`{comp['id']}`)")
-
-        return "\n".join(lines)
+        return "", history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), game_state
 
     def _get_relationships(self, game_state: GameState) -> str:
         """Get formatted relationship status.
