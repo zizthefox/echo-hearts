@@ -27,7 +27,7 @@ class EchoHeartsUI:
         return GameState(session_id)
 
     def _format_message_with_avatar(self, role: str, content: str, game_state: GameState) -> dict:
-        """Format a message with large visual novel style portrait.
+        """Format a message (avatar now in sidebar, so just return plain message).
 
         Args:
             role: Message role (user/assistant)
@@ -35,52 +35,9 @@ class EchoHeartsUI:
             game_state: Current game state
 
         Returns:
-            Message dict with HTML-embedded portrait for visual novel style
+            Message dict for chatbot
         """
-        # For user messages, just return plain content
-        if role == "user":
-            return {"role": role, "content": content}
-
-        # For Echo's messages, embed large portrait in HTML
-        if role == "assistant" and game_state and "echo" in game_state.companions:
-            # Get dynamic avatar path based on current expression
-            avatar_path = self._get_echo_avatar_path(game_state)
-            if avatar_path:
-                import os
-                if os.path.exists(avatar_path):
-                    # Try to read and base64 encode - handle LFS gracefully
-                    import base64
-                    try:
-                        with open(avatar_path, "rb") as img_file:
-                            # Read file
-                            img_bytes = img_file.read()
-
-                            # Check if it's an LFS pointer (starts with "version https://git-lfs")
-                            if img_bytes.startswith(b"version https://git-lfs"):
-                                # It's an LFS pointer - use direct path instead
-                                # HuggingFace serves LFS files directly
-                                img_src = f"/{avatar_path}"
-                            else:
-                                # Real image - encode as base64
-                                img_data = base64.b64encode(img_bytes).decode()
-                                img_src = f"data:image/png;base64,{img_data}"
-
-                    except Exception:
-                        # Fallback to direct path
-                        img_src = f"/{avatar_path}"
-
-                    html_content = f"""
-<div style="display: flex; gap: 20px; align-items: flex-start; margin: 10px 0;">
-    <img src="{img_src}" style="width: 250px; height: 250px; border-radius: 15px; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
-    <div style="flex-grow: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border-left: 4px solid #667eea;">
-        <div style="color: #667eea; font-weight: bold; font-size: 1.2em; margin-bottom: 10px;">Echo</div>
-        <div style="font-size: 1.1em; line-height: 1.6;">{content}</div>
-    </div>
-</div>
-"""
-                    return {"role": role, "content": html_content}
-
-        # Fallback to plain message
+        # Just return plain message since avatar is in sidebar now
         return {"role": role, "content": content}
 
     def create_interface(self) -> gr.Blocks:
@@ -385,8 +342,16 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
 
                     # Sidebar with companion info
                     with gr.Column(scale=1):
-                        gr.Markdown("### Companion")
-                        companion_list = gr.Markdown()
+                        # Echo's avatar image
+                        echo_avatar = gr.Image(
+                            value="assets/echo_avatar.png",
+                            label="Echo",
+                            show_label=True,
+                            height=300,
+                            interactive=False,
+                            show_download_button=False,
+                            container=True
+                        )
 
                         gr.Markdown("### Relationship")
                         relationships = gr.Markdown()
@@ -398,7 +363,7 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
             start_new_btn.click(
                 self.start_game,
                 inputs=[game_state],
-                outputs=[landing_page, game_interface, chatbot, companion_list, relationships, story_progress, game_state]
+                outputs=[landing_page, game_interface, chatbot, relationships, story_progress, game_state]
             )
 
 
@@ -413,13 +378,13 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
             msg_input.submit(
                 self.handle_message,
                 inputs=[msg_input, chatbot, game_state],
-                outputs=[msg_input, chatbot, companion_list, relationships, story_progress, room_image, room_title, game_state]
+                outputs=[msg_input, chatbot, relationships, story_progress, room_image, room_title, echo_avatar, game_state]
             )
 
             send_btn.click(
                 self.handle_message,
                 inputs=[msg_input, chatbot, game_state],
-                outputs=[msg_input, chatbot, companion_list, relationships, story_progress, room_image, room_title, game_state]
+                outputs=[msg_input, chatbot, relationships, story_progress, room_image, room_title, echo_avatar, game_state]
             )
 
             # Interactive room object handlers (wire to puzzle_state)
@@ -467,42 +432,41 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
             gr.update(visible=False)   # Hide game interface
         )
 
-    def start_game(self, game_state: GameState) -> Tuple[gr.update, gr.update, List[dict], str, str, str, GameState]:
+    def start_game(self, game_state: GameState) -> Tuple[gr.update, gr.update, List[dict], str, str, GameState]:
         """Start a new game from the landing page.
 
         Args:
             game_state: Current game state (may be None)
 
         Returns:
-            Tuple of (landing_page visibility, game_interface visibility, chatbot, companion_list, relationships, story_progress, game_state)
+            Tuple of (landing_page visibility, game_interface visibility, chatbot, relationships, story_progress, game_state)
         """
         # Create new game state
         if game_state is None:
             game_state = self._create_game_state()
 
         # Initialize UI with prologue
-        chatbot, companion_list, relationships, story_progress, game_state = self.initialize_ui(game_state)
+        chatbot, relationships, story_progress, game_state = self.initialize_ui(game_state)
 
         # Hide landing page, show game interface
         return (
             gr.update(visible=False),  # Hide landing page
             gr.update(visible=True),   # Show game interface
             chatbot,
-            companion_list,
             relationships,
             story_progress,
             game_state
         )
 
 
-    def initialize_ui(self, game_state: GameState) -> Tuple[List[dict], str, str, str, GameState]:
+    def initialize_ui(self, game_state: GameState) -> Tuple[List[dict], str, str, GameState]:
         """Initialize UI with fresh game state data and prologue.
 
         Args:
             game_state: The session's game state (may be None on first load)
 
         Returns:
-            Tuple of (chatbot_history, companion_list, relationships, story_progress, game_state)
+            Tuple of (chatbot_history, relationships, story_progress, game_state)
         """
         # Lazy initialization - create game state if not exists
         if game_state is None:
@@ -536,7 +500,6 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
 
         return (
             prologue,  # Initial chatbot history with prologue
-            self._get_companion_list(game_state),
             self._get_relationships(game_state),
             self._get_story_progress(game_state),
             game_state  # Return updated state to persist it
@@ -803,14 +766,14 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
 
         return avatar_path
 
-    def reset_playthrough(self, old_game_state: GameState) -> Tuple[List[dict], str, str, str, GameState]:
+    def reset_playthrough(self, old_game_state: GameState) -> Tuple[List[dict], str, str, GameState]:
         """Reset to a new playthrough.
 
         Args:
             old_game_state: Previous game state
 
         Returns:
-            Tuple of (chatbot, companion_list, relationships, story_progress, new_game_state)
+            Tuple of (chatbot, relationships, story_progress, new_game_state)
         """
         # Create completely fresh GameState
         new_game_state = GameState(str(uuid.uuid4())[:8])
@@ -832,7 +795,6 @@ Your previous journey has ended, but the echoes remain...
 
         return (
             prologue,
-            self._get_companion_list(new_game_state),
             self._get_relationships(new_game_state),
             self._get_story_progress(new_game_state),
             new_game_state
