@@ -48,11 +48,30 @@ class EchoHeartsUI:
             if avatar_path:
                 import os
                 if os.path.exists(avatar_path):
-                    # Use direct file path instead of base64 for HuggingFace LFS compatibility
-                    # HuggingFace Spaces serves LFS files directly via CDN
+                    # Try to read and base64 encode - handle LFS gracefully
+                    import base64
+                    try:
+                        with open(avatar_path, "rb") as img_file:
+                            # Read file
+                            img_bytes = img_file.read()
+
+                            # Check if it's an LFS pointer (starts with "version https://git-lfs")
+                            if img_bytes.startswith(b"version https://git-lfs"):
+                                # It's an LFS pointer - use direct path instead
+                                # HuggingFace serves LFS files directly
+                                img_src = f"/{avatar_path}"
+                            else:
+                                # Real image - encode as base64
+                                img_data = base64.b64encode(img_bytes).decode()
+                                img_src = f"data:image/png;base64,{img_data}"
+
+                    except Exception:
+                        # Fallback to direct path
+                        img_src = f"/{avatar_path}"
+
                     html_content = f"""
 <div style="display: flex; gap: 20px; align-items: flex-start; margin: 10px 0;">
-    <img src="{avatar_path}" style="width: 250px; height: 250px; border-radius: 15px; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+    <img src="{img_src}" style="width: 250px; height: 250px; border-radius: 15px; object-fit: cover; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
     <div style="flex-grow: 1; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border-left: 4px solid #667eea;">
         <div style="color: #667eea; font-weight: bold; font-size: 1.2em; margin-bottom: 10px;">Echo</div>
         <div style="font-size: 1.1em; line-height: 1.6;">{content}</div>
