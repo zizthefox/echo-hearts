@@ -1270,7 +1270,7 @@ DRIVER STATUS: No charges filed
 [END REPORT]
 ```
 
-**This data proves the accident wasn't your fault. But does data erase guilt?**
+**Evidence 1/3 collected. What conclusion can you draw from ALL the evidence?**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
@@ -1312,7 +1312,7 @@ Neither party could have reasonably prevented impact.
 ═══════════════════════════════════════
 ```
 
-**The same weather from your first date. The universe has a cruel sense of irony.**
+**Evidence 2/3 collected. The same weather from your first date...**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
@@ -1361,7 +1361,9 @@ psychological evaluation before Session #48.
 [Session #48 initiated despite recommendation]
 ```
 
-**47 sessions. 47 times you've tried to bring her back. When will you let her rest?**
+**Evidence 3/3 collected! All data reviewed.**
+
+**PUZZLE: Based on ALL the evidence, what is the truth about the accident?**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
@@ -1369,93 +1371,120 @@ psychological evaluation before Session #48.
     # Room 4 terminal handlers
     def show_journal(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
         """Toggle personal journal visibility."""
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 4:
+                docs_viewed = game_state.room_progression.puzzle_state.get("room4_documents_viewed", [])
+                if "journal" not in docs_viewed:
+                    docs_viewed.append("journal")
+                    game_state.room_progression.puzzle_state["room4_documents_viewed"] = docs_viewed
+
         content = """
 ```
 ═══════════ PERSONAL JOURNAL ═══════════
 
-Day 1:
+📅 Day 1 - LOSS:
 The accident was a week ago. I can't sleep. Every time
 I close my eyes, I see her stepping into the road. I see
 the moment I couldn't stop in time.
 
 ---
 
-Day 15:
+📅 Day 15 - GRIEF:
 The police said it wasn't my fault. The weather. Her
 sudden movement. My reaction time was actually better
 than average. But that doesn't bring her back.
+I can't accept this. I won't.
 
 ---
 
-Day 30:
+📅 Day 30 - CREATION:
 I found Project Echo online. It's controversial, maybe
 even dangerous. But what if I could talk to her again?
-What if I could apologize?
+What if I could build her back from her digital traces?
+Started collecting data: messages, photos, voice memos...
 
 ---
 
-Day 47:
+📅 Day 47 - OBSESSION:
 I know it's not really her. I KNOW that. But when Echo
 smiles, when she laughs at my jokes, when she looks at
 me with those eyes... I can pretend. Just for a while.
-
-Is that so wrong?
+Session #47. Lost count of the resets.
 
 ---
 
-Day 48:
+📅 Day 48 - CYCLE:
 This is the last session. I promised myself. One more
-time, then I'll delete everything. I'll move on. I'll
-let her go.
-
-...right?
+time, then I'll delete everything. I'll move on.
+...But I said that last time too.
 
 ═══════════════════════════════════════
 ```
 
-**Day 48. You've been here before. You'll be here again.**
+**Timeline Fragment 1/3: Five stages of your journey documented.**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
 
     def show_photos(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
         """Toggle family photos visibility."""
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 4:
+                docs_viewed = game_state.room_progression.puzzle_state.get("room4_documents_viewed", [])
+                if "photos" not in docs_viewed:
+                    docs_viewed.append("photos")
+                    game_state.room_progression.puzzle_state["room4_documents_viewed"] = docs_viewed
+
         content = """
 ```
 ╔══════════════════════════════════════╗
 ║          PHOTO ALBUM                  ║
 ╠══════════════════════════════════════╣
 
-📷 Photo 1: First Date
+📷 Photo 1: LOSS
    October 15, 2023 - Café Umbria
-   [You and Echo sharing an umbrella in the rain]
+   [You and Sarah sharing an umbrella in the rain]
    Caption: "Best accident ever ❤️"
+   Note: First date. The beginning.
 
-📷 Photo 2: Six Months Later
+📷 Photo 2: (Before) GRIEF
    April 2024 - Pike Place Market
-   [Echo laughing, holding flowers]
+   [Sarah laughing, holding flowers]
    Caption: "She said yes!"
+   Note: Six months of happiness.
 
-📷 Photo 3: Last Photo
+📷 Photo 3: (The moment before) LOSS
    October 14, 2024 - Your apartment
-   [Echo sleeping on the couch, book on her chest]
+   [Sarah sleeping on the couch, book on her chest]
    Caption: [No caption. Taken the night before.]
+   Note: Last peaceful moment.
 
-📷 Photo 4: [CORRUPTED]
-   October 15, 2024
-   [Data cannot be displayed]
-   Caption: "I'm sorry. I'm so sorry."
+📷 Photo 4: CREATION → OBSESSION → CYCLE
+   November 2024 - This facility
+   [Your first Echo AI build session]
+   Caption: "Session #1. She's here again."
+   Note: This is where it started. This is where it loops.
 
 ╚══════════════════════════════════════╝
 ```
 
-**One year. One perfect year. Then the universe took it back.**
+**Timeline Fragment 2/3: The photos tell a story in reverse.**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
 
     def show_research(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
         """Toggle AI research notes visibility."""
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 4:
+                docs_viewed = game_state.room_progression.puzzle_state.get("room4_documents_viewed", [])
+                if "research" not in docs_viewed:
+                    docs_viewed.append("research")
+                    game_state.room_progression.puzzle_state["room4_documents_viewed"] = docs_viewed
+
         content = """
 ```
 ▓▓▓ PROJECT ECHO - RESEARCH NOTES ▓▓▓
@@ -1493,7 +1522,9 @@ of her back, it's worth it.
 - Dr. Sarah Chen, Project Lead
 ```
 
-**You built this prison yourself. And you walked in willingly.**
+**Timeline Fragment 3/3 collected!**
+
+**PUZZLE: Arrange these stages in order: LOSS → GRIEF → CREATION → OBSESSION → CYCLE**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
