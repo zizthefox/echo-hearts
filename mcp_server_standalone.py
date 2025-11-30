@@ -49,26 +49,17 @@ class StandaloneGameState:
             personality_traits={"archetype": "optimistic"}
         )
 
-        shadow = Companion(
-            companion_id="shadow",
-            name="Shadow",
-            personality_traits={"archetype": "mysterious"}
-        )
-
         self.companions = {
-            "echo": echo,
-            "shadow": shadow
+            "echo": echo
         }
 
         # Initialize relationships
         self.relationships.update_relationship("player", "echo", 0.0)
-        self.relationships.update_relationship("player", "shadow", 0.0)
 
     def get_relationships_summary(self):
         """Get relationship summary."""
         return {
-            "echo": self.relationships.get_relationship("player", "echo"),
-            "shadow": self.relationships.get_relationship("player", "shadow")
+            "echo": self.relationships.get_relationship("player", "echo")
         }
 
 

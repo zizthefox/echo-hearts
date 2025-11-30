@@ -36,7 +36,7 @@ class EchoHeartsMCPServer:
                         "properties": {
                             "companion_id": {
                                 "type": "string",
-                                "description": "Your companion ID (echo or shadow)"
+                                "description": "Your companion ID (echo)"
                             },
                             "target_id": {
                                 "type": "string",
@@ -54,7 +54,7 @@ class EchoHeartsMCPServer:
                         "properties": {
                             "character_id": {
                                 "type": "string",
-                                "description": "Your character ID (echo or shadow)"
+                                "description": "Your character ID (echo)"
                             },
                             "query": {
                                 "type": "string",
@@ -131,7 +131,7 @@ class EchoHeartsMCPServer:
                         "properties": {
                             "companion_id": {
                                 "type": "string",
-                                "description": "Which companion to query (echo or shadow)"
+                                "description": "Which companion to query (echo)"
                             },
                             "question": {
                                 "type": "string",

@@ -42,7 +42,7 @@ class InProcessMCPServer:
                         "properties": {
                             "companion_id": {
                                 "type": "string",
-                                "description": "Your companion ID (echo or shadow)"
+                                "description": "Your companion ID (echo)"
                             },
                             "target_id": {
                                 "type": "string",
@@ -60,7 +60,7 @@ class InProcessMCPServer:
                         "properties": {
                             "character_id": {
                                 "type": "string",
-                                "description": "Your character ID (echo or shadow)"
+                                "description": "Your character ID (echo)"
                             },
                             "query": {
                                 "type": "string",
@@ -137,7 +137,7 @@ class InProcessMCPServer:
                         "properties": {
                             "companion_id": {
                                 "type": "string",
-                                "description": "Which companion to query (echo or shadow)"
+                                "description": "Which companion to query (echo)"
                             },
                             "question": {
                                 "type": "string",
@@ -159,7 +159,7 @@ class InProcessMCPServer:
                             },
                             "companion_id": {
                                 "type": "string",
-                                "description": "Your companion ID (echo or shadow)"
+                                "description": "Your companion ID (echo)"
                             }
                         },
                         "required": ["player_message", "companion_id"]
@@ -211,7 +211,7 @@ class InProcessMCPServer:
                             "choice_type": {
                                 "type": "string",
                                 "description": "Type of choice",
-                                "enum": ["sacrifice_echo", "sacrifice_shadow", "refuse_sacrifice", "accept_truth", "deny_truth", "vulnerability"]
+                                "enum": ["sacrifice_echo", "refuse_sacrifice", "accept_truth", "deny_truth", "vulnerability"]
                             },
                             "choice_value": {
                                 "type": "string",
@@ -277,13 +277,49 @@ class InProcessMCPServer:
         Returns:
             Tool result as dict
         """
-        # Call the registered handler
-        for handler in self.server.request_handlers.get("tools/call", []):
-            result = await handler(name, arguments)
-            # Extract text from TextContent
-            if result and len(result) > 0:
-                return json.loads(result[0].text)
-        return {"error": "Tool not found"}
+        import logging
+        from mcp.types import CallToolRequest, CallToolRequestParams
+        logger = logging.getLogger(__name__)
+
+        logger.info(f"[MCP CALL DEBUG] call_tool_direct called: name={name}, arguments={arguments}")
+
+        # Use proper MCP protocol: get the CallToolRequest handler
+        handler = self.server.request_handlers.get(CallToolRequest)
+        logger.info(f"[MCP CALL DEBUG] Handler type: {type(handler)}")
+
+        if not handler:
+            logger.error(f"[MCP CALL DEBUG] No CallToolRequest handler registered")
+            return {"error": "Tool handler not registered"}
+
+        # Construct proper MCP request with params
+        request = CallToolRequest(
+            params=CallToolRequestParams(
+                name=name,
+                arguments=arguments
+            )
+        )
+
+        logger.info(f"[MCP CALL DEBUG] Calling MCP handler with request: {request}")
+        result = await handler(request)
+        logger.info(f"[MCP CALL DEBUG] Handler returned: {result}")
+        logger.info(f"[MCP CALL DEBUG] Result type: {type(result)}")
+
+        # Extract text from ServerResult -> CallToolResult -> TextContent (MCP protocol format)
+        # The handler returns a ServerResult wrapping CallToolResult
+        if hasattr(result, 'root'):
+            # ServerResult has a 'root' attribute containing CallToolResult
+            tool_result = result.root
+            logger.info(f"[MCP CALL DEBUG] Extracted tool_result: {tool_result}")
+
+            if hasattr(tool_result, 'content') and len(tool_result.content) > 0:
+                text_content = tool_result.content[0]
+                logger.info(f"[MCP CALL DEBUG] TextContent: {text_content}")
+                parsed = json.loads(text_content.text)
+                logger.info(f"[MCP CALL DEBUG] Parsed result: {parsed}")
+                return parsed
+
+        logger.error(f"[MCP CALL DEBUG] Handler returned no valid results")
+        return {"error": "Tool execution failed"}
 
 
 class InProcessMCPClient:

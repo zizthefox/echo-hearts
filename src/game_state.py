@@ -114,19 +114,7 @@ class GameState:
         # Get current room info
         current_room = self.room_progression.get_current_room()
 
-        # CHECK ROOM 3 TIMER: If in Room 3 and timer expired, trigger default sacrifice
-        if current_room.room_number == 3:
-            remaining = self.room_progression.get_room3_timer_remaining()
-            if remaining is not None and remaining == 0:
-                expiration_result = self.room_progression.handle_room3_timer_expiration()
-                if expiration_result.get("expired"):
-                    # Timer expired - auto-sacrifice Shadow and progress to Room 4
-                    from .game_mcp.tools import MCPTools
-                    mcp_tools = MCPTools(self)
-                    mcp_tools.unlock_next_room("Timer expired - default sacrifice (Shadow)")
-
-                    # Return the expiration narrative
-                    return expiration_result["narrative"], None, None, []
+        # Room 3 timer removed - now uses evidence analysis puzzle instead
 
         # PRE-CHECK: See if player's message triggers room progression BEFORE companion responds
         from .game_mcp.tools import MCPTools
@@ -253,6 +241,7 @@ class GameState:
         for tool_call in tool_calls_made:
             if tool_call["tool"] == "analyze_player_sentiment":
                 sentiment_result = tool_call["result"]
+                logger.info(f"[SENTIMENT DEBUG] Found sentiment analysis in tool calls: {sentiment_result}")
                 break
 
         # Use dynamic affinity change if sentiment was analyzed, otherwise use default
@@ -260,10 +249,12 @@ class GameState:
             affinity_change = sentiment_result["affinity_change"]
             sentiment = sentiment_result.get("sentiment", "unknown")
             reason = f"conversation ({sentiment})"
+            logger.info(f"[SENTIMENT DEBUG] Using sentiment analysis: sentiment={sentiment}, affinity_change={affinity_change}")
         else:
             # Fallback to default if companion didn't analyze sentiment
             affinity_change = 0.01
             reason = "conversation (default)"
+            logger.info(f"[SENTIMENT DEBUG] No sentiment analysis found - using default. sentiment_result={sentiment_result}")
 
         self.relationships.update_relationship(
             "player",
@@ -301,6 +292,8 @@ class GameState:
             current_room: Current room object
             affinity_change: Relationship affinity change value
         """
+        logger.info(f"[EXPRESSION DEBUG] _update_echo_expression called: room={current_room.room_number}, affinity_change={affinity_change}, sentiment_result={sentiment_result}")
+
         # Special expressions for specific room contexts
         if current_room.room_number == 3:
             # Room 3 (The Choice) - heavy tension
@@ -308,6 +301,7 @@ class GameState:
                 self.echo_expression = "worried"
             else:
                 self.echo_expression = "sad"
+            logger.info(f"[EXPRESSION DEBUG] Room 3 special case: expression={self.echo_expression}")
             return
 
         if current_room.room_number == 5:
@@ -319,30 +313,38 @@ class GameState:
                 self.echo_expression = "happy"
             else:
                 self.echo_expression = "sad"
+            logger.info(f"[EXPRESSION DEBUG] Room 5 special case: expression={self.echo_expression}")
             return
 
         # No sentiment analysis - use affinity-based fallback
         if not sentiment_result:
+            logger.info(f"[EXPRESSION DEBUG] No sentiment_result - using fallback logic")
             if affinity_change > 0.05:
                 self.echo_expression = "happy"
             elif affinity_change < -0.05:
                 self.echo_expression = "sad"
             else:
                 self.echo_expression = "neutral"
+            logger.info(f"[EXPRESSION DEBUG] Fallback result: expression={self.echo_expression} (affinity_change={affinity_change})")
             return
 
         # Map sentiment to expression
         sentiment = sentiment_result.get("sentiment", "neutral").lower()
+        logger.info(f"[EXPRESSION DEBUG] Sentiment extracted: '{sentiment}' (from sentiment_result)")
 
         # Positive sentiments
         if sentiment in ["positive", "very_positive", "supportive", "affectionate"]:
+            logger.info(f"[EXPRESSION DEBUG] Matched positive sentiment branch")
             if affinity_change > 0.15:
                 self.echo_expression = "loving"
+                logger.info(f"[EXPRESSION DEBUG] Set to 'loving' (affinity_change={affinity_change} > 0.15)")
             else:
                 self.echo_expression = "happy"
+                logger.info(f"[EXPRESSION DEBUG] Set to 'happy' (affinity_change={affinity_change} <= 0.15)")
 
         # Negative sentiments
         elif sentiment in ["negative", "very_negative", "hostile", "dismissive", "cruel"]:
+            logger.info(f"[EXPRESSION DEBUG] Matched negative sentiment branch")
             if affinity_change < -0.15:
                 self.echo_expression = "sad"
             else:
@@ -350,14 +352,17 @@ class GameState:
 
         # Curious/questioning
         elif sentiment in ["curious", "questioning", "confused"]:
+            logger.info(f"[EXPRESSION DEBUG] Matched curious sentiment branch")
             self.echo_expression = "surprised"
 
         # Angry/frustrated (rare for player to make Echo angry, more like hurt-angry)
         elif sentiment in ["frustrated", "angry"]:
+            logger.info(f"[EXPRESSION DEBUG] Matched angry sentiment branch")
             self.echo_expression = "angry"
 
         # Neutral or unknown
         else:
+            logger.info(f"[EXPRESSION DEBUG] No sentiment match - defaulting to neutral. sentiment='{sentiment}'")
             self.echo_expression = "neutral"
 
         logger.info(f"[EXPRESSION] Echo expression updated: {self.echo_expression} (sentiment: {sentiment}, affinity: {affinity_change:+.3f})")

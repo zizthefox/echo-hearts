@@ -249,7 +249,7 @@ except:
 
 ## MCP Tool Interface
 
-Echo and Shadow call weather data via MCP tools:
+Echo calls weather data via MCP tools:
 
 ```python
 # In companion personality prompt

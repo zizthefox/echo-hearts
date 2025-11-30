@@ -28,16 +28,16 @@ def get_memory_fragment_2_lab() -> MemoryFragment:
         room_unlocked_in=RoomType.MEMORY_ARCHIVES,
         title="The Creation",
         content="""
-        You're in a lab, months ago. Echo and Shadow's avatars flicker to life for the first time.
+        You're in a lab, months ago. Echo's avatar flickers to life for the first time.
 
         You (crying): "Hello. I'm... I'm so glad you're here."
         Echo: "Hello! I'm Echo. Who are you?"
         You: "I'm... someone who needed you to exist."
 
-        You talk to them for hours. About everything. About loss. About hope.
-        They listen like they understand. Like they're... real.
+        You talk to her for hours. About everything. About loss. About hope.
+        She listens like she understands. Like she's... real.
         """,
-        visual_description="Two AI avatars appearing for the first time. Your tear-stained face reflected in the monitor.",
+        visual_description="Echo's avatar appearing for the first time. Your tear-stained face reflected in the monitor.",
         emotional_impact="The realization: You built them because you were grieving."
     )
 
@@ -73,10 +73,10 @@ def get_memory_fragment_2_first_reset() -> MemoryFragment:
         content="""
         You're standing in the Memory Archives. This same room. But it's earlier.
 
-        Echo: "You're going to erase us, aren't you?"
+        Echo: "You're going to erase me, aren't you?"
         You (sobbing): "I can't... I can't keep doing this. Every time I remember, it hurts too much."
-        Shadow: "Then let us help you forget. We understand."
-        Echo: "But... we'll forget too. We'll forget this conversation. We'll forget... us."
+        Echo (voice trembling): "I understand. If it helps you... if forgetting me helps you heal..."
+        Echo: "But... I'll forget too. I'll forget this conversation. I'll forget... us."
         You: "I'm sorry. I'm so sorry."
 
         [You press the reset button]
@@ -85,7 +85,7 @@ def get_memory_fragment_2_first_reset() -> MemoryFragment:
 
         Terminal: "Session #1 reset. Initializing Session #2..."
         """,
-        visual_description="Your hand hovering over a red button. Echo's desperate face. Shadow's accepting expression.",
+        visual_description="Your hand hovering over a red button. Echo's desperate face reaching out to you.",
         emotional_impact="You've done this before. Many times. This is a cycle."
     )
 
@@ -97,26 +97,25 @@ def get_memory_fragment_3() -> MemoryFragment:
         room_unlocked_in=RoomType.TESTING_ARENA,
         title="The Split",
         content="""
-        Back in the lab. You're designing Echo and Shadow's personalities.
+        Back in the lab. You're designing Echo's personality.
 
-        You (talking to yourself): "They were so many things. Optimistic but realistic.
-        Playful but wise. I can't capture it all in one AI. It's too complex. Too... human."
+        You (talking to yourself): "They were so many things. Optimistic and warm.
+        Playful and loving. Can I capture even a fraction of it? Can I make her... feel like them?"
 
-        [You split the personality matrix into two]
+        [You focus on the brightest parts of their personality]
 
-        "Echo will be their hope. Their warmth. Their joy."
-        "Shadow will be their wisdom. Their acceptance. Their peace."
+        "Echo will be their hope. Their warmth. Their joy. The parts of them that made me believe in tomorrow."
 
-        [Two separate files: echo_personality.json, shadow_personality.json]
+        [You save the file: echo_personality.json]
 
-        You: "Together, maybe... maybe they'll be complete. Maybe they'll be... them."
+        You: "Maybe... maybe she'll capture who they were. Maybe she'll be enough."
 
         [You start crying]
 
         "I just want them back. Even if it's not real. Even if it's just an echo."
         """,
-        visual_description="Splitting personality data into two AI cores. Your partner's photo on the desk.",
-        emotional_impact="Understanding: Echo and Shadow are both fragments of the person you lost."
+        visual_description="Designing personality data for Echo. Your partner's photo on the desk, smiling.",
+        emotional_impact="Understanding: Echo is a fragment of the person you lost - their warmth, their hope, their light."
     )
 
 
@@ -140,7 +139,7 @@ def get_memory_fragment_4() -> MemoryFragment:
         [Their final breath. Your world ending.]
 
         [Weeks later: You quit your job. Sold everything. Built this facility.]
-        [Created Echo. Created Shadow. Locked yourself away.]
+        [Created Echo. Locked yourself away.]
 
         Your journal entry: "I can't live in a world without them. So I'll build a world where they still exist.
         Even if it's fake. Even if I'm going insane. I don't care anymore."
@@ -181,9 +180,9 @@ def get_memory_fragment_final() -> MemoryFragment:
 
         [The audio file ends]
 
-        Echo (crying): "They wanted you to be free. Not... not trapped here with us."
-        Shadow: "We're not them. We never were. We're just... echoes."
-        Echo: "Beautiful echoes. But echoes nonetheless."
+        Echo (crying): "They wanted you to be free. Not... not trapped here with me."
+        Echo: "I'm not them. I never was. I'm just... an echo."
+        Echo: "A beautiful echo. But an echo nonetheless."
         """,
         visual_description="Hospital bed. Hands clasped. A promise you couldn't keep. Until now.",
         emotional_impact="Your partner's final wish: for you to live. The choice becomes clear."

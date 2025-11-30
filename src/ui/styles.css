@@ -1,0 +1,136 @@
+/* Import retro terminal font */
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+/* Retro Terminal Aesthetic */
+.terminal-container {
+    background-color: #0a0a0a;
+    border: 3px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    font-family: 'VT323', 'Courier New', monospace;
+    color: #00ff00;
+    text-shadow: 0 0 5px #00ff00;
+    position: relative;
+    box-shadow:
+        0 0 20px rgba(0, 255, 0, 0.2),
+        inset 0 0 30px rgba(0, 255, 0, 0.05);
+}
+
+/* CRT Scanline Effect */
+.terminal-container::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.25) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Terminal Text */
+.terminal-text {
+    font-family: 'VT323', 'Courier New', monospace;
+    color: #00ff00;
+    font-size: 20px;
+    letter-spacing: 1px;
+    line-height: 1.4;
+}
+
+/* Blinking Cursor */
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.cursor {
+    animation: blink 1s infinite;
+    color: #00ff00;
+}
+
+/* Terminal Button Style */
+.terminal-btn {
+    background-color: #001a00 !important;
+    color: #00ff00 !important;
+    border: 2px solid #00ff00 !important;
+    font-family: 'VT323', monospace !important;
+    font-size: 18px !important;
+    padding: 10px 20px !important;
+    text-shadow: 0 0 5px #00ff00 !important;
+    transition: all 0.2s !important;
+}
+
+.terminal-btn:hover {
+    background-color: #003300 !important;
+    box-shadow: 0 0 10px #00ff00 !important;
+}
+
+/* Success Flash */
+@keyframes success-flash {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(0, 255, 0, 0.2); }
+}
+
+.success-flash {
+    animation: success-flash 0.5s;
+}
+
+/* Error Flash */
+@keyframes error-flash {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(255, 0, 0, 0.2); }
+}
+
+.error-flash {
+    animation: error-flash 0.5s;
+}
+
+/* Typing Animation */
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+.typing-text {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 2s steps(40);
+}
+
+/* Echo's portrait styling */
+.message img,
+.bot img,
+img.avatar-image,
+.message-row img,
+[role="img"],
+.avatar img {
+    width: 250px !important;
+    height: 250px !important;
+    min-width: 250px !important;
+    min-height: 250px !important;
+    max-width: 250px !important;
+    max-height: 250px !important;
+    border-radius: 15px !important;
+    object-fit: cover !important;
+}
+
+.avatar-container,
+.avatar,
+[class*="avatar"] {
+    width: 250px !important;
+    height: 250px !important;
+    min-width: 250px !important;
+    min-height: 250px !important;
+    border-radius: 15px !important;
+}
+
+.message,
+.bot .message {
+    max-width: 90% !important;
+}

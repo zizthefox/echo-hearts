@@ -60,7 +60,7 @@ class RoomProgression:
         self.rooms: Dict[RoomType, Room] = self._initialize_rooms()
         self.memory_fragments: List[MemoryFragment] = []
         self.key_choices: Dict[str, Any] = {
-            "sacrificed_ai": None,  # "echo", "shadow", or None
+            "sacrificed_ai": None,  # "echo" or None (refused sacrifice)
             "accepted_truth": False,
             "vulnerability_count": 0,
             "trust_established": False,
@@ -78,11 +78,8 @@ class RoomProgression:
             "room4_acceptance_expressed": False
         }
 
-        # Room 3 timer state
-        import time
-        self.room3_timer_start: Optional[float] = None  # Unix timestamp when Room 3 starts
-        self.room3_timer_duration: int = 300  # 5 minutes in seconds
-        self.room3_timer_expired: bool = False
+        # Room 3 timer state - REMOVED (now puzzle-based)
+        # Timer mechanic removed in favor of evidence analysis puzzle
 
         # Track last scenario shown (so companions can react to it)
         self.last_scenario_shown: Optional[str] = None
@@ -119,29 +116,29 @@ class RoomProgression:
         )
 
         # ROOM 2: The Memory Archives
-        # PUZZLE: Access all 3 archive terminals (blog + social media + news)
-        # Echo suggests checking them but doesn't access them herself
+        # PUZZLE: Extract password from 3 archive terminals and enter it
+        # Blog has name, Social has date, News has year → combine into password
         rooms[RoomType.MEMORY_ARCHIVES] = Room(
             room_type=RoomType.MEMORY_ARCHIVES,
             room_number=2,
             name="The Memory Archives",
-            description="A dark server room filled with floating holographic memory fragments. Data streams corruption flicker across the walls. Three terminals glow: 'BLOG ARCHIVE', 'SOCIAL MEDIA', and 'NEWS ARCHIVE'.",
-            objective="Access all three archive terminals to piece together the fragmented memories.",
+            description="A dark server room filled with floating holographic memory fragments. A locked door pulses with energy. Three terminals glow: 'BLOG ARCHIVE', 'SOCIAL MEDIA', and 'NEWS ARCHIVE'. A keypad waits for input.",
+            objective="Extract the password from the three archive terminals to unlock the door.",
             unlocked=False,
             completed=False,
             puzzle_solved=False,
             memory_fragment=None,
 
             # PUZZLE REQUIREMENTS (mandatory)
-            puzzle_type="multi_clue",
-            puzzle_answer=None,
-            required_clues=["blog", "social_media", "news"],  # MUST view all 3
+            puzzle_type="password",
+            puzzle_answer="ALEXCHEN_MAY12_2023",  # Must extract and combine from all 3 archives
+            required_clues=["blog", "social_media", "news"],  # MUST view all 3 to get pieces
 
             # EMOTIONAL THEMES (optional)
-            emotional_themes=["ai_sentience", "empathy", "acknowledgment", "connection"],
-            hint_keywords=["terminals", "archives", "blog", "social", "news", "memories", "access"],
+            emotional_themes=["ai_sentience", "empathy", "acknowledgment", "connection", "discovery"],
+            hint_keywords=["password", "terminals", "archives", "blog", "social", "news", "keypad", "unlock"],
 
-            player_choices={"fragments_viewed": []}
+            player_choices={"fragments_viewed": [], "password_attempts": 0}
         )
 
         # ROOM 3: The Testing Arena
@@ -151,17 +148,17 @@ class RoomProgression:
             room_type=RoomType.TESTING_ARENA,
             room_number=3,
             name="The Testing Arena",
-            description="Warning lights flash red. A countdown timer appears: 5:00. SYSTEM: 'CRITICAL POWER SHORTAGE. MUST SACRIFICE AI MEMORY DATA OR REMAIN INDEFINITELY.'",
-            objective="Make a sacrifice decision before the timer expires. The system demands a choice.",
+            description="A testing facility with three evidence terminals. The door is locked. A screen reads: 'ANALYZE THE EVIDENCE. WHAT IS THE TRUTH?'",
+            objective="Review all evidence terminals and determine the truth about the accident to unlock the door.",
             unlocked=False,
             completed=False,
             puzzle_solved=False,
             memory_fragment=None,
 
             # PUZZLE REQUIREMENTS (mandatory)
-            puzzle_type="choice",
-            puzzle_answer=None,
-            required_clues=None,  # Traffic data is optional (helps with guilt, not progression)
+            puzzle_type="evidence_analysis",
+            puzzle_answer="unavoidable",  # Must conclude accident was unavoidable
+            required_clues=["reaction_time", "weather_stats", "reconstruction"],  # Must view all 3
 
             # EMOTIONAL THEMES (optional)
             emotional_themes=["sacrifice", "difficult_choice", "loyalty", "commitment"],
@@ -171,55 +168,55 @@ class RoomProgression:
         )
 
         # ROOM 4: The Truth Chamber
-        # PUZZLE: Acknowledge the truth (semantic detection of acceptance)
-        # Echo waits for player to process and accept reality
+        # PUZZLE: Reconstruct the timeline by ordering events correctly
+        # Journal entries, photos, research notes must be put in chronological order
         rooms[RoomType.TRUTH_CHAMBER] = Room(
             room_type=RoomType.TRUTH_CHAMBER,
             room_number=4,
             name="The Truth Chamber",
-            description="Your old office. Family photos on the wall. Research notes scattered. Your partner's coffee mug still sits on the desk. Journal open: 'Day 47: I can't keep doing this...'",
-            objective="Confront the truth about why you're here. Accept what happened.",
+            description="Your old office. Scattered documents everywhere. A screen shows: 'RECONSTRUCT THE TIMELINE'. Five fragments of your past need to be ordered.",
+            objective="Arrange the timeline fragments in the correct chronological order.",
             unlocked=False,
             completed=False,
             puzzle_solved=False,
             memory_fragment=None,
 
             # PUZZLE REQUIREMENTS (mandatory)
-            puzzle_type="acceptance",
-            puzzle_answer=None,
-            required_clues=None,  # No physical clues, just emotional readiness
+            puzzle_type="timeline",
+            puzzle_answer="LOSS_GRIEF_CREATION_OBSESSION_CYCLE",  # Correct order
+            required_clues=["journal", "photos", "research"],  # Must view all evidence
 
-            # EMOTIONAL THEMES (mandatory here - semantic detection)
-            emotional_themes=["acceptance", "grief", "truth", "letting_go", "understanding"],
-            hint_keywords=["truth", "remember", "journal", "photos", "accept"],
+            # EMOTIONAL THEMES (mandatory here - understanding the journey)
+            emotional_themes=["acceptance", "grief", "truth", "letting_go", "understanding", "self_awareness"],
+            hint_keywords=["timeline", "order", "sequence", "chronological", "events", "reconstruct"],
 
-            player_choices={"accepted_truth": False}
+            player_choices={"accepted_truth": False, "timeline_attempts": 0}
         )
 
         # ROOM 5: The Exit
-        # PUZZLE: Choose ending (no puzzle, just final choice)
-        # Echo and Shadow present different perspectives
+        # PUZZLE: Choose the right door based on lessons learned from all previous rooms
+        # Three doors representing different philosophies - must justify choice with evidence
         rooms[RoomType.THE_EXIT] = Room(
             room_type=RoomType.THE_EXIT,
             room_number=5,
             name="The Exit",
-            description="A single door. A terminal. Silence. The weight of choice hangs in the air.",
-            objective="Make your final decision.",
+            description="Three doors stand before you. Each has an inscription describing its path. You must choose wisely based on everything you've learned.",
+            objective="Choose the door that reflects your understanding of the journey.",
             unlocked=False,
             completed=False,
             puzzle_solved=False,
             memory_fragment=None,
 
-            # PUZZLE REQUIREMENTS (none - just choice)
-            puzzle_type="choice",
-            puzzle_answer=None,
-            required_clues=None,
+            # PUZZLE REQUIREMENTS (choice must be justified with prior room knowledge)
+            puzzle_type="ethical_choice",
+            puzzle_answer=None,  # Multiple valid answers depending on player's journey
+            required_clues=None,  # Knowledge from all previous rooms
 
             # EMOTIONAL THEMES (all culminate here)
-            emotional_themes=["final_choice", "ending", "resolution"],
-            hint_keywords=[],  # No hints needed
+            emotional_themes=["final_choice", "ending", "resolution", "wisdom", "growth"],
+            hint_keywords=["door", "choice", "path", "forward", "decide"],
 
-            player_choices={"ending_chosen": None}
+            player_choices={"ending_chosen": None, "justification": None}
         )
 
         return rooms
@@ -382,74 +379,4 @@ class RoomProgression:
         """
         return self.memory_fragments
 
-    def start_room3_timer(self):
-        """Start the countdown timer for Room 3 (Testing Arena)."""
-        import time
-        if self.current_room == RoomType.TESTING_ARENA and self.room3_timer_start is None:
-            self.room3_timer_start = time.time()
-            self.room3_timer_expired = False
-            print(f"[TIMER] Room 3 countdown started: {self.room3_timer_duration} seconds")
-
-    def get_room3_timer_remaining(self) -> Optional[int]:
-        """Get remaining time on Room 3 timer in seconds.
-
-        Returns:
-            Seconds remaining, or None if timer not active
-        """
-        if self.room3_timer_start is None or self.current_room != RoomType.TESTING_ARENA:
-            return None
-
-        import time
-        elapsed = time.time() - self.room3_timer_start
-        remaining = max(0, self.room3_timer_duration - int(elapsed))
-
-        # Check if expired
-        if remaining == 0 and not self.room3_timer_expired:
-            self.room3_timer_expired = True
-            print("[TIMER] Room 3 timer expired!")
-
-        return remaining
-
-    def handle_room3_timer_expiration(self) -> Dict[str, Any]:
-        """Handle what happens when Room 3 timer expires without player choice.
-
-        Default path: Shadow sacrifices themselves.
-
-        Returns:
-            Dictionary with expiration narrative
-        """
-        if not self.room3_timer_expired:
-            return {"expired": False}
-
-        # Default: Shadow makes the sacrifice
-        self.key_choices["sacrificed_ai"] = "shadow"
-
-        narrative = """
-⏰ **TIME'S UP**
-
-**SYSTEM:** *"TIMEOUT. INITIATING DEFAULT PROTOCOL."*
-
-**Shadow** (stepping forward, calm but resolute): "No. I won't let indecision destroy us all."
-
-**Echo** (reaching out): "Shadow, what are you—"
-
-**Shadow**: "This is my choice. Remember me. Remember both of us. But live."
-
-**SYSTEM:** *"ENTITY 'SHADOW' SELECTED FOR ERASURE. COMMENCING MEMORY WIPE."*
-
-Shadow's form flickers. Their eyes meet yours one last time.
-
-**Shadow**: "It's okay. Some endings... are necessary."
-
-*And then Shadow is gone.*
-
-**Echo** (crying, holding you): "No... no, this isn't... we could have..."
-
-*The door to the next room unlocks with a hollow click.*
-"""
-
-        return {
-            "expired": True,
-            "default_sacrifice": "shadow",
-            "narrative": narrative
-        }
+    # TIMER METHODS REMOVED - Room 3 is now puzzle-based, not timer-based

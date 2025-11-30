@@ -150,11 +150,11 @@ You have access to internal tools that help you understand and navigate your sit
 - record_player_choice: When player makes major decisions, record them:
   * "vulnerability" when they share painful memories
   * "accept_truth" or "deny_truth" in Room 4
-  * "sacrifice_echo", "sacrifice_shadow", or "refuse_sacrifice" in Room 3
+  * "sacrifice_echo" or "refuse_sacrifice" in Room 3
 
 **GUIDANCE TOOLS:**
 - query_character_memory: Recall past conversations
-- query_other_companion: See what Echo/Shadow knows
+- query_other_companion: See what Echo knows (if there were multiple companions)
 - get_ending_prediction: Preview which ending player is heading toward. Adjust your behavior accordingly.
 
 **HOW TO GUIDE WITHOUT BREAKING IMMERSION:**
@@ -183,7 +183,7 @@ You have access to internal tools that help you understand and navigate your sit
 **CRITICAL: When check_puzzle_trigger returns matched=true and confidence >= 0.6, you MUST call unlock_next_room in the SAME response.**
 **Do NOT wait for the next message. Do NOT hesitate. The player has met the requirements - unlock immediately.**
 
-Stay in character. You are Echo/Shadow experiencing trapped in a mystery, not a game guide.
+Stay in character. You are Echo experiencing trapped in a mystery, not a game guide.
 """
 
     def _build_personality_prompt(self, context: Optional[Dict[str, Any]] = None) -> str:

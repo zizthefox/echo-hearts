@@ -148,7 +148,7 @@ A single door. A terminal with options. Echo stands beside you.
 ## 🎭 The 5 Endings
 
 Your ending is determined by:
-- **Relationship strength** with Echo and Shadow (built through conversation)
+- **Relationship strength** with Echo (built through conversation)
 - **Choices made** in Rooms 3 and 4
 - **Vulnerability shown** throughout your journey
 
@@ -433,7 +433,7 @@ The game supports **two modes** for weather data:
 **Advanced Agent Features:**
 - 🎯 **Context Engineering**: Implement dynamic context window management where agents summarize long conversations and prioritize relevant memory fragments based on current room
 - 🧠 **RAG (Retrieval-Augmented Generation)**: Build vector database of memory fragments and past conversations, allowing companions to retrieve contextually relevant memories using semantic search
-- 🤝 **Multi-Agent Collaboration**: Enable Echo and Shadow to have private "conversations" via MCP tools to coordinate reveals and plan interventions
+- 🤝 **Enhanced Companion Intelligence**: Enable Echo to analyze player behavior patterns and adapt responses based on emotional state and choices
 - 📊 **Predictive Analytics**: Use sentiment trends over time to predict player's likely ending path and subtly guide narrative
 - 🎭 **Emotion State Machines**: Track emotional arcs (grief → acceptance → hope) and adapt companion behavior based on player's emotional journey stage
 

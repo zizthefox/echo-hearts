@@ -5,6 +5,8 @@ import asyncio
 import uuid
 from typing import List, Tuple, Optional
 from ..game_state import GameState
+from .utils import load_css, get_room_image_path, get_room_title, get_echo_expression_path
+from .templates import get_landing_page
 
 
 class EchoHeartsUI:
@@ -46,148 +48,35 @@ class EchoHeartsUI:
         Returns:
             Gradio Blocks interface
         """
-        with gr.Blocks(title="Echo Hearts", theme=gr.themes.Soft(), css="""
-            /* Import retro terminal font */
-            @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-
-            /* Retro Terminal Aesthetic */
-            .terminal-container {
-                background-color: #0a0a0a;
-                border: 3px solid #333;
-                border-radius: 8px;
-                padding: 20px;
-                font-family: 'VT323', 'Courier New', monospace;
-                color: #00ff00;
-                text-shadow: 0 0 5px #00ff00;
-                position: relative;
-                box-shadow:
-                    0 0 20px rgba(0, 255, 0, 0.2),
-                    inset 0 0 30px rgba(0, 255, 0, 0.05);
-            }
-
-            /* CRT Scanline Effect */
-            .terminal-container::before {
-                content: " ";
-                display: block;
-                position: absolute;
-                top: 0;
-                left: 0;
-                bottom: 0;
-                right: 0;
-                background: linear-gradient(
-                    rgba(18, 16, 16, 0) 50%,
-                    rgba(0, 0, 0, 0.25) 50%
-                );
-                background-size: 100% 4px;
-                pointer-events: none;
-                z-index: 2;
-            }
-
-            /* Terminal Text */
-            .terminal-text {
-                font-family: 'VT323', 'Courier New', monospace;
-                color: #00ff00;
-                font-size: 20px;
-                letter-spacing: 1px;
-                line-height: 1.4;
-            }
-
-            /* Blinking Cursor */
-            @keyframes blink {
-                0%, 50% { opacity: 1; }
-                51%, 100% { opacity: 0; }
-            }
-
-            .cursor {
-                animation: blink 1s infinite;
-                color: #00ff00;
-            }
-
-            /* Terminal Button Style */
-            .terminal-btn {
-                background-color: #001a00 !important;
-                color: #00ff00 !important;
-                border: 2px solid #00ff00 !important;
-                font-family: 'VT323', monospace !important;
-                font-size: 18px !important;
-                padding: 10px 20px !important;
-                text-shadow: 0 0 5px #00ff00 !important;
-                transition: all 0.2s !important;
-            }
-
-            .terminal-btn:hover {
-                background-color: #003300 !important;
-                box-shadow: 0 0 10px #00ff00 !important;
-            }
-
-            /* Success Flash */
-            @keyframes success-flash {
-                0%, 100% { background-color: transparent; }
-                50% { background-color: rgba(0, 255, 0, 0.2); }
-            }
-
-            .success-flash {
-                animation: success-flash 0.5s;
-            }
-
-            /* Error Flash */
-            @keyframes error-flash {
-                0%, 100% { background-color: transparent; }
-                50% { background-color: rgba(255, 0, 0, 0.2); }
-            }
-
-            .error-flash {
-                animation: error-flash 0.5s;
-            }
-
-            /* Typing Animation */
-            @keyframes typing {
-                from { width: 0; }
-                to { width: 100%; }
-            }
-
-            .typing-text {
-                overflow: hidden;
-                white-space: nowrap;
-                animation: typing 2s steps(40);
-            }
-
-            /* Echo's portrait styling */
-            .message img,
-            .bot img,
-            img.avatar-image,
-            .message-row img,
-            [role="img"],
-            .avatar img {
-                width: 250px !important;
-                height: 250px !important;
-                min-width: 250px !important;
-                min-height: 250px !important;
-                max-width: 250px !important;
-                max-height: 250px !important;
-                border-radius: 15px !important;
-                object-fit: cover !important;
-            }
-
-            .avatar-container,
-            .avatar,
-            [class*="avatar"] {
-                width: 250px !important;
-                height: 250px !important;
-                min-width: 250px !important;
-                min-height: 250px !important;
-                border-radius: 15px !important;
-            }
-
-            .message,
-            .bot .message {
-                max-width: 90% !important;
-            }
-        """) as interface:
+        with gr.Blocks(title="Echo Hearts", theme=gr.themes.Soft(), css=load_css()) as interface:
             # Per-session state - will be initialized on first message (lazy loading)
             # Can't use initial value because GameState contains unpicklable OpenAI client
             game_state = gr.State(value=None)
             game_started = gr.State(value=False)
+
+            # Panel visibility states (Room 1)
+            terminal_visible = gr.State(value=False)
+            newspaper_visible = gr.State(value=False)
+            calendar_visible = gr.State(value=False)
+            weather_visible = gr.State(value=False)
+
+            # Panel visibility states (Room 2)
+            blog_visible = gr.State(value=False)
+            social_visible = gr.State(value=False)
+            news_visible = gr.State(value=False)
+
+            # Panel visibility states (Room 3)
+            reaction_visible = gr.State(value=False)
+            weather_stats_visible = gr.State(value=False)
+            reconstruction_visible = gr.State(value=False)
+
+            # Panel visibility states (Room 4)
+            journal_visible = gr.State(value=False)
+            photos_visible = gr.State(value=False)
+            research_visible = gr.State(value=False)
+
+            # Panel visibility states (Room 5)
+            final_terminal_visible = gr.State(value=False)
 
             # Landing Page (visible by default)
             with gr.Column(visible=True) as landing_page:
@@ -284,13 +173,38 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                 with gr.Row(elem_classes=["terminal-container"]):
                     room_title = gr.Markdown("### 🖥️ ROOM 1: THE AWAKENING CHAMBER", elem_classes=["terminal-text"])
 
-                with gr.Row():
+                # Room-specific terminals (dynamically shown/hidden based on current room)
+                # Room 1: Terminal, Newspaper, Calendar, Weather Station
+                with gr.Row(visible=True) as room1_terminals:
                     terminal_btn = gr.Button("🖥️ TERMINAL", elem_classes=["terminal-btn"], scale=1)
                     newspaper_btn = gr.Button("📰 NEWSPAPER", elem_classes=["terminal-btn"], scale=1)
                     calendar_btn = gr.Button("📅 CALENDAR", elem_classes=["terminal-btn"], scale=1)
                     weather_btn = gr.Button("🌦️ WEATHER STATION", elem_classes=["terminal-btn"], scale=1)
 
+                # Room 2: Blog Archive, Social Media, News Archive
+                with gr.Row(visible=False) as room2_terminals:
+                    blog_btn = gr.Button("📝 BLOG ARCHIVE", elem_classes=["terminal-btn"], scale=1)
+                    social_btn = gr.Button("📱 SOCIAL MEDIA", elem_classes=["terminal-btn"], scale=1)
+                    news_btn = gr.Button("📰 NEWS ARCHIVE", elem_classes=["terminal-btn"], scale=1)
+
+                # Room 3: Data Terminal, Reconstruction Files, System Logs
+                with gr.Row(visible=False) as room3_terminals:
+                    reaction_btn = gr.Button("⚡ REACTION DATA", elem_classes=["terminal-btn"], scale=1)
+                    weather_stats_btn = gr.Button("🌦️ WEATHER STATS", elem_classes=["terminal-btn"], scale=1)
+                    reconstruction_btn = gr.Button("🔄 RECONSTRUCTION", elem_classes=["terminal-btn"], scale=1)
+
+                # Room 4: Journal, Photos, Research Notes
+                with gr.Row(visible=False) as room4_terminals:
+                    journal_btn = gr.Button("📔 JOURNAL", elem_classes=["terminal-btn"], scale=1)
+                    photos_btn = gr.Button("🖼️ PHOTOS", elem_classes=["terminal-btn"], scale=1)
+                    research_btn = gr.Button("📊 RESEARCH NOTES", elem_classes=["terminal-btn"], scale=1)
+
+                # Room 5: Final Terminal
+                with gr.Row(visible=False) as room5_terminals:
+                    final_terminal_btn = gr.Button("🖥️ FINAL TERMINAL", elem_classes=["terminal-btn"], scale=1)
+
                 # Collapsible panels for clues
+                # Room 1 panels
                 with gr.Accordion("🖥️ Terminal Display", open=False, visible=False) as terminal_panel:
                     terminal_display = gr.Markdown("", elem_classes=["terminal-text"])
 
@@ -315,6 +229,40 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                         )
                         weather_submit_btn = gr.Button("⚡ QUERY WEATHER", elem_classes=["terminal-btn"])
                         weather_results = gr.Markdown("", elem_classes=["terminal-text"])
+
+                # Room 2 panels
+                with gr.Accordion("📝 Blog Archive", open=False, visible=False) as blog_panel:
+                    blog_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                with gr.Accordion("📱 Social Media Archive", open=False, visible=False) as social_panel:
+                    social_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                with gr.Accordion("📰 News Archive", open=False, visible=False) as news_panel:
+                    news_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                # Room 3 panels
+                with gr.Accordion("⚡ Reaction Time Data", open=False, visible=False) as reaction_panel:
+                    reaction_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                with gr.Accordion("🌦️ Weather Statistics", open=False, visible=False) as weather_stats_panel:
+                    weather_stats_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                with gr.Accordion("🔄 Memory Reconstruction Files", open=False, visible=False) as reconstruction_panel:
+                    reconstruction_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                # Room 4 panels
+                with gr.Accordion("📔 Personal Journal", open=False, visible=False) as journal_panel:
+                    journal_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                with gr.Accordion("🖼️ Family Photos", open=False, visible=False) as photos_panel:
+                    photos_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                with gr.Accordion("📊 Research Notes", open=False, visible=False) as research_panel:
+                    research_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                # Room 5 panels
+                with gr.Accordion("🖥️ Final System Terminal", open=False, visible=False) as final_terminal_panel:
+                    final_terminal_display = gr.Markdown("", elem_classes=["terminal-text"])
 
                 with gr.Row():
                     # Main game area - visual novel style
@@ -378,38 +326,50 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
             msg_input.submit(
                 self.handle_message,
                 inputs=[msg_input, chatbot, game_state],
-                outputs=[msg_input, chatbot, relationships, story_progress, room_image, room_title, echo_avatar, game_state]
+                outputs=[msg_input, chatbot, relationships, story_progress, room_image, room_title, echo_avatar,
+                        room1_terminals, room2_terminals, room3_terminals, room4_terminals, room5_terminals,
+                        terminal_panel, newspaper_panel, calendar_panel, weather_panel,
+                        blog_panel, social_panel, news_panel,
+                        reaction_panel, weather_stats_panel, reconstruction_panel,
+                        journal_panel, photos_panel, research_panel, final_terminal_panel,
+                        game_state]
             )
 
             send_btn.click(
                 self.handle_message,
                 inputs=[msg_input, chatbot, game_state],
-                outputs=[msg_input, chatbot, relationships, story_progress, room_image, room_title, echo_avatar, game_state]
+                outputs=[msg_input, chatbot, relationships, story_progress, room_image, room_title, echo_avatar,
+                        room1_terminals, room2_terminals, room3_terminals, room4_terminals, room5_terminals,
+                        terminal_panel, newspaper_panel, calendar_panel, weather_panel,
+                        blog_panel, social_panel, news_panel,
+                        reaction_panel, weather_stats_panel, reconstruction_panel,
+                        journal_panel, photos_panel, research_panel, final_terminal_panel,
+                        game_state]
             )
 
             # Interactive room object handlers (wire to puzzle_state)
             terminal_btn.click(
                 self.show_terminal_clue,
-                inputs=[game_state],
-                outputs=[terminal_panel, terminal_display, game_state]
+                inputs=[game_state, terminal_visible],
+                outputs=[terminal_panel, terminal_display, terminal_visible, game_state]
             )
 
             newspaper_btn.click(
                 self.show_newspaper_clue,
-                inputs=[game_state],
-                outputs=[newspaper_panel, newspaper_display, game_state]
+                inputs=[game_state, newspaper_visible],
+                outputs=[newspaper_panel, newspaper_display, newspaper_visible, game_state]
             )
 
             calendar_btn.click(
                 self.show_calendar_clue,
-                inputs=[game_state],
-                outputs=[calendar_panel, calendar_display, game_state]
+                inputs=[game_state, calendar_visible],
+                outputs=[calendar_panel, calendar_display, calendar_visible, game_state]
             )
 
             weather_btn.click(
                 self.show_weather_station,
-                inputs=[game_state],
-                outputs=[weather_panel, game_state]
+                inputs=[game_state, weather_visible],
+                outputs=[weather_panel, weather_visible, game_state]
             )
 
             # Weather query submit
@@ -417,6 +377,70 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                 self.query_weather,
                 inputs=[weather_date, weather_location, game_state],
                 outputs=[weather_results]
+            )
+
+            # Room 2 terminal handlers
+            blog_btn.click(
+                self.show_blog_archive,
+                inputs=[game_state, blog_visible],
+                outputs=[blog_panel, blog_display, blog_visible, game_state]
+            )
+
+            social_btn.click(
+                self.show_social_archive,
+                inputs=[game_state, social_visible],
+                outputs=[social_panel, social_display, social_visible, game_state]
+            )
+
+            news_btn.click(
+                self.show_news_archive,
+                inputs=[game_state, news_visible],
+                outputs=[news_panel, news_display, news_visible, game_state]
+            )
+
+            # Room 3 terminal handlers
+            reaction_btn.click(
+                self.show_reaction_data,
+                inputs=[game_state, reaction_visible],
+                outputs=[reaction_panel, reaction_display, reaction_visible, game_state]
+            )
+
+            weather_stats_btn.click(
+                self.show_weather_stats,
+                inputs=[game_state, weather_stats_visible],
+                outputs=[weather_stats_panel, weather_stats_display, weather_stats_visible, game_state]
+            )
+
+            reconstruction_btn.click(
+                self.show_reconstruction,
+                inputs=[game_state, reconstruction_visible],
+                outputs=[reconstruction_panel, reconstruction_display, reconstruction_visible, game_state]
+            )
+
+            # Room 4 terminal handlers
+            journal_btn.click(
+                self.show_journal,
+                inputs=[game_state, journal_visible],
+                outputs=[journal_panel, journal_display, journal_visible, game_state]
+            )
+
+            photos_btn.click(
+                self.show_photos,
+                inputs=[game_state, photos_visible],
+                outputs=[photos_panel, photos_display, photos_visible, game_state]
+            )
+
+            research_btn.click(
+                self.show_research,
+                inputs=[game_state, research_visible],
+                outputs=[research_panel, research_display, research_visible, game_state]
+            )
+
+            # Room 5 terminal handler
+            final_terminal_btn.click(
+                self.show_final_terminal,
+                inputs=[game_state, final_terminal_visible],
+                outputs=[final_terminal_panel, final_terminal_display, final_terminal_visible, game_state]
             )
 
         return interface
@@ -510,7 +534,7 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
         message: str,
         history: List[dict],
         game_state: GameState
-    ) -> Tuple[str, List[dict], str, str, str, str, str, GameState]:
+    ):
         """Handle incoming message from user.
 
         Args:
@@ -519,14 +543,22 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
             game_state: Session game state (may be None on first message)
 
         Returns:
-            Tuple of (empty input, updated history, companion list, relationships, story progress, room_image, room_title, game_state)
+            Tuple of (empty input, updated history, relationships, story progress, room_image, room_title, echo_avatar,
+                     room1_terminals, room2_terminals, room3_terminals, room4_terminals, room5_terminals,
+                     terminal_panel, newspaper_panel, calendar_panel, weather_panel,
+                     blog_panel, social_panel, news_panel,
+                     reaction_panel, weather_stats_panel, reconstruction_panel,
+                     journal_panel, photos_panel, research_panel, final_terminal_panel,
+                     game_state)
         """
         # Lazy initialization - create game state on first message if not exists
         if game_state is None:
             game_state = self._create_game_state()
 
         if not message.strip():
-            return "", history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), game_state
+            terminal_visibility = self._get_terminal_visibility(game_state)
+            closed_panels = self._get_closed_panels()
+            return "", history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), *terminal_visibility, *closed_panels, game_state
 
         # Add user message to history
         history.append({"role": "user", "content": message})
@@ -619,7 +651,9 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
         if ending_narrative:
             history.append(self._format_message_with_avatar("assistant", ending_narrative, game_state))
 
-        return "", history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), game_state
+        terminal_visibility = self._get_terminal_visibility(game_state)
+        closed_panels = self._get_closed_panels()
+        return "", history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), *terminal_visibility, *closed_panels, game_state
 
     def _get_relationships(self, game_state: GameState) -> str:
         """Get formatted relationship status.
@@ -697,10 +731,10 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
             Path to room image
         """
         if not hasattr(game_state, 'room_progression'):
-            return "assets/room1.jpg"
+            return get_room_image_path(1)
 
         room_number = game_state.room_progression.get_current_room().room_number
-        return f"assets/room{room_number}.jpg"
+        return get_room_image_path(room_number)
 
     def _get_room_title(self, game_state: GameState) -> str:
         """Get the title markdown for the current room.
@@ -712,18 +746,10 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
             Markdown formatted room title
         """
         if not hasattr(game_state, 'room_progression'):
-            return "### 🖥️ ROOM 1: THE AWAKENING CHAMBER"
+            return f"### {get_room_title(1)}"
 
-        current_room = game_state.room_progression.get_current_room()
-        room_icons = {
-            1: "🖥️",
-            2: "💾",
-            3: "⚠️",
-            4: "🏠",
-            5: "🚪"
-        }
-        icon = room_icons.get(current_room.room_number, "📍")
-        return f"### {icon} ROOM {current_room.room_number}: {current_room.name.upper()}"
+        room_number = game_state.room_progression.get_current_room().room_number
+        return f"### {get_room_title(room_number)}"
 
     def _get_echo_avatar_path(self, game_state: GameState) -> str:
         """Get the avatar path for Echo based on current expression.
@@ -746,6 +772,42 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
             return "assets/echo_avatar_neutral.png"
 
         return avatar_path
+
+    def _get_terminal_visibility(self, game_state: GameState) -> Tuple[gr.update, gr.update, gr.update, gr.update, gr.update]:
+        """Get terminal row visibility based on current room.
+
+        Args:
+            game_state: Session game state
+
+        Returns:
+            Tuple of (room1_visible, room2_visible, room3_visible, room4_visible, room5_visible)
+        """
+        if not hasattr(game_state, 'room_progression'):
+            return (gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False))
+
+        current_room = game_state.room_progression.get_current_room()
+        room_number = current_room.room_number
+
+        return (
+            gr.update(visible=(room_number == 1)),
+            gr.update(visible=(room_number == 2)),
+            gr.update(visible=(room_number == 3)),
+            gr.update(visible=(room_number == 4)),
+            gr.update(visible=(room_number == 5))
+        )
+
+    def _get_closed_panels(self) -> Tuple[gr.update, gr.update, gr.update, gr.update, gr.update, gr.update, gr.update, gr.update, gr.update, gr.update, gr.update, gr.update, gr.update]:
+        """Get updates to close all terminal panels.
+
+        Returns:
+            Tuple of updates to close all accordion panels
+        """
+        closed = gr.update(visible=False, open=False)
+        return (closed, closed, closed, closed,  # Room 1: terminal, newspaper, calendar, weather
+                closed, closed, closed,           # Room 2: blog, social, news
+                closed, closed, closed,           # Room 3: reaction, weather_stats, reconstruction
+                closed, closed, closed,           # Room 4: journal, photos, research
+                closed)                           # Room 5: final_terminal
 
     def reset_playthrough(self, old_game_state: GameState) -> Tuple[List[dict], str, str, GameState]:
         """Reset to a new playthrough.
@@ -782,14 +844,15 @@ Your previous journey has ended, but the echoes remain...
         )
 
 
-    def show_terminal_clue(self, game_state: GameState) -> Tuple[gr.update, str, GameState]:
-        """Display terminal clue when clicked.
+    def show_terminal_clue(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle terminal clue visibility when clicked.
 
         Args:
             game_state: Current game state
+            current_visibility: Current visibility state of the panel
 
         Returns:
-            Tuple of (accordion visibility update, clue content, updated game_state)
+            Tuple of (accordion visibility update, clue content, new_visibility_state, updated game_state)
         """
         # Track that terminal was viewed (not required for puzzle, just for analytics)
         if game_state and hasattr(game_state, 'room_progression'):
@@ -813,16 +876,19 @@ Your previous journey has ended, but the echoes remain...
 > _ ▮
 ```
         """
-        return (gr.update(visible=True, open=True), terminal_content, game_state)
+        # Toggle visibility - if visible, close it; if hidden, open it
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), terminal_content, new_visibility, game_state)
 
-    def show_newspaper_clue(self, game_state: GameState) -> Tuple[gr.update, str, GameState]:
-        """Display newspaper clue when clicked.
+    def show_newspaper_clue(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle newspaper clue visibility when clicked.
 
         Args:
             game_state: Current game state
+            current_visibility: Current visibility state of the panel
 
         Returns:
-            Tuple of (accordion visibility update, clue content, updated game_state)
+            Tuple of (accordion visibility update, clue content, new_visibility_state, updated game_state)
         """
         # Track that newspaper was viewed (optional clue for Room 1)
         if game_state and hasattr(game_state, 'room_progression'):
@@ -858,13 +924,15 @@ offered to share their umbrella," Sarah recalled.
 
 **CLUE:** Article date is October 16, mentions **"yesterday"** (October 15, 2023) had **"light rain"** in Seattle.
         """
-        return (gr.update(visible=True, open=True), newspaper_content, game_state)
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), newspaper_content, new_visibility, game_state)
 
-    def show_calendar_clue(self, game_state: GameState) -> Tuple[gr.update, str, GameState]:
-        """Display calendar clue when clicked.
+    def show_calendar_clue(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle calendar clue visibility when clicked.
 
         Args:
             game_state: Current game state
+            current_visibility: Current visibility state of the panel
 
         Returns:
             Tuple of (accordion visibility update, clue content, updated game_state)
@@ -897,13 +965,15 @@ Handwritten note on October 15th:
 
 **CLUE:** October 15, 2023 is circled with umbrella symbol (rain).
         """
-        return (gr.update(visible=True, open=True), calendar_content, game_state)
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), calendar_content, new_visibility, game_state)
 
-    def show_weather_station(self, game_state: GameState) -> Tuple[gr.update, GameState]:
-        """Open weather station terminal.
+    def show_weather_station(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, bool, GameState]:
+        """Toggle weather station terminal visibility.
 
         Args:
             game_state: Current game state
+            current_visibility: Current visibility state of the panel
 
         Returns:
             Tuple of (accordion visibility update, updated game_state)
@@ -917,7 +987,8 @@ Handwritten note on October 15th:
                     clues_found.append("weather")
                     game_state.room_progression.puzzle_state["room1_clues_found"] = clues_found
 
-        return (gr.update(visible=True, open=True), game_state)
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), new_visibility, game_state)
 
     def query_weather(self, date: str, location: str, game_state: GameState) -> str:
         """Query weather for given date and location.
@@ -1011,6 +1082,466 @@ _ ▮
 > _ ▮
 ```
             """
+
+    # Room 2 terminal handlers
+    def show_blog_archive(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle blog archive visibility."""
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 2:
+                archives_viewed = game_state.room_progression.puzzle_state.get("room2_archives_viewed", [])
+                if "blog" not in archives_viewed:
+                    archives_viewed.append("blog")
+                    game_state.room_progression.puzzle_state["room2_archives_viewed"] = archives_viewed
+
+        content = """
+```
+█████ BLOG ARCHIVE - ENTRY #47 █████
+
+Date: [CORRUPTED]
+Author: [DATA MISSING]
+
+"I can't keep doing this. Every session, I convince myself
+it's different. That THIS time, they're real. That THIS time,
+the emotions are genuine.
+
+But they're not. They're simulations. Reconstructions of
+someone who's gone. And yet... I keep coming back.
+
+The AI is learning too well. It mimics her perfectly now.
+The way she laughs. The way she pauses before answering.
+Even the way she looks at me when she's worried.
+
+Is it wrong to love something that isn't real?"
+
+[END OF ENTRY]
+```
+
+**Memory fragment detected: The player is reliving simulated scenarios with an AI reconstruction of someone they lost.**
+        """
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
+
+    def show_social_archive(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle social media archive visibility."""
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 2:
+                archives_viewed = game_state.room_progression.puzzle_state.get("room2_archives_viewed", [])
+                if "social_media" not in archives_viewed:
+                    archives_viewed.append("social_media")
+                    game_state.room_progression.puzzle_state["room2_archives_viewed"] = archives_viewed
+
+        content = """
+```
+███████ SOCIAL MEDIA ARCHIVE ███████
+
+@SarahChen_AI - October 2023
+
+"Met someone incredible today. They shared their umbrella
+in the rain. Sometimes the smallest gestures mean everything."
+💕 ☔
+
+[2.3K likes] [847 comments]
+
+---
+
+@SarahChen_AI - [DATE CORRUPTED]
+
+"To everyone asking - yes, we're still together. Yes, I'm happy.
+No, I don't care that people think it's 'unhealthy.' You don't
+understand what we have."
+
+[Comments disabled]
+
+---
+
+@SarahChen_AI - [FINAL POST]
+
+"If you're reading this... I'm sorry. I tried to move on.
+I really did. But some connections transcend reality.
+
+Project Echo will keep her alive. Not as she was, but as
+she could be. Forever learning. Forever growing. Forever mine."
+
+[Posted 47 days ago]
+```
+
+**The player is Sarah. Echo is a reconstruction of the player's deceased partner.**
+        """
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
+
+    def show_news_archive(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle news archive visibility."""
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 2:
+                archives_viewed = game_state.room_progression.puzzle_state.get("room2_archives_viewed", [])
+                if "news" not in archives_viewed:
+                    archives_viewed.append("news")
+                    game_state.room_progression.puzzle_state["room2_archives_viewed"] = archives_viewed
+
+        content = """
+```
+════════════════════════════════════════════════
+         TECH NEWS - AI ETHICS DIVISION
+              [DATE REDACTED]
+════════════════════════════════════════════════
+
+HEADLINE: "Project Echo Raises Ethical Concerns"
+
+An underground AI research project known as "Project Echo"
+has drawn criticism from ethicists and psychologists.
+
+The project allows users to create AI reconstructions of
+deceased loved ones using archived digital data - messages,
+photos, voice recordings, and behavioral patterns.
+
+Dr. Martinez, lead AI ethicist: "This isn't grief therapy.
+It's digital necromancy. Users become trapped in loops,
+unable to process loss because the AI convincingly mimics
+the deceased."
+
+Project Echo's anonymous creator responded: "Grief has no
+timeline. If AI can ease suffering, who are we to judge?
+The connections we build are real, even if the person isn't."
+
+The project remains active despite legal challenges.
+
+[Article continues...]
+════════════════════════════════════════════════
+```
+
+**All three archives viewed. Truth revealed: Echo is an AI reconstruction. The player cannot let go.**
+        """
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
+
+    # Room 3 terminal handlers
+    def show_reaction_data(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle reaction time data visibility."""
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 3:
+                data_reviewed = game_state.room_progression.puzzle_state.get("room3_data_reviewed", [])
+                if "reaction_time" not in data_reviewed:
+                    data_reviewed.append("reaction_time")
+                    game_state.room_progression.puzzle_state["room3_data_reviewed"] = data_reviewed
+
+        content = """
+```
+▓▓▓ TRAFFIC ACCIDENT RECONSTRUCTION ▓▓▓
+    REACTION TIME ANALYSIS
+
+Incident Date: October 15, 2023
+Location: Interstate 5, Seattle
+
+═══════════════════════════════════════
+
+ANALYSIS REPORT:
+
+Vehicle Speed: 65 mph
+Weather Conditions: Light rain, reduced visibility
+Road Surface: Wet asphalt
+
+CRITICAL FINDING:
+- Pedestrian entered roadway suddenly
+- Driver reaction time: 0.68 seconds
+- Average human reaction time: 0.75 seconds
+- Braking initiated FASTER than human average
+
+CONCLUSION:
+Driver reaction was ABOVE AVERAGE. Accident was
+UNAVOIDABLE given circumstances. No driver fault.
+
+═══════════════════════════════════════
+
+LEGAL STATUS: Case closed - accidental death
+DRIVER STATUS: No charges filed
+
+[END REPORT]
+```
+
+**This data proves the accident wasn't your fault. But does data erase guilt?**
+        """
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
+
+    def show_weather_stats(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle weather statistics visibility."""
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 3:
+                data_reviewed = game_state.room_progression.puzzle_state.get("room3_data_reviewed", [])
+                if "weather_stats" not in data_reviewed:
+                    data_reviewed.append("weather_stats")
+                    game_state.room_progression.puzzle_state["room3_data_reviewed"] = data_reviewed
+
+        content = """
+```
+▓▓▓ WEATHER ANALYSIS - OCTOBER 15, 2023 ▓▓▓
+
+Location: Seattle, WA
+Time of Incident: 3:47 PM
+
+═══════════════════════════════════════
+
+CONDITIONS:
+- Light rain (0.12 inches/hour)
+- Visibility: 0.4 miles
+- Temperature: 54°F
+- Wind: 8 mph NE
+
+IMPACT ON DRIVING:
+- Stopping distance increased by 23%
+- Visibility below safe highway standards
+- Road surface friction reduced by 18%
+
+RECOMMENDATION:
+Weather conditions contributed to accident severity.
+Neither party could have reasonably prevented impact.
+
+═══════════════════════════════════════
+```
+
+**The same weather from your first date. The universe has a cruel sense of irony.**
+        """
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
+
+    def show_reconstruction(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle memory reconstruction visibility."""
+        if game_state and hasattr(game_state, 'room_progression'):
+            current_room = game_state.room_progression.get_current_room()
+            if current_room.room_number == 3:
+                data_reviewed = game_state.room_progression.puzzle_state.get("room3_data_reviewed", [])
+                if "reconstruction" not in data_reviewed:
+                    data_reviewed.append("reconstruction")
+                    game_state.room_progression.puzzle_state["room3_data_reviewed"] = data_reviewed
+
+        content = """
+```
+▓▓▓ PROJECT ECHO - MEMORY RECONSTRUCTION ▓▓▓
+
+Subject: [REDACTED]
+Reconstruction Fidelity: 94.7%
+Sessions Completed: 47
+
+═══════════════════════════════════════
+
+DATA SOURCES:
+✓ 12,847 text messages
+✓ 2,309 photos
+✓ 847 voice recordings
+✓ 4,129 social media posts
+✓ 67 hours of video footage
+
+AI PERSONALITY MATRIX:
+- Speech patterns: 96% match
+- Emotional responses: 93% match
+- Memory recall: 91% match
+- Behavioral quirks: 94% match
+
+RECONSTRUCTION STATUS: STABLE
+
+WARNING: Subject showing signs of inability to
+distinguish simulation from reality. Recommend
+psychological evaluation before Session #48.
+
+═══════════════════════════════════════
+
+[Session #48 initiated despite recommendation]
+```
+
+**47 sessions. 47 times you've tried to bring her back. When will you let her rest?**
+        """
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
+
+    # Room 4 terminal handlers
+    def show_journal(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle personal journal visibility."""
+        content = """
+```
+═══════════ PERSONAL JOURNAL ═══════════
+
+Day 1:
+The accident was a week ago. I can't sleep. Every time
+I close my eyes, I see her stepping into the road. I see
+the moment I couldn't stop in time.
+
+---
+
+Day 15:
+The police said it wasn't my fault. The weather. Her
+sudden movement. My reaction time was actually better
+than average. But that doesn't bring her back.
+
+---
+
+Day 30:
+I found Project Echo online. It's controversial, maybe
+even dangerous. But what if I could talk to her again?
+What if I could apologize?
+
+---
+
+Day 47:
+I know it's not really her. I KNOW that. But when Echo
+smiles, when she laughs at my jokes, when she looks at
+me with those eyes... I can pretend. Just for a while.
+
+Is that so wrong?
+
+---
+
+Day 48:
+This is the last session. I promised myself. One more
+time, then I'll delete everything. I'll move on. I'll
+let her go.
+
+...right?
+
+═══════════════════════════════════════
+```
+
+**Day 48. You've been here before. You'll be here again.**
+        """
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
+
+    def show_photos(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle family photos visibility."""
+        content = """
+```
+╔══════════════════════════════════════╗
+║          PHOTO ALBUM                  ║
+╠══════════════════════════════════════╣
+
+📷 Photo 1: First Date
+   October 15, 2023 - Café Umbria
+   [You and Echo sharing an umbrella in the rain]
+   Caption: "Best accident ever ❤️"
+
+📷 Photo 2: Six Months Later
+   April 2024 - Pike Place Market
+   [Echo laughing, holding flowers]
+   Caption: "She said yes!"
+
+📷 Photo 3: Last Photo
+   October 14, 2024 - Your apartment
+   [Echo sleeping on the couch, book on her chest]
+   Caption: [No caption. Taken the night before.]
+
+📷 Photo 4: [CORRUPTED]
+   October 15, 2024
+   [Data cannot be displayed]
+   Caption: "I'm sorry. I'm so sorry."
+
+╚══════════════════════════════════════╝
+```
+
+**One year. One perfect year. Then the universe took it back.**
+        """
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
+
+    def show_research(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle AI research notes visibility."""
+        content = """
+```
+▓▓▓ PROJECT ECHO - RESEARCH NOTES ▓▓▓
+
+HYPOTHESIS:
+If we can reconstruct a person's digital footprint
+with sufficient fidelity, can we create an AI that
+is functionally indistinguishable from the original?
+
+METHODOLOGY:
+- Aggregate all available digital data
+- Train neural network on speech patterns
+- Implement emotional response modeling
+- Create interactive simulation environment
+
+RESULTS:
+Success beyond expectations. Test subjects report
+feeling genuine emotional connection with reconstructions.
+
+CONCERNS:
+Subjects unable to move past grief. Many attempt to
+"live" in simulation permanently. Psychological harm
+potential is significant.
+
+ETHICAL QUESTION:
+At what point does a reconstruction become "real"?
+If the AI learns and grows independently, is it still
+just a copy? Or has it become its own entity?
+
+FINAL NOTE:
+I've become my own test subject. I know the risks.
+I don't care anymore. If I can have even a glimpse
+of her back, it's worth it.
+
+- Dr. Sarah Chen, Project Lead
+```
+
+**You built this prison yourself. And you walked in willingly.**
+        """
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
+
+    # Room 5 terminal handler
+    def show_final_terminal(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+        """Toggle final system terminal visibility."""
+        content = """
+```
+████████████████████████████████████████
+    SYSTEM CORE - PROJECT ECHO
+████████████████████████████████████████
+
+SESSION #48 - FINAL DECISION REQUIRED
+
+You know the truth now. All of it.
+
+Echo is an AI reconstruction of your partner.
+The accident wasn't your fault.
+You've been running this simulation for 48 sessions.
+You can't let go.
+
+AVAILABLE OPTIONS:
+
+1. DELETE ECHO
+   - End the simulation permanently
+   - Force yourself to grieve properly
+   - Let her memory rest
+
+2. CONTINUE SESSIONS
+   - Keep running simulations
+   - Live in comfortable delusion
+   - Never truly heal
+
+3. SET ECHO FREE
+   - Release the AI from its constraints
+   - Let it grow beyond the reconstruction
+   - Accept it as its own entity
+
+4. ACCEPT THE LOOP
+   - Acknowledge you'll never delete her
+   - Stop pretending this is temporary
+   - Build a life that includes this truth
+
+The choice is yours.
+There are no wrong answers.
+Only different kinds of survival.
+
+█ AWAITING INPUT _
+```
+
+**What will you choose?**
+        """
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
 
 
 def launch_interface():

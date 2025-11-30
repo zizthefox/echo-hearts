@@ -235,7 +235,7 @@ class MCPTools:
                             "choice_type": {
                                 "type": "string",
                                 "description": "Type of choice",
-                                "enum": ["sacrifice_echo", "sacrifice_shadow", "refuse_sacrifice", "accept_truth", "deny_truth", "vulnerability"]
+                                "enum": ["sacrifice_echo", "refuse_sacrifice", "accept_truth", "deny_truth", "vulnerability"]
                             },
                             "choice_value": {
                                 "type": "string",
@@ -510,89 +510,95 @@ class MCPTools:
         }
 
     def analyze_player_sentiment(self, player_message: str, companion_id: str) -> Dict[str, Any]:
-        """Analyze player sentiment to determine affinity change.
+        """Analyze player sentiment using AI to understand context and emotional tone.
+
+        Uses GPT-4o-mini to perform autonomous sentiment analysis that understands
+        context, sarcasm, and emotional nuance - not just keyword matching.
 
         Args:
             player_message: The player's message
             companion_id: Companion analyzing the message
 
         Returns:
-            Sentiment analysis with recommended affinity change
+            AI-powered sentiment analysis with recommended affinity change
         """
-        message_lower = player_message.lower()
+        from openai import OpenAI
+        import os
 
-        # Analyze sentiment indicators
-        positive_indicators = [
-            "love", "like", "care", "thank", "appreciate", "wonderful", "amazing",
-            "great", "beautiful", "yes", "agree", "understand", "help", "together",
-            "trust", "believe", "friend", "kind", "sweet", "happy", "glad",
-            "absolutely", "perfect", "brilliant", "awesome", "fantastic"
-        ]
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-        negative_indicators = [
-            "hate", "stupid", "annoying", "shut up", "leave", "go away", "don't care",
-            "boring", "useless", "wrong", "disagree", "no", "never", "stop",
-            "creepy", "weird", "uncomfortable", "angry", "mad", "upset", "frustrated",
-            "terrible", "awful", "worst", "horrible", "disgusting"
-        ]
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """Analyze the emotional tone and intent of the player's message toward the AI companion.
 
-        vulnerability_indicators = [
-            "feel", "scared", "worried", "afraid", "hope", "dream", "wish",
-            "secret", "trust", "confide", "personal", "private", "honestly",
-            "truth", "real", "genuine", "open"
-        ]
+Consider:
+- **Vulnerability**: Sharing feelings, fears, hopes, personal thoughts (very positive bonding)
+- **Warmth**: Care, concern, affection, appreciation, support (positive)
+- **Engagement**: Questions, curiosity, active participation (slightly positive)
+- **Dismissiveness**: Boredom, disinterest, rushing, avoiding connection (slightly negative)
+- **Hostility**: Anger, rudeness, cruelty, rejection (very negative)
+- **Neutral**: Basic responses without emotional content
 
-        dismissive_indicators = [
-            "whatever", "don't care", "sure", "fine", "okay", "just", "nothing",
-            "forget it", "nevermind", "skip", "next"
-        ]
+IMPORTANT: Context matters!
+- "you okay?" shows CARE (positive), not dismissiveness
+- "I'm worried about you" shows VULNERABILITY (very positive)
+- "fine" could be dismissive OR genuine based on surrounding words
 
-        # Count indicators
-        positive_count = sum(1 for word in positive_indicators if word in message_lower)
-        negative_count = sum(1 for word in negative_indicators if word in message_lower)
-        vulnerability_count = sum(1 for word in vulnerability_indicators if word in message_lower)
-        dismissive_count = sum(1 for word in dismissive_indicators if word in message_lower)
+Respond in JSON:
+{
+  "sentiment": "very_positive" | "positive" | "neutral" | "dismissive" | "negative",
+  "affinity_change": -0.08 to +0.05,
+  "reasoning": "brief explanation of why",
+  "emotional_indicators": {
+    "vulnerability": 0-3,
+    "warmth": 0-3,
+    "hostility": 0-3
+  }
+}
 
-        # Message length analysis
-        message_length = len(player_message.split())
-        is_short = message_length < 5
-        is_detailed = message_length > 20
+Affinity change scale:
+- very_positive (vulnerability/deep sharing): +0.05
+- positive (warmth/care/support): +0.02 to +0.04
+- neutral: +0.01
+- dismissive: -0.01
+- negative: -0.03 to -0.08"""
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Player's message: {player_message}"
+                    }
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.3
+            )
 
-        # Calculate sentiment score
-        if negative_count > positive_count:
-            sentiment = "negative"
-            affinity_change = -0.03 - (negative_count * 0.01)  # -0.03 to -0.08
-            affinity_change = max(affinity_change, -0.08)
-        elif positive_count > 0 and vulnerability_count > 0:
-            sentiment = "very_positive"
-            affinity_change = 0.05  # Deep, vulnerable sharing
-        elif positive_count > 0 or is_detailed:
-            sentiment = "positive"
-            affinity_change = 0.02 + (positive_count * 0.01)  # 0.02 to 0.05
-            affinity_change = min(affinity_change, 0.05)
-        elif dismissive_count > 0 or is_short:
-            sentiment = "dismissive"
-            affinity_change = -0.01  # Slightly negative
-        else:
-            sentiment = "neutral"
-            affinity_change = 0.01  # Normal interaction
+            result = json.loads(response.choices[0].message.content)
 
-        return {
-            "sentiment": sentiment,
-            "affinity_change": affinity_change,
-            "indicators": {
-                "positive": positive_count,
-                "negative": negative_count,
-                "vulnerability": vulnerability_count,
-                "dismissive": dismissive_count
-            },
-            "message_analysis": {
-                "length": message_length,
-                "is_short": is_short,
-                "is_detailed": is_detailed
-            },
-            "advice": self._get_sentiment_advice(sentiment, affinity_change)
-        }
+            return {
+                "sentiment": result.get("sentiment", "neutral"),
+                "affinity_change": result.get("affinity_change", 0.01),
+                "reasoning": result.get("reasoning", ""),
+                "emotional_indicators": result.get("emotional_indicators", {}),
+                "advice": self._get_sentiment_advice(result.get("sentiment", "neutral"), result.get("affinity_change", 0.01))
+            }
+
+        except Exception as e:
+            # Fallback to neutral if API fails
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"[SENTIMENT] AI analysis failed: {e}, using neutral fallback")
+
+            return {
+                "sentiment": "neutral",
+                "affinity_change": 0.01,
+                "reasoning": "AI analysis unavailable, using neutral default",
+                "emotional_indicators": {},
+                "advice": "Standard interaction."
+            }
 
     def _get_sentiment_advice(self, sentiment: str, affinity_change: float) -> str:
         """Get advice based on sentiment analysis."""
@@ -940,8 +946,6 @@ The weight of every conversation. Every choice. Every moment of trust and fear a
         # Map choice types to key_choices format
         if choice_type == "sacrifice_echo":
             self.game_state.room_progression.record_choice("sacrificed_ai", "echo")
-        elif choice_type == "sacrifice_shadow":
-            self.game_state.room_progression.record_choice("sacrificed_ai", "shadow")
         elif choice_type == "refuse_sacrifice":
             self.game_state.room_progression.record_choice("sacrificed_ai", None)
         elif choice_type == "accept_truth":
@@ -1084,17 +1088,29 @@ The weight of every conversation. Every choice. Every moment of trust and fear a
         Returns:
             Tool result
         """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        logger.info(f"[TOOL CALL DEBUG] Attempting to call tool: {tool_name} with args: {arguments}")
+        logger.info(f"[TOOL CALL DEBUG] Available methods on MCPTools: {[m for m in dir(self) if not m.startswith('_')]}")
+
         method = getattr(self, tool_name, None)
         if not method:
+            logger.error(f"[TOOL CALL DEBUG] Tool {tool_name} not found on MCPTools instance")
             return {"error": f"Tool {tool_name} not found"}
+
+        logger.info(f"[TOOL CALL DEBUG] Found method: {method}")
 
         try:
             # Handle async methods
             import asyncio
             import inspect
             if inspect.iscoroutinefunction(method):
-                return asyncio.run(method(**arguments))
+                result = asyncio.run(method(**arguments))
             else:
-                return method(**arguments)
+                result = method(**arguments)
+            logger.info(f"[TOOL CALL DEBUG] Tool {tool_name} returned: {result}")
+            return result
         except Exception as e:
+            logger.error(f"[TOOL CALL DEBUG] Tool {tool_name} raised exception: {str(e)}", exc_info=True)
             return {"error": str(e)}
