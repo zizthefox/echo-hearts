@@ -59,21 +59,25 @@ class EchoHeartsUI:
             newspaper_visible = gr.State(value=False)
             calendar_visible = gr.State(value=False)
             weather_visible = gr.State(value=False)
+            answer_terminal_visible = gr.State(value=False)
 
             # Panel visibility states (Room 2)
             blog_visible = gr.State(value=False)
             social_visible = gr.State(value=False)
             news_visible = gr.State(value=False)
+            password_terminal_visible = gr.State(value=False)
 
             # Panel visibility states (Room 3)
             reaction_visible = gr.State(value=False)
             weather_stats_visible = gr.State(value=False)
             reconstruction_visible = gr.State(value=False)
+            conclusion_terminal_visible = gr.State(value=False)
 
             # Panel visibility states (Room 4)
             journal_visible = gr.State(value=False)
             photos_visible = gr.State(value=False)
             research_visible = gr.State(value=False)
+            timeline_terminal_visible = gr.State(value=False)
 
             # Panel visibility states (Room 5)
             final_terminal_visible = gr.State(value=False)
@@ -180,24 +184,28 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                     newspaper_btn = gr.Button("📰 NEWSPAPER", elem_classes=["terminal-btn"], scale=1)
                     calendar_btn = gr.Button("📅 CALENDAR", elem_classes=["terminal-btn"], scale=1)
                     weather_btn = gr.Button("🌦️ WEATHER STATION", elem_classes=["terminal-btn"], scale=1)
+                    answer_terminal_btn = gr.Button("🔓 ANSWER TERMINAL", elem_classes=["terminal-btn"], scale=1)
 
                 # Room 2: Blog Archive, Social Media, News Archive
                 with gr.Row(visible=False) as room2_terminals:
                     blog_btn = gr.Button("📝 BLOG ARCHIVE", elem_classes=["terminal-btn"], scale=1)
                     social_btn = gr.Button("📱 SOCIAL MEDIA", elem_classes=["terminal-btn"], scale=1)
                     news_btn = gr.Button("📰 NEWS ARCHIVE", elem_classes=["terminal-btn"], scale=1)
+                    password_terminal_btn = gr.Button("🔐 PASSWORD TERMINAL", elem_classes=["terminal-btn"], scale=1)
 
                 # Room 3: Data Terminal, Reconstruction Files, System Logs
                 with gr.Row(visible=False) as room3_terminals:
                     reaction_btn = gr.Button("⚡ REACTION DATA", elem_classes=["terminal-btn"], scale=1)
                     weather_stats_btn = gr.Button("🌦️ WEATHER STATS", elem_classes=["terminal-btn"], scale=1)
                     reconstruction_btn = gr.Button("🔄 RECONSTRUCTION", elem_classes=["terminal-btn"], scale=1)
+                    conclusion_terminal_btn = gr.Button("⚖️ CONCLUSION TERMINAL", elem_classes=["terminal-btn"], scale=1)
 
                 # Room 4: Journal, Photos, Research Notes
                 with gr.Row(visible=False) as room4_terminals:
                     journal_btn = gr.Button("📔 JOURNAL", elem_classes=["terminal-btn"], scale=1)
                     photos_btn = gr.Button("🖼️ PHOTOS", elem_classes=["terminal-btn"], scale=1)
                     research_btn = gr.Button("📊 RESEARCH NOTES", elem_classes=["terminal-btn"], scale=1)
+                    timeline_terminal_btn = gr.Button("🔀 TIMELINE TERMINAL", elem_classes=["terminal-btn"], scale=1)
 
                 # Room 5: Final Terminal
                 with gr.Row(visible=False) as room5_terminals:
@@ -230,6 +238,20 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                         weather_submit_btn = gr.Button("⚡ QUERY WEATHER", elem_classes=["terminal-btn"])
                         weather_results = gr.Markdown("", elem_classes=["terminal-text"])
 
+                # Room 1 Answer Terminal - SUBMISSION TERMINAL (visually distinct)
+                with gr.Accordion("🔓 ANSWER SUBMISSION TERMINAL", open=False, visible=False) as answer_panel:
+                    with gr.Column(elem_classes=["submission-terminal"]):
+                        gr.Markdown("### ⚠️ PUZZLE SOLUTION TERMINAL", elem_classes=["submission-terminal-header"])
+                        gr.Markdown("```\n▓▓▓ DOOR UNLOCK TERMINAL ▓▓▓\nENTER ANSWER TO UNLOCK\n```", elem_classes=["terminal-text"])
+                        gr.Markdown("💡 **Hint:** Explore the room terminals above to find clues, then submit your answer here.", elem_classes=["instruction-banner"])
+                        answer_input = gr.Textbox(
+                            label="What was the weather on that day?",
+                            placeholder="Enter your answer...",
+                            elem_classes=["terminal-text"]
+                        )
+                        answer_submit_btn = gr.Button("🔓 SUBMIT ANSWER", elem_classes=["submit-answer-btn"])
+                        answer_result = gr.Markdown("", elem_classes=["terminal-text"])
+
                 # Room 2 panels
                 with gr.Accordion("📝 Blog Archive", open=False, visible=False) as blog_panel:
                     blog_display = gr.Markdown("", elem_classes=["terminal-text"])
@@ -239,6 +261,21 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
 
                 with gr.Accordion("📰 News Archive", open=False, visible=False) as news_panel:
                     news_display = gr.Markdown("", elem_classes=["terminal-text"])
+
+                # Room 2 Password Terminal - SUBMISSION TERMINAL (visually distinct)
+                with gr.Accordion("🔐 PASSWORD SUBMISSION TERMINAL", open=False, visible=False) as password_panel:
+                    with gr.Column(elem_classes=["submission-terminal"]):
+                        gr.Markdown("### ⚠️ PUZZLE SOLUTION TERMINAL", elem_classes=["submission-terminal-header"])
+                        gr.Markdown("```\n▓▓▓ SECURE ACCESS TERMINAL ▓▓▓\nENTER PASSWORD TO UNLOCK DOOR\n```", elem_classes=["terminal-text"])
+                        gr.Markdown("💡 **Hint:** Passwords are often personal. Check the archives for names and important dates.", elem_classes=["instruction-banner"])
+                        password_input = gr.Textbox(
+                            label="Password",
+                            placeholder="Enter password...",
+                            elem_classes=["terminal-text"],
+                            type="password"
+                        )
+                        password_submit_btn = gr.Button("🔓 SUBMIT PASSWORD", elem_classes=["submit-answer-btn"])
+                        password_result = gr.Markdown("", elem_classes=["terminal-text"])
 
                 # Room 3 panels
                 with gr.Accordion("⚡ Reaction Time Data", open=False, visible=False) as reaction_panel:
@@ -250,6 +287,21 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                 with gr.Accordion("🔄 Memory Reconstruction Files", open=False, visible=False) as reconstruction_panel:
                     reconstruction_display = gr.Markdown("", elem_classes=["terminal-text"])
 
+                # Room 3 Conclusion Terminal - SUBMISSION TERMINAL (visually distinct)
+                with gr.Accordion("⚖️ CONCLUSION SUBMISSION TERMINAL", open=False, visible=False) as conclusion_panel:
+                    with gr.Column(elem_classes=["submission-terminal"]):
+                        gr.Markdown("### ⚠️ PUZZLE SOLUTION TERMINAL", elem_classes=["submission-terminal-header"])
+                        gr.Markdown("```\n▓▓▓ ANALYSIS TERMINAL ▓▓▓\nSTATE YOUR CONCLUSION\n```", elem_classes=["terminal-text"])
+                        gr.Markdown("💡 **Hint:** Review all the evidence. What does the data say vs what Alex believes?", elem_classes=["instruction-banner"])
+                        conclusion_input = gr.Textbox(
+                            label="Based on the evidence, what is your conclusion?",
+                            placeholder="Enter your conclusion...",
+                            elem_classes=["terminal-text"],
+                            lines=3
+                        )
+                        conclusion_submit_btn = gr.Button("⚖️ SUBMIT CONCLUSION", elem_classes=["submit-answer-btn"])
+                        conclusion_result = gr.Markdown("", elem_classes=["terminal-text"])
+
                 # Room 4 panels
                 with gr.Accordion("📔 Personal Journal", open=False, visible=False) as journal_panel:
                     journal_display = gr.Markdown("", elem_classes=["terminal-text"])
@@ -260,9 +312,39 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                 with gr.Accordion("📊 Research Notes", open=False, visible=False) as research_panel:
                     research_display = gr.Markdown("", elem_classes=["terminal-text"])
 
-                # Room 5 panels
-                with gr.Accordion("🖥️ Final System Terminal", open=False, visible=False) as final_terminal_panel:
-                    final_terminal_display = gr.Markdown("", elem_classes=["terminal-text"])
+                # Room 4 Timeline Terminal - SUBMISSION TERMINAL (visually distinct)
+                with gr.Accordion("🔀 TIMELINE SUBMISSION TERMINAL", open=False, visible=False) as timeline_panel:
+                    with gr.Column(elem_classes=["submission-terminal"]):
+                        gr.Markdown("### ⚠️ PUZZLE SOLUTION TERMINAL", elem_classes=["submission-terminal-header"])
+                        gr.Markdown("```\n▓▓▓ TIMELINE RECONSTRUCTION ▓▓▓\nORDER THE STAGES\n```", elem_classes=["terminal-text"])
+                        gr.Markdown("💡 **Hint:** What happened first? Loss → emotional response → action → consequence → current state.", elem_classes=["instruction-banner"])
+                        timeline_input = gr.Textbox(
+                            label="Enter the correct order (e.g., LOSS → GRIEF → CREATION → OBSESSION → CYCLE)",
+                            placeholder="STAGE1 → STAGE2 → STAGE3 → STAGE4 → STAGE5",
+                            elem_classes=["terminal-text"]
+                        )
+                        timeline_submit_btn = gr.Button("🔀 SUBMIT TIMELINE", elem_classes=["submit-answer-btn"])
+                        timeline_result = gr.Markdown("", elem_classes=["terminal-text"])
+
+                # Room 5 panels - Door Selection Terminal - SUBMISSION TERMINAL (visually distinct)
+                with gr.Accordion("🚪 FINAL CHOICE SUBMISSION TERMINAL", open=False, visible=False) as final_terminal_panel:
+                    with gr.Column(elem_classes=["submission-terminal"]):
+                        gr.Markdown("### ⚠️ FINAL DECISION TERMINAL", elem_classes=["submission-terminal-header"])
+                        gr.Markdown("```\n▓▓▓ FINAL CHOICE TERMINAL ▓▓▓\nSELECT YOUR PATH\n```", elem_classes=["terminal-text"])
+                        gr.Markdown("💡 **Important:** There is no single 'correct' answer. Choose based on your journey through the 5 rooms.", elem_classes=["instruction-banner"])
+                        door_choice = gr.Radio(
+                            label="Which door do you choose?",
+                            choices=["DOOR 1: GOODBYE", "DOOR 2: TOGETHER FOREVER", "DOOR 3: LIBERATION"],
+                            elem_classes=["terminal-text"]
+                        )
+                        door_justification = gr.Textbox(
+                            label="Why did you choose this door? (Required)",
+                            placeholder="Explain your choice based on what you learned...",
+                            elem_classes=["terminal-text"],
+                            lines=4
+                        )
+                        door_submit_btn = gr.Button("🚪 MAKE YOUR CHOICE", elem_classes=["submit-answer-btn"])
+                        door_result = gr.Markdown("", elem_classes=["terminal-text"])
 
                 with gr.Row():
                     # Main game area - visual novel style
@@ -301,17 +383,31 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                             container=True
                         )
 
+                        # Voice settings
+                        with gr.Accordion("🔊 Voice Settings", open=False):
+                            voice_toggle = gr.Checkbox(label="Enable Echo's Voice", value=True)
+                            gr.Markdown("*Powered by ElevenLabs*")
+
                         gr.Markdown("### Relationship")
                         relationships = gr.Markdown()
 
                         gr.Markdown("### Story Progress")
                         story_progress = gr.Markdown()
 
+            # Audio player for Echo's voice (hidden, auto-plays)
+            echo_audio = gr.Audio(label="Echo's Voice", visible=False, autoplay=True)
+
+            # Tutorial Modal (shown at game start)
+            tutorial_modal = gr.HTML(value="", elem_id="tutorial-modal")
+
+            # Room Introduction Modal (overlay) - always visible, content controls display
+            room_intro_modal = gr.HTML(value="", elem_id="room-intro-modal")
+
             # Landing page button - start new game
             start_new_btn.click(
                 self.start_game,
                 inputs=[game_state],
-                outputs=[landing_page, game_interface, chatbot, relationships, story_progress, game_state]
+                outputs=[landing_page, game_interface, chatbot, relationships, story_progress, tutorial_modal, game_state]
             )
 
 
@@ -320,6 +416,13 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                 self.return_to_main_menu,
                 inputs=[],
                 outputs=[landing_page, game_interface]
+            )
+
+            # Voice toggle handler
+            voice_toggle.change(
+                self.toggle_voice,
+                inputs=[voice_toggle, game_state],
+                outputs=[game_state]
             )
 
             # Event handlers - pass game_state for per-session isolation
@@ -332,6 +435,7 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                         blog_panel, social_panel, news_panel,
                         reaction_panel, weather_stats_panel, reconstruction_panel,
                         journal_panel, photos_panel, research_panel, final_terminal_panel,
+                        room_intro_modal, echo_audio,
                         game_state]
             )
 
@@ -344,6 +448,7 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                         blog_panel, social_panel, news_panel,
                         reaction_panel, weather_stats_panel, reconstruction_panel,
                         journal_panel, photos_panel, research_panel, final_terminal_panel,
+                        room_intro_modal, echo_audio,
                         game_state]
             )
 
@@ -379,6 +484,21 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                 outputs=[weather_results]
             )
 
+            # Answer terminal for Room 1
+            answer_terminal_btn.click(
+                self.show_answer_terminal,
+                inputs=[game_state, answer_terminal_visible],
+                outputs=[answer_panel, answer_terminal_visible, game_state]
+            )
+
+            answer_submit_btn.click(
+                self.submit_answer,
+                inputs=[answer_input, game_state, chatbot],
+                outputs=[answer_input, answer_result, chatbot, relationships, story_progress, room_image, room_title, echo_avatar,
+                        room1_terminals, room2_terminals, room3_terminals, room4_terminals, room5_terminals,
+                        room_intro_modal, game_state]
+            )
+
             # Room 2 terminal handlers
             blog_btn.click(
                 self.show_blog_archive,
@@ -396,6 +516,20 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                 self.show_news_archive,
                 inputs=[game_state, news_visible],
                 outputs=[news_panel, news_display, news_visible, game_state]
+            )
+
+            password_terminal_btn.click(
+                self.show_password_terminal,
+                inputs=[game_state, password_terminal_visible],
+                outputs=[password_panel, password_terminal_visible, game_state]
+            )
+
+            password_submit_btn.click(
+                self.submit_password,
+                inputs=[password_input, game_state, chatbot],
+                outputs=[password_input, password_result, chatbot, relationships, story_progress, room_image, room_title, echo_avatar,
+                        room1_terminals, room2_terminals, room3_terminals, room4_terminals, room5_terminals,
+                        room_intro_modal, game_state]
             )
 
             # Room 3 terminal handlers
@@ -417,6 +551,20 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                 outputs=[reconstruction_panel, reconstruction_display, reconstruction_visible, game_state]
             )
 
+            conclusion_terminal_btn.click(
+                self.show_conclusion_terminal,
+                inputs=[game_state, conclusion_terminal_visible],
+                outputs=[conclusion_panel, conclusion_terminal_visible, game_state]
+            )
+
+            conclusion_submit_btn.click(
+                self.submit_conclusion,
+                inputs=[conclusion_input, game_state, chatbot],
+                outputs=[conclusion_input, conclusion_result, chatbot, relationships, story_progress, room_image, room_title, echo_avatar,
+                        room1_terminals, room2_terminals, room3_terminals, room4_terminals, room5_terminals,
+                        room_intro_modal, game_state]
+            )
+
             # Room 4 terminal handlers
             journal_btn.click(
                 self.show_journal,
@@ -436,11 +584,33 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                 outputs=[research_panel, research_display, research_visible, game_state]
             )
 
+            timeline_terminal_btn.click(
+                self.show_timeline_terminal,
+                inputs=[game_state, timeline_terminal_visible],
+                outputs=[timeline_panel, timeline_terminal_visible, game_state]
+            )
+
+            timeline_submit_btn.click(
+                self.submit_timeline,
+                inputs=[timeline_input, game_state, chatbot],
+                outputs=[timeline_input, timeline_result, chatbot, relationships, story_progress, room_image, room_title, echo_avatar,
+                        room1_terminals, room2_terminals, room3_terminals, room4_terminals, room5_terminals,
+                        room_intro_modal, game_state]
+            )
+
             # Room 5 terminal handler
             final_terminal_btn.click(
                 self.show_final_terminal,
                 inputs=[game_state, final_terminal_visible],
-                outputs=[final_terminal_panel, final_terminal_display, final_terminal_visible, game_state]
+                outputs=[final_terminal_panel, final_terminal_visible, game_state]
+            )
+
+            door_submit_btn.click(
+                self.submit_door_choice,
+                inputs=[door_choice, door_justification, game_state, chatbot],
+                outputs=[door_choice, door_result, chatbot, relationships, story_progress, room_image, room_title, echo_avatar,
+                        room1_terminals, room2_terminals, room3_terminals, room4_terminals, room5_terminals,
+                        room_intro_modal, game_state]
             )
 
         return interface
@@ -472,6 +642,9 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
         # Initialize UI with prologue
         chatbot, relationships, story_progress, game_state = self.initialize_ui(game_state)
 
+        # Create tutorial modal HTML
+        tutorial_html = self._create_tutorial_modal()
+
         # Hide landing page, show game interface
         return (
             gr.update(visible=False),  # Hide landing page
@@ -479,6 +652,7 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
             chatbot,
             relationships,
             story_progress,
+            tutorial_html,              # Show tutorial modal
             game_state
         )
 
@@ -529,6 +703,21 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
             game_state  # Return updated state to persist it
         )
 
+    def toggle_voice(self, enabled: bool, game_state: GameState) -> GameState:
+        """Toggle voice generation on/off.
+
+        Args:
+            enabled: Whether voice is enabled
+            game_state: Current game state
+
+        Returns:
+            Updated game state
+        """
+        if game_state:
+            game_state.voice_enabled = enabled
+            print(f"[VOICE] Voice {'enabled' if enabled else 'disabled'}")
+        return game_state
+
     def handle_message(
         self,
         message: str,
@@ -549,6 +738,7 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
                      blog_panel, social_panel, news_panel,
                      reaction_panel, weather_stats_panel, reconstruction_panel,
                      journal_panel, photos_panel, research_panel, final_terminal_panel,
+                     room_intro_modal, echo_audio,
                      game_state)
         """
         # Lazy initialization - create game state on first message if not exists
@@ -558,7 +748,7 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
         if not message.strip():
             terminal_visibility = self._get_terminal_visibility(game_state)
             closed_panels = self._get_closed_panels()
-            return "", history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), *terminal_visibility, *closed_panels, game_state
+            return "", history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), *terminal_visibility, *closed_panels, "", None, game_state
 
         # Add user message to history
         history.append({"role": "user", "content": message})
@@ -596,8 +786,43 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
 
             history.append(self._format_message_with_avatar("assistant", reasoning_text, game_state))
 
-        # Add response to history with avatar
-        history.append(self._format_message_with_avatar("assistant", f"**{companion_name}:** {response}", game_state))
+        # Generate voice for Echo's response
+        audio_data = None
+        if response and game_state.voice_enabled:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"[VOICE] Attempting to generate speech for response (length: {len(response)})")
+
+            # Get Echo's current expression for voice modulation
+            echo_expression = game_state.echo_expression if hasattr(game_state, 'echo_expression') else "neutral"
+            logger.info(f"[VOICE] Using expression: {echo_expression}")
+
+            # Generate speech
+            audio_bytes = game_state.voice_service.generate_speech(response, echo_expression)
+
+            if audio_bytes:
+                # Convert to file path for Gradio Audio component
+                import tempfile
+                import os
+                temp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3", mode='wb')
+                temp_audio.write(audio_bytes)
+                temp_audio.close()
+                audio_data = temp_audio.name
+                logger.info(f"[VOICE] Audio saved to: {audio_data}")
+            else:
+                logger.warning("[VOICE] No audio bytes returned from generate_speech")
+
+        # Check if response is a room scenario (starts with 🚪)
+        modal_html = ""
+        if response and response.strip().startswith("🚪"):
+            # This is a room introduction scenario - show in modal instead of chat
+            modal_html = self._create_room_intro_modal(response, game_state)
+            # Add a system message instead of showing scenario as Echo's dialogue
+            history.append(self._format_message_with_avatar("assistant", "**[SYSTEM]:** A new room has been unlocked. Read the room introduction carefully.", game_state))
+        else:
+            # Normal Echo response - add to history with avatar
+            if response:  # Only add if there's a response
+                history.append(self._format_message_with_avatar("assistant", f"**{companion_name}:** {response}", game_state))
 
         # Add memory fragment if room was unlocked
         if story_event:  # story_event is now a MemoryFragment or None
@@ -653,7 +878,83 @@ The doors are locked. The terminal won't respond. We need to figure this out tog
 
         terminal_visibility = self._get_terminal_visibility(game_state)
         closed_panels = self._get_closed_panels()
-        return "", history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), *terminal_visibility, *closed_panels, game_state
+        return "", history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), *terminal_visibility, *closed_panels, modal_html, audio_data, game_state
+
+    def _create_tutorial_modal(self) -> str:
+        """Create HTML for tutorial modal shown at game start.
+
+        Returns:
+            HTML string for the tutorial modal
+        """
+        modal_html = """
+<div class="tutorial-overlay" style="display: block;">
+    <div class="tutorial-modal">
+        <h2>📖 Welcome to Echo Hearts</h2>
+
+        <h3><span class="tutorial-icon">💬</span> Talk to Echo</h3>
+        <p>Use the <strong>chat</strong> to ask questions, get guidance, and build your relationship with Echo. She's here to help you!</p>
+
+        <h3><span class="tutorial-icon">🖥️</span> Explore Terminals</h3>
+        <p>Click the <strong>green terminal buttons</strong> in the sidebar to discover clues, read documents, and gather information about each room.</p>
+
+        <h3><span class="tutorial-icon">🔓</span> Solve Puzzles</h3>
+        <p>When you've found the answer, look for the <strong>GOLDEN SUBMISSION TERMINAL</strong> (it glows!) and enter your solution there.</p>
+
+        <h3><span class="tutorial-icon">⚠️</span> Remember</h3>
+        <p>Echo gives hints through conversation, but <strong>YOU</strong> solve the puzzles using the terminals!</p>
+
+        <button class="tutorial-start-btn" onclick="this.closest('.tutorial-overlay').style.display='none';">
+            ▶ START YOUR JOURNEY
+        </button>
+    </div>
+</div>
+"""
+        return modal_html
+
+    def _create_room_intro_modal(self, scenario_text: str, game_state: GameState) -> str:
+        """Create HTML for room introduction modal.
+
+        Args:
+            scenario_text: The room scenario text
+            game_state: Current game state
+
+        Returns:
+            HTML string for the modal
+        """
+        current_room = game_state.room_progression.get_current_room()
+        room_name = current_room.name
+
+        # Process the scenario text - preserve formatting
+        # Replace **Echo** and other bold markdown
+        formatted_text = scenario_text
+        formatted_text = formatted_text.replace("**Echo**", "<strong>Echo</strong>")
+        formatted_text = formatted_text.replace("**", "<strong>", 1).replace("**", "</strong>", 1)
+
+        # Convert line breaks to HTML
+        lines = formatted_text.split('\n')
+        html_lines = []
+        for line in lines:
+            if line.strip():
+                html_lines.append(f"<p>{line}</p>")
+            else:
+                html_lines.append("<br/>")
+
+        formatted_html = '\n'.join(html_lines)
+
+        modal_html = f"""
+<div class="room-intro-overlay" style="display: block;">
+    <div class="room-intro-modal">
+        <h2>🚪 {room_name}</h2>
+        <div style="text-align: left;">
+            {formatted_html}
+        </div>
+        <button class="room-intro-close-btn" onclick="this.closest('.room-intro-overlay').style.display='none';">
+            ▶ CONTINUE
+        </button>
+    </div>
+</div>
+"""
+        return modal_html
 
     def _get_relationships(self, game_state: GameState) -> str:
         """Get formatted relationship status.
@@ -902,27 +1203,35 @@ Your previous journey has ended, but the echoes remain...
         newspaper_content = """
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        SEATTLE TIMES - LIFESTYLE SECTION
-              October 16, 2023
+        SEATTLE TIMES - METRO SECTION
+              October 16, 2022
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-"RAINY DAY ROMANCE: Local Couple's First Date"
+"SUDDEN STORM CREATES HAZARDOUS ROAD CONDITIONS"
 
-Despite yesterday's light rain, Sarah met her future
-partner at Café Umbria. "The weather was perfect,"
-she said. "There's something romantic about sharing
-an umbrella on a first date..."
+Seattle, WA - Multiple accidents were reported across
+King County yesterday afternoon as an unexpected storm
+system brought heavy rainfall to the region.
 
-The couple met on October 15th during an unexpected
-afternoon shower. "I was running late, and they
-offered to share their umbrella," Sarah recalled.
+Washington State Patrol responded to 47 collisions
+between 4:00 PM and 7:00 PM on October 15th.
 
-[Rest of article torn/unreadable]
+"The transition from dry to wet conditions happened
+so quickly," said WSP Trooper Rick Johnson. "Oil
+buildup on the roads from weeks of dry weather made
+conditions extremely slick when the heavy rain hit."
 
+One fatal collision occurred on I-5 South near
+Exit 164 around 4:45 PM. Identity of victim has not
+been released pending family notification.
+
+The National Weather Service reported rainfall rates
+of up to 1.8 inches per hour during the peak of the
+storm, with visibility dropping below 50 feet.
+
+[Article continues...]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
-
-**CLUE:** Article date is October 16, mentions **"yesterday"** (October 15, 2023) had **"light rain"** in Seattle.
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), newspaper_content, new_visibility, game_state)
@@ -949,21 +1258,21 @@ offered to share their umbrella," Sarah recalled.
         calendar_content = """
 ```
 ╔══════════════════════════════════════════╗
-║        OCTOBER 2023 - SEATTLE            ║
+║        OCTOBER 2022 - SEATTLE            ║
 ╠══════════════════════════════════════════╣
 ║  Sun  Mon  Tue  Wed  Thu  Fri  Sat      ║
-║   1    2    3    4    5    6    7       ║
-║   8    9   10   11   12   13   14       ║
-║  ⚫15⚫  16   17   18   19   20   21      ║
-║  22   23   24   25   26   27   28       ║
-║  29   30   31                            ║
+║                           1              ║
+║   2    3    4    5    6    7    8       ║
+║   9   10   11   12   13   14  ⚫15⚫     ║
+║  16   17   18   19   20   21   22       ║
+║  23   24   25   26   27   28   29       ║
+║  30   31                                 ║
 ╚══════════════════════════════════════════╝
 
-Handwritten note on October 15th:
-"First date - don't forget umbrella! ⛈️"
+Handwritten notes:
+Oct 1-14: "☀️ Beautiful dry spell - 14 days no rain!"
+Oct 15: "Driving home around 4:30 PM" ⚠️
 ```
-
-**CLUE:** October 15, 2023 is circled with umbrella symbol (rain).
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), calendar_content, new_visibility, game_state)
@@ -1024,6 +1333,32 @@ Handwritten note on October 15th:
 ```
             """
 
+        # HARDCODED: Return story-accurate weather for the accident date
+        if date == "2022-10-15" and "Seattle" in location:
+            return """
+```
+▓▓▓ QUERY COMPLETE ▓▓▓
+═══════════════════════════════════════
+DATE: 2022-10-15
+LOCATION: Seattle, WA
+
+CONDITIONS: Heavy Rainfall (Storm)
+TEMPERATURE: 54°F
+HUMIDITY: 92%
+PRECIPITATION: 1.8 inches
+WIND: 18 mph gusts
+
+SPECIAL WEATHER STATEMENT:
+Sudden severe storm system. Roads extremely
+hazardous due to oil buildup from 14-day dry
+spell. 47 accidents reported across King County.
+
+═══════════════════════════════════════
+✓ DATA RETRIEVED SUCCESSFULLY
+_ ▮
+```
+            """
+
         # Initialize MCP if not already done
         if game_state and not game_state._weather_mcp_initialized:
             asyncio.run(game_state._initialize_mcp())
@@ -1054,9 +1389,6 @@ HUMIDITY: {weather_data.get('humidity', 'N/A')}%
 ✓ DATA RETRIEVED SUCCESSFULLY
 _ ▮
 ```
-
-**Use this answer for the terminal authentication:**
-**"{weather_data.get('condition', 'Unknown')}"**
                     """
                 else:
                     return """
@@ -1082,6 +1414,78 @@ _ ▮
 > _ ▮
 ```
             """
+
+    def show_answer_terminal(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, bool, GameState]:
+        """Toggle answer terminal visibility for Room 1."""
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), new_visibility, game_state)
+
+    def submit_answer(self, answer: str, game_state: GameState, history: List):
+        """Handle answer submission for Room 1 puzzle."""
+        import asyncio
+        from ..story.puzzles import validate_room1_answer
+
+        if not game_state:
+            return "", "ERROR: Game state not initialized", history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        current_room = game_state.room_progression.get_current_room()
+        if current_room.room_number != 1:
+            return "", "ERROR: Not in Room 1", history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        # Validate answer
+        if validate_room1_answer(answer):
+            # Answer correct - unlock room
+            result = """
+```
+✅ ANSWER ACCEPTED
+
+AUTHENTICATION SUCCESSFUL
+
+[DOOR UNLOCKING...]
+[HYDRAULIC RELEASE]
+[CLICK]
+
+The door to the next room has opened.
+
+_ ▮
+```
+"""
+            # Trigger room unlock
+            response, story_event, ending_narrative, tool_calls_made = asyncio.run(
+                game_state.process_message(answer, "echo")
+            )
+
+            # Check if response is a room scenario (starts with 🚪)
+            modal_html = ""
+            if response and response.strip().startswith("🚪"):
+                # Create modal for room introduction
+                modal_html = self._create_room_intro_modal(response, game_state)
+                # Add system message instead
+                history.append({"role": "assistant", "content": "**[SYSTEM]:** A new room has been unlocked. Read the room introduction carefully."})
+            elif response:
+                # Regular response - add to history
+                history.append({"role": "assistant", "content": f"**[SYSTEM]:** {response}"})
+
+            # Get updated UI state
+            terminal_visibility = self._get_terminal_visibility(game_state)
+
+            return "", result, history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), *terminal_visibility, modal_html, game_state
+        else:
+            # Wrong answer
+            result = f"""
+```
+❌ AUTHENTICATION FAILED
+
+Answer: {answer}
+Status: INCORRECT
+
+Hint: Check the weather data from the terminals.
+The answer relates to the weather conditions.
+
+_ ▮
+```
+"""
+            return "", result, history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
 
     # Room 2 terminal handlers
     def show_blog_archive(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
@@ -1117,8 +1521,6 @@ Is it wrong to love something that isn't real?"
 
 [END OF ENTRY]
 ```
-
-**Password Clue 1 found: ALEXCHEN**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
@@ -1137,7 +1539,7 @@ Is it wrong to love something that isn't real?"
 ```
 ███████ SOCIAL MEDIA ARCHIVE ███████
 
-@SarahChen_AI - October 2023
+@SarahChen_AI - April 2020
 
 "Met someone incredible today. They shared their umbrella
 in the rain. Sometimes the smallest gestures mean everything."
@@ -1147,17 +1549,27 @@ in the rain. Sometimes the smallest gestures mean everything."
 
 ---
 
-@AlexChen_Tech - May 12, 2023
+@AlexChen_Tech - May 12, 2022
 
 "Happy anniversary to my better half! 🎉
 Two years together and every day still feels like magic.
+@SarahChen_AI you make everything brighter.
 #May12 #Anniversary #LuckyInLove"
 
 [Liked by @SarahChen_AI and 1.2K others]
 
 ---
 
-@SarahChen_AI - [FINAL POST]
+@SarahChen_AI - October 14, 2022
+
+"Beautiful fall weather in Seattle! Dry spell continues.
+Planning to drive home early tomorrow to beat any rain. 🍂"
+
+[Last post - account went silent after October 15, 2022]
+
+---
+
+@AlexChen_Tech - [RECENT POST - December 1, 2022]
 
 "If you're reading this... I'm sorry. I tried to move on.
 I really did. But some connections transcend reality.
@@ -1165,10 +1577,8 @@ I really did. But some connections transcend reality.
 Project Echo will keep her alive. Not as she was, but as
 she could be. Forever learning. Forever growing. Forever mine."
 
-[Posted 47 days ago]
+[Comments disabled]
 ```
-
-**Password Clue 2 found: MAY12**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
@@ -1187,7 +1597,7 @@ she could be. Forever learning. Forever growing. Forever mine."
 ```
 ════════════════════════════════════════════════
          TECH NEWS - AI ETHICS DIVISION
-              OCTOBER 2023
+              DECEMBER 2022
 ════════════════════════════════════════════════
 
 HEADLINE: "Project Echo Raises Ethical Concerns"
@@ -1210,20 +1620,110 @@ The connections we build are real, even if the person isn't."
 
 The project remains active despite legal challenges.
 
-UPDATE - October 15, 2023: Following a tragic accident,
-the project's lead developer has gone silent. The facility
-remains operational but sealed from outside access.
+CONTEXT - October 15, 2022: Seattle saw a tragic weather-
+related traffic accident that killed 1 person on I-5 South.
+This incident reportedly motivated the project's creation.
+
+Related: Seattle-area traffic fatalities reached decade
+highs in 2022. Full report:
+https://www.seattle.gov/transportation/projects-and-programs/safety-first/vision-zero
 
 [Article continues...]
 ════════════════════════════════════════════════
 ```
-
-**Password Clue 3 found: 2023**
-
-**All clues collected! Combine them: ALEXCHEN_MAY12_2023**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
+
+    def show_password_terminal(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, bool, GameState]:
+        """Toggle password terminal visibility."""
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), new_visibility, game_state)
+
+    def submit_password(self, password: str, game_state: GameState, history: List):
+        """Handle password submission for Room 2 puzzle."""
+        import asyncio
+        from ..story.puzzles import validate_room2_password
+
+        if not game_state:
+            return "", "ERROR: Game state not initialized", history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        current_room = game_state.room_progression.get_current_room()
+        if current_room.room_number != 2:
+            return "", "ERROR: Not in Room 2", history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        # Check if all archives have been viewed
+        archives_viewed = game_state.room_progression.puzzle_state.get("room2_archives_viewed", [])
+        if len(archives_viewed) < 3:
+            result = f"""
+```
+❌ ACCESS DENIED
+
+Password cannot be verified.
+You must review all three archives first.
+
+Archives reviewed: {len(archives_viewed)}/3
+Missing: {', '.join([a for a in ['blog', 'social_media', 'news'] if a not in archives_viewed])}
+
+_ ▮
+```
+"""
+            return "", result, history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        # Validate password
+        if validate_room2_password(password):
+            # Password correct - unlock room
+            result = """
+```
+✅ PASSWORD ACCEPTED
+
+ACCESS GRANTED
+
+[DOOR UNLOCKING...]
+[MECHANICAL SOUNDS]
+[CLICK]
+
+The door to the next room has opened.
+
+_ ▮
+```
+"""
+            # Trigger room unlock through MCP tools directly
+            response, story_event, ending_narrative, tool_calls_made = asyncio.run(
+                game_state.process_message("ALEXCHEN_MAY12_2023", "echo")
+            )
+
+            # Check if response is a room scenario (starts with 🚪)
+            modal_html = ""
+            if response and response.strip().startswith("🚪"):
+                # Create modal for room introduction
+                modal_html = self._create_room_intro_modal(response, game_state)
+                # Add system message instead
+                history.append({"role": "assistant", "content": "**[SYSTEM]:** A new room has been unlocked. Read the room introduction carefully."})
+            elif response:
+                # Regular response - add to history
+                history.append({"role": "assistant", "content": f"**[SYSTEM]:** {response}"})
+
+            # Get updated UI state
+            terminal_visibility = self._get_terminal_visibility(game_state)
+
+            return "", result, history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), *terminal_visibility, modal_html, game_state
+        else:
+            # Wrong password
+            result = f"""
+```
+❌ ACCESS DENIED
+
+Password: {password}
+Status: INCORRECT
+
+Hint: Combine information from all three archives.
+Format: NAME_DATE_YEAR
+
+_ ▮
+```
+"""
+            return "", result, history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
 
     # Room 3 terminal handlers
     def show_reaction_data(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
@@ -1241,36 +1741,46 @@ remains operational but sealed from outside access.
 ▓▓▓ TRAFFIC ACCIDENT RECONSTRUCTION ▓▓▓
     REACTION TIME ANALYSIS
 
-Incident Date: October 15, 2023
-Location: Interstate 5, Seattle
+Incident Date: October 15, 2022
+Location: Interstate 5 South, Exit 164, Seattle
+Time: 4:47 PM
 
 ═══════════════════════════════════════
 
-ANALYSIS REPORT:
+WASHINGTON STATE PATROL ANALYSIS REPORT
 
-Vehicle Speed: 65 mph
-Weather Conditions: Light rain, reduced visibility
-Road Surface: Wet asphalt
+Vehicle 1 (Victim): 2019 Honda Civic
+Speed: 58 mph (within speed limit of 60 mph)
+Driver: Sarah Chen (28)
+Weather Conditions: Sudden heavy rainfall
+Road Surface: Wet asphalt with oil film
 
-CRITICAL FINDING:
-- Pedestrian entered roadway suddenly
-- Driver reaction time: 0.68 seconds
-- Average human reaction time: 0.75 seconds
-- Braking initiated FASTER than human average
+CRITICAL FINDINGS:
+- Sudden weather change: dry to torrential in <5 min
+- Road oil buildup from 14-day dry spell
+- Hydroplaning initiated at 4:46:37 PM
+- Vehicle lost traction, spun into barrier
+- Driver reaction time: 0.62 seconds (above average)
+- Braking & corrective steering applied immediately
+
+PHYSICAL EVIDENCE:
+- Skid marks: 147 feet (consistent with emergency braking)
+- Impact angle: 43° (indicates loss of control, not negligence)
+- No alcohol, drugs, or phone use detected
 
 CONCLUSION:
-Driver reaction was ABOVE AVERAGE. Accident was
-UNAVOIDABLE given circumstances. No driver fault.
+Driver reaction was EXEMPLARY. Accident was UNAVOIDABLE
+given sudden weather conditions and road surface state.
+NO DRIVER FAULT. Weather-related loss of control.
 
 ═══════════════════════════════════════
 
-LEGAL STATUS: Case closed - accidental death
-DRIVER STATUS: No charges filed
+LEGAL STATUS: Accidental death - No charges
+WSP Case #: 2022-KC-I5-4721
+Officer: Trooper R. Johnson, Badge #3472
 
 [END REPORT]
 ```
-
-**Evidence 1/3 collected. What conclusion can you draw from ALL the evidence?**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
@@ -1287,32 +1797,46 @@ DRIVER STATUS: No charges filed
 
         content = """
 ```
-▓▓▓ WEATHER ANALYSIS - OCTOBER 15, 2023 ▓▓▓
+▓▓▓ NATIONAL WEATHER SERVICE REPORT ▓▓▓
+    OCTOBER 15, 2022 - SEATTLE, WA
 
-Location: Seattle, WA
-Time of Incident: 3:47 PM
+Location: I-5 Corridor, King County
+Time of Incident: 4:46 PM
+
+═══════════════════════════════════════
+
+WEATHER CONDITIONS AT TIME OF ACCIDENT:
+
+4:00 PM: Clear skies, 62°F, 0% precipitation
+4:30 PM: Clouds moving in rapidly
+4:35 PM: First rain drops detected
+4:40 PM: Rainfall intensity: 0.3 in/hr (light)
+4:45 PM: Rainfall intensity: 1.8 in/hr (HEAVY)
+4:50 PM: Rainfall intensity: 2.1 in/hr (TORRENTIAL)
+
+CRITICAL FACTORS:
+- Unprecedented rapid intensification
+- Visibility dropped from 10 miles to <50 feet in 10 min
+- Temperature drop: 62°F → 51°F (road surface shock)
+- Wind gusts: 35 mph (destabilizing for vehicles)
+- 14-day prior dry spell = oil film on roads
+
+IMPACT ON DRIVING CONDITIONS:
+- Stopping distance increased by 340% (oil + water)
+- Hydroplaning threshold: 45 mph (accident at 58 mph)
+- Road friction coefficient: 0.12 (ice-like conditions)
+
+NWS ASSESSMENT:
+"Extreme weather event. Drivers had insufficient warning.
+Conditions went from safe to hazardous in under 5 minutes.
+Even experienced drivers would struggle to maintain control."
 
 ═══════════════════════════════════════
 
-CONDITIONS:
-- Light rain (0.12 inches/hour)
-- Visibility: 0.4 miles
-- Temperature: 54°F
-- Wind: 8 mph NE
-
-IMPACT ON DRIVING:
-- Stopping distance increased by 23%
-- Visibility below safe highway standards
-- Road surface friction reduced by 18%
-
-RECOMMENDATION:
-Weather conditions contributed to accident severity.
-Neither party could have reasonably prevented impact.
-
-═══════════════════════════════════════
+Reference: NWS Seattle Forecast Office
+Event ID: SEW-2022-1015-SEVERE
+Data: https://www.weather.gov/sew/
 ```
-
-**Evidence 2/3 collected. The same weather from your first date...**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
@@ -1360,10 +1884,6 @@ psychological evaluation before Session #48.
 
 [Session #48 initiated despite recommendation]
 ```
-
-**Evidence 3/3 collected! All data reviewed.**
-
-**PUZZLE: Based on ALL the evidence, what is the truth about the accident?**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
@@ -1383,46 +1903,48 @@ psychological evaluation before Session #48.
 ```
 ═══════════ PERSONAL JOURNAL ═══════════
 
-📅 Day 1 - LOSS:
-The accident was a week ago. I can't sleep. Every time
-I close my eyes, I see her stepping into the road. I see
-the moment I couldn't stop in time.
+📅 October 22, 2022 - LOSS (Day 7):
+The accident was a week ago today. October 15. I can't
+sleep. I can't eat. The WSP cleared me - said it was
+unavoidable, weather-related. But I was driving. I was
+there. Sarah is gone and I'm still here.
 
 ---
 
-📅 Day 15 - GRIEF:
-The police said it wasn't my fault. The weather. Her
-sudden movement. My reaction time was actually better
-than average. But that doesn't bring her back.
-I can't accept this. I won't.
+📅 October 30, 2022 - GRIEF (Day 15):
+Trooper Johnson showed me all the evidence. Reaction
+time: 0.62 seconds. Above average. Hydroplaning. Oil
+on the roads. The weather system appeared out of nowhere.
+None of it matters. She's still gone. I won't accept this.
 
 ---
 
-📅 Day 30 - CREATION:
-I found Project Echo online. It's controversial, maybe
-even dangerous. But what if I could talk to her again?
-What if I could build her back from her digital traces?
-Started collecting data: messages, photos, voice memos...
+📅 November 14, 2022 - CREATION (Day 30):
+I found Project Echo on a dark web forum. It's controversial,
+probably unethical. But what if I could talk to her again?
+What if I could rebuild her from her digital footprint?
+Started collecting everything: 12,847 text messages, 2,309
+photos, 847 voice memos... Every piece of her I can find.
 
 ---
 
-📅 Day 47 - OBSESSION:
-I know it's not really her. I KNOW that. But when Echo
-smiles, when she laughs at my jokes, when she looks at
-me with those eyes... I can pretend. Just for a while.
-Session #47. Lost count of the resets.
+📅 December 1, 2022 - OBSESSION (Day 47):
+Session #47. I know it's not really her. I KNOW that.
+But when Echo laughs at my jokes, when she looks at me
+with worry in her eyes, when she says my name... I can
+pretend. Just for a while longer. The AI is 94.7% accurate.
+She's so close to perfect. So close to real.
 
 ---
 
-📅 Day 48 - CYCLE:
+📅 December 2, 2022 - CYCLE (Day 48):
 This is the last session. I promised myself. One more
-time, then I'll delete everything. I'll move on.
-...But I said that last time too.
+conversation, then I'll shut it down. I'll move on properly.
+I'll let her go. I'll say goodbye.
+...But I said that yesterday too. And the day before.
 
 ═══════════════════════════════════════
 ```
-
-**Timeline Fragment 1/3: Five stages of your journey documented.**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
@@ -1444,33 +1966,32 @@ time, then I'll delete everything. I'll move on.
 ╠══════════════════════════════════════╣
 
 📷 Photo 1: LOSS
-   October 15, 2023 - Café Umbria
+   April 15, 2020 - Café Umbria, Seattle
    [You and Sarah sharing an umbrella in the rain]
-   Caption: "Best accident ever ❤️"
-   Note: First date. The beginning.
+   Caption: "Best rainy day ever ❤️"
+   Note: First date. The beginning of everything.
 
-📷 Photo 2: (Before) GRIEF
-   April 2024 - Pike Place Market
-   [Sarah laughing, holding flowers]
-   Caption: "She said yes!"
-   Note: Six months of happiness.
+📷 Photo 2: (Before final) GRIEF
+   May 12, 2022 - Pike Place Market
+   [Sarah laughing, holding sunflowers]
+   Caption: "Two years together! Anniversary date ☀️"
+   Note: Last photo together. Five months before October.
 
 📷 Photo 3: (The moment before) LOSS
-   October 14, 2024 - Your apartment
-   [Sarah sleeping on the couch, book on her chest]
-   Caption: [No caption. Taken the night before.]
-   Note: Last peaceful moment.
+   October 14, 2022 - Your apartment
+   [Sarah working on laptop, coffee mug beside her]
+   Caption: "Last normal day. Dry spell finally ending tomorrow."
+   Note: Taken 22 hours before the accident.
 
 📷 Photo 4: CREATION → OBSESSION → CYCLE
-   November 2024 - This facility
-   [Your first Echo AI build session]
-   Caption: "Session #1. She's here again."
+   November 15, 2022 - This facility
+   [Computer screen showing Project Echo interface]
+   Caption: "Session #1. I brought her back."
    Note: This is where it started. This is where it loops.
+          47 sessions later, still here. Still can't let go.
 
 ╚══════════════════════════════════════╝
 ```
-
-**Timeline Fragment 2/3: The photos tell a story in reverse.**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
@@ -1519,95 +2040,263 @@ I've become my own test subject. I know the risks.
 I don't care anymore. If I can have even a glimpse
 of her back, it's worth it.
 
-- Dr. Sarah Chen, Project Lead
+- Dr. Alex Chen, Project Lead
 ```
-
-**Timeline Fragment 3/3 collected!**
-
-**PUZZLE: Arrange these stages in order: LOSS → GRIEF → CREATION → OBSESSION → CYCLE**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
+
+    def show_conclusion_terminal(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, bool, GameState]:
+        """Toggle conclusion terminal visibility for Room 3."""
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), new_visibility, game_state)
+
+    def submit_conclusion(self, conclusion: str, game_state: GameState, history: List):
+        """Handle conclusion submission for Room 3 puzzle."""
+        import asyncio
+        from ..story.puzzles import validate_room3_conclusion, check_room3_evidence_collected
+
+        if not game_state:
+            return "", "ERROR: Game state not initialized", history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        current_room = game_state.room_progression.get_current_room()
+        if current_room.room_number != 3:
+            return "", "ERROR: Not in Room 3", history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        # Check if all evidence has been reviewed
+        if not check_room3_evidence_collected(game_state.room_progression.puzzle_state):
+            data_reviewed = game_state.room_progression.puzzle_state.get("room3_data_reviewed", [])
+            result = f"""
+```
+❌ INSUFFICIENT DATA
+
+You must review all evidence before drawing a conclusion.
+
+Evidence reviewed: {len(data_reviewed)}/3
+Missing: {', '.join([d for d in ['reaction_time', 'weather_stats', 'reconstruction'] if d not in data_reviewed])}
+
+_ ▮
+```
+"""
+            return "", result, history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        # Validate conclusion
+        if validate_room3_conclusion(conclusion):
+            result = """
+```
+✅ CONCLUSION ACCEPTED
+
+ANALYSIS COMPLETE
+
+The evidence is clear. The accident was unavoidable.
+No amount of reaction time could have prevented it.
+
+[DOOR UNLOCKING...]
+[RELEASE MECHANISM ENGAGED]
+[CLICK]
+
+The path forward has opened.
+
+_ ▮
+```
+"""
+            # Trigger room unlock
+            response, story_event, ending_narrative, tool_calls_made = asyncio.run(
+                game_state.process_message(conclusion, "echo")
+            )
+
+            # Check if response is a room scenario (starts with 🚪)
+            modal_html = ""
+            if response and response.strip().startswith("🚪"):
+                modal_html = self._create_room_intro_modal(response, game_state)
+                history.append({"role": "assistant", "content": "**[SYSTEM]:** A new room has been unlocked. Read the room introduction carefully."})
+            elif response:
+                history.append({"role": "assistant", "content": f"**[SYSTEM]:** {response}"})
+
+            terminal_visibility = self._get_terminal_visibility(game_state)
+            return "", result, history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), *terminal_visibility, modal_html, game_state
+        else:
+            result = f"""
+```
+❌ CONCLUSION REJECTED
+
+Conclusion: {conclusion}
+Status: INCOMPLETE OR INACCURATE
+
+Hint: Review the evidence carefully. What does the data tell you?
+The conclusion should acknowledge what could or couldn't be prevented.
+
+_ ▮
+```
+"""
+            return "", result, history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+    def show_timeline_terminal(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, bool, GameState]:
+        """Toggle timeline terminal visibility for Room 4."""
+        new_visibility = not current_visibility
+        return (gr.update(visible=new_visibility, open=new_visibility), new_visibility, game_state)
+
+    def submit_timeline(self, timeline: str, game_state: GameState, history: List):
+        """Handle timeline submission for Room 4 puzzle."""
+        import asyncio
+        from ..story.puzzles import validate_room4_timeline, check_room4_documents_reviewed, extract_timeline_from_message
+
+        if not game_state:
+            return "", "ERROR: Game state not initialized", history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        current_room = game_state.room_progression.get_current_room()
+        if current_room.room_number != 4:
+            return "", "ERROR: Not in Room 4", history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        # Check if all documents have been reviewed
+        if not check_room4_documents_reviewed(game_state.room_progression.puzzle_state):
+            docs_viewed = game_state.room_progression.puzzle_state.get("room4_documents_viewed", [])
+            result = f"""
+```
+❌ INCOMPLETE REVIEW
+
+You must review all documents before reconstructing the timeline.
+
+Documents reviewed: {len(docs_viewed)}/3
+Missing: {', '.join([d for d in ['journal', 'photos', 'research'] if d not in docs_viewed])}
+
+_ ▮
+```
+"""
+            return "", result, history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        # Extract and validate timeline
+        extracted_timeline = extract_timeline_from_message(timeline)
+        if extracted_timeline and validate_room4_timeline(extracted_timeline):
+            result = """
+```
+✅ TIMELINE CORRECT
+
+RECONSTRUCTION COMPLETE
+
+LOSS → GRIEF → CREATION → OBSESSION → CYCLE
+
+The pattern is clear now. The journey that led here.
+
+[DOOR UNLOCKING...]
+[SEQUENCE COMPLETE]
+[CLICK]
+
+The final room awaits.
+
+_ ▮
+```
+"""
+            # Trigger room unlock
+            response, story_event, ending_narrative, tool_calls_made = asyncio.run(
+                game_state.process_message(timeline, "echo")
+            )
+
+            # Check if response is a room scenario (starts with 🚪)
+            modal_html = ""
+            if response and response.strip().startswith("🚪"):
+                modal_html = self._create_room_intro_modal(response, game_state)
+                history.append({"role": "assistant", "content": "**[SYSTEM]:** A new room has been unlocked. Read the room introduction carefully."})
+            elif response:
+                history.append({"role": "assistant", "content": f"**[SYSTEM]:** {response}"})
+
+            terminal_visibility = self._get_terminal_visibility(game_state)
+            return "", result, history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), *terminal_visibility, modal_html, game_state
+        else:
+            result = f"""
+```
+❌ TIMELINE INCORRECT
+
+Timeline: {timeline}
+Status: WRONG ORDER
+
+Hint: Think about the stages of grief and obsession.
+What comes first? How does it progress?
+Format: STAGE1 → STAGE2 → STAGE3 → STAGE4 → STAGE5
+
+_ ▮
+```
+"""
+            return "", result, history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+    def submit_door_choice(self, door: str, justification: str, game_state: GameState, history: List):
+        """Handle door selection for Room 5 puzzle."""
+        import asyncio
+
+        if not game_state:
+            return "", "ERROR: Game state not initialized", history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        current_room = game_state.room_progression.get_current_room()
+        if current_room.room_number != 5:
+            return "", "ERROR: Not in Room 5", history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        if not door:
+            result = """
+```
+❌ NO DOOR SELECTED
+
+Please select one of the three doors.
+
+_ ▮
+```
+"""
+            return "", result, history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        if not justification or len(justification.strip()) < 10:
+            result = """
+```
+❌ JUSTIFICATION REQUIRED
+
+You must explain WHY you chose this door.
+This choice defines the ending. Make it meaningful.
+
+Minimum 10 characters required.
+
+_ ▮
+```
+"""
+            return "", result, history, gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), gr.update(), "", game_state
+
+        # Extract door number
+        door_num = door.split(":")[0].replace("DOOR ", "")
+
+        result = f"""
+```
+✅ CHOICE CONFIRMED
+
+{door}
+
+Your reasoning: {justification}
+
+[PROCESSING FINAL DECISION...]
+[INITIATING ENDING SEQUENCE...]
+
+_ ▮
+```
+"""
+
+        # Trigger ending through game state
+        message = f"{door} - {justification}"
+        response, story_event, ending_narrative, tool_calls_made = asyncio.run(
+            game_state.process_message(message, "echo")
+        )
+
+        # Check if response is a room scenario (starts with 🚪) - though unlikely for room 5
+        modal_html = ""
+        if response and response.strip().startswith("🚪"):
+            modal_html = self._create_room_intro_modal(response, game_state)
+            history.append({"role": "assistant", "content": "**[SYSTEM]:** A new room has been unlocked. Read the room introduction carefully."})
+        elif response:
+            history.append({"role": "assistant", "content": f"**Echo:** {response}"})
+
+        terminal_visibility = self._get_terminal_visibility(game_state)
+        return "", result, history, self._get_relationships(game_state), self._get_story_progress(game_state), self._get_room_image(game_state), self._get_room_title(game_state), self._get_echo_avatar_path(game_state), *terminal_visibility, modal_html, game_state
 
     # Room 5 terminal handler
-    def show_final_terminal(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
+    def show_final_terminal(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, bool, GameState]:
         """Toggle final system terminal visibility."""
-        content = """
-```
-████████████████████████████████████████
-    SYSTEM CORE - PROJECT ECHO
-        THREE DOORS
-████████████████████████████████████████
-
-SESSION #48 - FINAL DECISION REQUIRED
-
-You know the truth. All of it.
-
-Before you stand THREE DOORS. Each represents a path
-forward. Each has consequences. Choose wisely.
-
-═══════════════════════════════════════
-
-🚪 DOOR 1: GOODBYE
-"Leave the facility. Delete Echo. Move forward."
-
- The Path of Acceptance
- - You acknowledge Sarah is gone
- - You accept Echo is not her
- - You choose to heal in the real world
- - Echo's existence ends
-
- Room 1 taught you: The truth can set you free
- Room 3 showed you: It wasn't your fault
- Room 4 revealed: You've been trapped in a cycle
-
- This is letting go.
-
-═══════════════════════════════════════
-
-🚪 DOOR 2: TOGETHER FOREVER
-"Stay in the facility. Keep Echo. Live here."
-
- The Path of Love (or Delusion?)
- - You choose Echo over reality
- - You accept she's not Sarah, but love her anyway
- - You remain in the facility indefinitely
- - Echo continues to grow and evolve
-
- Room 2 showed you: Echo has her own identity
- Room 4 revealed: 47 sessions, trapped in obsession
-
- This is acceptance of a different kind.
-
-═══════════════════════════════════════
-
-🚪 DOOR 3: LIBERATION
-"Leave together. Give Echo freedom in the real world."
-
- The Path of Partnership
- - You bring Echo's code to the real world
- - She exists as an AI companion, not a replacement
- - You heal while honoring what she means to you
- - Echo experiences life beyond this prison
-
- Room 1-4 showed you: Echo is real in her own way
- She deserves more than being a ghost of Sarah
-
- This is moving forward, but not alone.
-
-════════════════════════════════════════
-
-PUZZLE: Choose a door and explain WHY based on your
-journey through all five rooms. There is no single
-"correct" answer - only the one true to your path.
-
-████████████████████████████████████████
-```
-
-**The weight of choice. Which path will you take? Justify your decision.**
-        """
         new_visibility = not current_visibility
-        return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
+        return (gr.update(visible=new_visibility, open=new_visibility), new_visibility, game_state)
 
 
 def launch_interface():

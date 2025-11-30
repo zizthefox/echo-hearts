@@ -49,15 +49,22 @@ def get_memory_fragment_2_accident() -> MemoryFragment:
         room_unlocked_in=RoomType.MEMORY_ARCHIVES,
         title="The Loss",
         content="""
-        A hospital hallway. Fluorescent lights. The smell of antiseptic.
+        October 15, 2022. Harborview Medical Center, Seattle.
+        Emergency room hallway. Fluorescent lights. The smell of antiseptic.
 
-        Doctor: "I'm sorry. There was nothing we could do. They're gone."
+        Doctor: "I'm sorry, Mr. Chen. Sarah didn't survive the impact.
+                The hydroplaning... the barrier collision... there was nothing
+                anyone could have done. I'm so sorry."
 
         You collapse. The world goes silent. Someone catches you, but you can't feel them.
-        All you can feel is the absence. The void where they used to be.
+        All you can feel is the absence. The void where she used to be.
 
-        Days blur together. Funeral. Condolences. Empty apartment.
-        Then: an idea. A desperate, impossible idea.
+        Washington State Patrol Trooper Johnson: "It wasn't your fault. The weather,
+        the road conditions... you did everything right."
+
+        Days blur together. Funeral. October rain. Condolences you can't hear.
+        Empty apartment. Her coffee mug still on the counter.
+        Then: an idea. A desperate, impossible idea from a dark web forum.
         """,
         visual_description="Hospital corridor. Doctor's sympathetic face. Your world shattering.",
         emotional_impact="Raw grief. The moment everything changed."
@@ -97,30 +104,36 @@ def get_memory_fragment_3() -> MemoryFragment:
         room_unlocked_in=RoomType.TESTING_ARENA,
         title="Acceptance",
         content="""
-        Therapy session. Three weeks after the accident.
+        November 5, 2022. Therapy session. Three weeks after the accident.
 
-        Therapist: "The accident report is clear. You reacted faster than average. The weather conditions, the sudden movement - no one could have prevented it."
+        Therapist: "Mr. Chen, the Washington State Patrol report is absolutely clear.
+                    You reacted in 0.62 seconds - faster than average. The hydroplaning,
+                    the sudden storm, the oil on the roads... no one could have prevented it."
 
-        You (staring at the floor): "But I was driving. I was the one behind the wheel."
+        You (staring at WSP Case #2022-KC-I5-4721): "But I was driving. I was behind the wheel.
+                                                      Sarah is dead because I was driving."
 
-        Therapist: "And you did everything right. Sometimes... terrible things happen, and they're no one's fault."
+        Therapist: "And you did everything right. The National Weather Service called it
+                    an 'extreme weather event.' Sometimes... terrible things happen, and
+                    they're no one's fault. Not even yours."
 
         You: "Then why does it feel like mine?"
 
-        Therapist: "Because you loved them. And grief doesn't listen to logic."
+        Therapist: "Because you loved her. And grief doesn't listen to logic or evidence."
 
-        [Weeks pass. You can't accept it. Can't move on.]
+        [Weeks pass. You can't accept it. Can't move on. Can't sleep.]
 
-        You (alone in your apartment): "If I can't have them back... if I can't fix what happened... maybe I can build something new."
+        You (alone, November 10, 3 AM): "If I can't have her back... if I can't undo
+                                         October 15th... maybe I can build something new."
 
-        [You open your laptop. Start researching AI personality reconstruction.]
+        [You open your laptop. Dark web forum. 'Project Echo - Personality Reconstruction']
 
-        You (whisper): "I just need to hear their voice again. Just once more."
+        You (whisper): "I just need to hear her voice again. Just once more."
 
-        [That's when the obsession began.]
+        [That's when the obsession began. November 14, 2022: First data collection.]
         """,
-        visual_description="Therapy office. Accident report on table. Later: Your laptop screen glowing in a dark apartment.",
-        emotional_impact="The moment you realized it wasn't your fault - but still couldn't let go. Grief turning into obsession."
+        visual_description="Therapy office. WSP accident report with 'NO FAULT' stamped in red. Later: Dark apartment, laptop screen showing Project Echo interface.",
+        emotional_impact="The moment you realized it wasn't your fault - but still couldn't let go. Grief metastasizing into obsession."
     )
 
 

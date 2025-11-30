@@ -14,6 +14,7 @@ from .memory.relationships import RelationshipTracker
 from .story.rooms import RoomProgression, MemoryFragment
 from .story.new_endings import determine_ending_from_relationships, get_ending_narrative, RoomEnding
 from .utils.config import config
+from .voice.elevenlabs_service import EchoVoiceService
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,10 @@ class GameState:
         # Web MCP for scraping blogs, news, social media (Room 2 & 3 puzzles)
         self.web_mcp_client = None
         self._web_mcp_initialized = False
+
+        # Voice service for Echo's speech
+        self.voice_service = EchoVoiceService()
+        self.voice_enabled = True  # User can toggle this
 
         # Echo's current expression (for dynamic avatar display)
         self.echo_expression = "neutral"  # Default expression

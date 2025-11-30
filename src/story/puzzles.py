@@ -14,7 +14,7 @@ def validate_room1_answer(player_answer: str) -> bool:
         True if answer is correct
     """
     answer_lower = player_answer.lower().strip()
-    valid_answers = ["light rain", "rainy", "rain", "drizzle"]
+    valid_answers = ["heavy rain", "heavy rainfall", "torrential rain", "storm", "downpour", "intense rain"]
     return any(ans in answer_lower for ans in valid_answers)
 
 
@@ -23,8 +23,8 @@ def validate_room2_password(player_password: str) -> bool:
 
     Password is extracted from three archives:
     - Blog: ALEXCHEN (name)
-    - Social: MAY12 (anniversary date)
-    - News: 2023 (year)
+    - Social: MAY12_2022 (anniversary date + year)
+    - News: 2022 (year of accident)
 
     Args:
         player_password: Password entered by player
@@ -34,10 +34,10 @@ def validate_room2_password(player_password: str) -> bool:
     """
     password_clean = player_password.upper().replace(" ", "").replace("-", "_")
     correct_passwords = [
-        "ALEXCHEN_MAY12_2023",
-        "ALEXCHENMA Y12_2023",
-        "ALEX_CHEN_MAY_12_2023",
-        "ALEXCHEN_MAY_12_2023"
+        "ALEXCHEN_MAY12_2022",
+        "ALEXCHEN_MAY_12_2022",
+        "ALEX_CHEN_MAY_12_2022",
+        "ALEXCHEN_MAY122022"
     ]
     return any(password_clean == pwd.replace(" ", "") for pwd in correct_passwords)
 

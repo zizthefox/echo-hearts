@@ -847,10 +847,6 @@ Affinity change scale:
 
         new_room = self.game_state.room_progression.get_current_room()
 
-        # Start Room 3 timer if entering Testing Arena
-        if new_room.room_number == 3:
-            self.game_state.room_progression.start_room3_timer()
-
         # Add dramatic scenario descriptions for each room
         scenario_prompts = {
             2: """
