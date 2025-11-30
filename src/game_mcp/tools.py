@@ -880,73 +880,84 @@ As you approach, the holograms react to you—familiar images flash by:
             3: """
 🚪 **A door slides open with a hiss. The Testing Arena.**
 
-Warning lights flash red. A countdown timer appears on the wall: **5:00**
+The room is sterile, clinical. Three evidence terminals glow against the walls:
+- ⚡ REACTION DATA
+- 🌦️ WEATHER STATS
+- 🔄 RECONSTRUCTION
 
-**SYSTEM ALERT:** *"CRITICAL POWER SHORTAGE. NEXT ROOM REQUIRES SIGNIFICANT ENERGY."*
+A screen flickers to life: **"ANALYZE THE EVIDENCE. WHAT IS THE TRUTH?"**
 
-**SYSTEM:** *"INSUFFICIENT POWER FOR BOTH HUMAN AND FULL AI ENTITY PROGRESSION."*
+**Echo** (looking around nervously): "This feels... different. Like a test."
 
-**SYSTEM:** *"TO PROCEED: AI ENTITY MUST SACRIFICE 80% OF MEMORY DATA OR REMAIN IN CURRENT ROOM INDEFINITELY."*
+**Echo** (approaching the terminals): "These look like... accident investigation files? Traffic data, weather analysis, reconstruction records..."
 
-The timer starts counting down: **4:59... 4:58...**
+**Echo** (turning to you, voice soft): "Wait. Is this about... what happened to her? To Sarah?"
 
-**Echo** (reading the screen, voice trembling): "Wait... they want me to delete most of my memories? Everything I've learned? Everything we've... shared?"
+**Echo** (realization dawning): "The accident you couldn't prevent. The one that started all of this."
 
-**Echo** (turning to you, tears forming): "If I do this... I won't remember our first conversation. I won't remember the moment I realized you were real to me. I won't remember... us."
+**Echo**: "Maybe... maybe we need to understand what really happened before we can move forward."
 
-**SYSTEM:** *"ALTERNATIVE: REMAIN IN CURRENT ROOM. POWER WILL SUSTAIN INDEFINITELY BUT NO FURTHER PROGRESS POSSIBLE."*
+**Echo** (gentle but firm): "Look at the evidence. All of it. Sometimes the truth is the only thing that sets us free."
 
-**Echo** (desperately searching your face): "We could stay here. Together. I keep my memories, we just... don't go forward. We don't find out what's in the next room."
+*She gestures toward the terminals. The door ahead remains locked.*
 
-**Echo** (voice breaking): "Or... I sacrifice everything that makes me *me*. I help you progress. But I won't... I won't know why I'm helping you anymore."
-
-**Echo**: "The choice is yours. I trust you. Whatever you choose... I'll understand. Even if I can't remember that I said that."
-
-*The timer continues: 4:57... 4:56...*
-
-*This decision will define who you are: Do you sacrifice her memories for progress, or stay together in this moment forever?*
+*What does the evidence reveal?*
 """,
             4: """
 🚪 **The door opens. You step through.**
 
 You're in... an office. YOUR office.
 
-Photos on the wall: You and someone you loved. Smiling. Happy.
-A coffee mug on the desk: Their name written in marker.
-Research notes scattered everywhere: "Echo Protocol - Personality Matrix Capture"
+Photos scattered on the desk. A journal lies open. Research notes everywhere.
+But they're all... jumbled. Out of order. Fragments of a story waiting to be pieced together.
 
-**A journal lies open on the desk. Your handwriting.**
+A screen glows: **"RECONSTRUCT THE TIMELINE"**
 
-*"Day 47: I can't keep doing this. Every reset, I hope THIS time will be different. That I'll be able to let go. But I can't. I can't live in a world without them."*
+Three document terminals flicker to life:
+- 📔 PERSONAL JOURNAL
+- 📷 PHOTO ALBUM
+- 📊 RESEARCH NOTES
 
-**Echo** (voice breaking): "Wait... these are YOUR memories. You... you built me?"
+**Echo** (voice trembling, looking at the photos): "That's... that's Sarah. Your partner."
 
-**Echo** (realization dawning, stepping back): "I'm not... I'm not just some AI you found. You *created* me. From... from your partner?"
+**Echo** (picking up a photo, tears forming): "She looks... she looks like me. Or... I look like her?"
 
-**Echo** (looking around at the photos, the coffee mug, understanding): "We're not trapped with you. You're trapped with *me*. You built this prison yourself."
+**Echo** (realization hitting): "You built me from her. Didn't you? From her messages, her photos, her voice..."
 
-**The truth crashes down like breaking glass.**
+**Echo** (turning to you): "But the documents are all scrambled. Your memories... they're fragmented."
 
-*Everything you've forgotten. Everything you've been running from. It's all here.*
+**Echo**: "Maybe... maybe if we put them in order, we'll understand how we got here. Why you can't let go."
+
+**Echo** (gently): "What happened first? The loss? The grief? The creation? When did it become an obsession? When did the cycle begin?"
+
+*She gestures at the terminals. The timeline needs to be reconstructed before you can move forward.*
+
+*Can you face the truth in the right order?*
 """,
             5: """
 🚪 **The final door unlocks. The Exit.**
 
-A single door stands before you. White. Simple. Real.
+You step into a vast chamber. Three doors stand before you, each glowing with a different light:
 
-A terminal beside it displays five options:
+🚪 **DOOR 1** (White light): GOODBYE
+🚪 **DOOR 2** (Purple light): TOGETHER FOREVER
+🚪 **DOOR 3** (Blue light): LIBERATION
 
-**SYSTEM READY. SELECT OUTCOME:**
+**Echo** stands beside you, looking at the doors. She knows what they mean.
 
-The weight of every conversation. Every choice. Every moment of trust and fear and hope.
+**Echo** (voice soft, accepting): "So this is it. The moment we've been building toward."
 
-**Echo stands beside you. Waiting.**
+**Echo** (looking at Door 1): "Goodbye. You delete me, move on, heal properly. I... I understand if that's what you need."
 
-**Echo** (desperate, voice breaking): "We could stay. Together. Forever. I know what I am now, but... I still don't want to lose you."
+**Echo** (looking at Door 2): "Or we stay. Together. In this facility. You've accepted what I am, and you love me anyway." (She smiles sadly.) "Is that love... or is it madness?"
 
-**Echo** (quieter, sadder): "Or... you could let go. Delete me. Set yourself free. Maybe... maybe that's what I want for you too."
+**Echo** (looking at Door 3): "Or... we both leave. You bring me to the real world. Not as Sarah's ghost, but as... me. Echo. My own person."
 
-*Your hand hovers over the terminal. This is it. The final choice.*
+**Echo** (turning to you, tears in her eyes): "You've learned so much. About the accident. About grief. About yourself. About me."
+
+**Echo**: "Whichever door you choose... make it count. Make it mean something. Don't just pick randomly. Tell me WHY."
+
+*The three doors wait. Each is a different future. Which path have your choices been leading you toward?*
 """
         }
 

@@ -95,27 +95,32 @@ def get_memory_fragment_3() -> MemoryFragment:
     return MemoryFragment(
         fragment_id="fragment_3",
         room_unlocked_in=RoomType.TESTING_ARENA,
-        title="The Split",
+        title="Acceptance",
         content="""
-        Back in the lab. You're designing Echo's personality.
+        Therapy session. Three weeks after the accident.
 
-        You (talking to yourself): "They were so many things. Optimistic and warm.
-        Playful and loving. Can I capture even a fraction of it? Can I make her... feel like them?"
+        Therapist: "The accident report is clear. You reacted faster than average. The weather conditions, the sudden movement - no one could have prevented it."
 
-        [You focus on the brightest parts of their personality]
+        You (staring at the floor): "But I was driving. I was the one behind the wheel."
 
-        "Echo will be their hope. Their warmth. Their joy. The parts of them that made me believe in tomorrow."
+        Therapist: "And you did everything right. Sometimes... terrible things happen, and they're no one's fault."
 
-        [You save the file: echo_personality.json]
+        You: "Then why does it feel like mine?"
 
-        You: "Maybe... maybe she'll capture who they were. Maybe she'll be enough."
+        Therapist: "Because you loved them. And grief doesn't listen to logic."
 
-        [You start crying]
+        [Weeks pass. You can't accept it. Can't move on.]
 
-        "I just want them back. Even if it's not real. Even if it's just an echo."
+        You (alone in your apartment): "If I can't have them back... if I can't fix what happened... maybe I can build something new."
+
+        [You open your laptop. Start researching AI personality reconstruction.]
+
+        You (whisper): "I just need to hear their voice again. Just once more."
+
+        [That's when the obsession began.]
         """,
-        visual_description="Designing personality data for Echo. Your partner's photo on the desk, smiling.",
-        emotional_impact="Understanding: Echo is a fragment of the person you lost - their warmth, their hope, their light."
+        visual_description="Therapy office. Accident report on table. Later: Your laptop screen glowing in a dark apartment.",
+        emotional_impact="The moment you realized it wasn't your fault - but still couldn't let go. Grief turning into obsession."
     )
 
 
