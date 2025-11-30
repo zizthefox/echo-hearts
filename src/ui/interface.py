@@ -184,7 +184,6 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                     newspaper_btn = gr.Button("📰 NEWSPAPER", elem_classes=["terminal-btn"], scale=1)
                     calendar_btn = gr.Button("📅 CALENDAR", elem_classes=["terminal-btn"], scale=1)
                     weather_btn = gr.Button("🌦️ WEATHER STATION", elem_classes=["terminal-btn"], scale=1)
-                    answer_terminal_btn = gr.Button("🔓 ANSWER TERMINAL", elem_classes=["terminal-btn"], scale=1)
 
                 # Room 2: Blog Archive, Social Media, News Archive
                 with gr.Row(visible=False) as room2_terminals:
