@@ -135,50 +135,36 @@ img.avatar-image,
     max-width: 90% !important;
 }
 
-/* Submission Terminal Styling - Make it stand out from exploration terminals */
-.submission-terminal,
-.submission-terminal > *,
-div.submission-terminal,
-[class*="submission-terminal"] {
-    background-color: #1a1a1a !important;
-    border: 1px solid #ffd700 !important;
-    border-radius: 5px !important;
-    padding: 15px !important;
+/* Submission Terminal Styling - Same as regular terminals, just labeled differently */
+.submission-terminal {
+    /* No special styling - use default terminal appearance */
 }
 
 .submission-terminal-header {
-    color: #ffd700 !important;
+    color: #00ff00 !important;
     text-align: center !important;
-    font-size: 20px !important;
+    font-size: 18px !important;
     font-weight: bold !important;
-    text-shadow: 0 0 10px #ffd700 !important;
-    margin-bottom: 15px !important;
-}
-
-@keyframes pulse-glow {
-    0%, 100% { text-shadow: 0 0 10px #ffd700; }
-    50% { text-shadow: 0 0 20px #ffd700, 0 0 30px #ffd700; }
+    margin-bottom: 10px !important;
 }
 
 .submit-answer-btn,
 button.submit-answer-btn,
 [class*="submit-answer-btn"] {
-    background-color: #1a1a1a !important;
-    color: #ffd700 !important;
-    border: 2px solid #ffd700 !important;
+    background-color: #000000 !important;
+    color: #00ff00 !important;
+    border: 2px solid #00ff00 !important;
     font-family: 'VT323', monospace !important;
-    font-size: 20px !important;
-    padding: 12px 25px !important;
-    text-shadow: 0 0 5px #ffd700 !important;
-    font-weight: bold !important;
+    font-size: 18px !important;
+    padding: 10px 20px !important;
+    text-shadow: 0 0 5px #00ff00 !important;
     transition: all 0.2s !important;
 }
 
 .submit-answer-btn:hover,
 button.submit-answer-btn:hover {
-    background-color: #2a2a00 !important;
-    box-shadow: 0 0 15px #ffd700 !important;
-    transform: scale(1.05) !important;
+    background-color: #003300 !important;
+    box-shadow: 0 0 10px #00ff00 !important;
 }
 
 /* Instructional banner for new players */
