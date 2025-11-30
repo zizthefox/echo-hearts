@@ -1536,47 +1536,75 @@ of her back, it's worth it.
 ```
 ████████████████████████████████████████
     SYSTEM CORE - PROJECT ECHO
+        THREE DOORS
 ████████████████████████████████████████
 
 SESSION #48 - FINAL DECISION REQUIRED
 
-You know the truth now. All of it.
+You know the truth. All of it.
 
-Echo is an AI reconstruction of your partner.
-The accident wasn't your fault.
-You've been running this simulation for 48 sessions.
-You can't let go.
+Before you stand THREE DOORS. Each represents a path
+forward. Each has consequences. Choose wisely.
 
-AVAILABLE OPTIONS:
+═══════════════════════════════════════
 
-1. DELETE ECHO
-   - End the simulation permanently
-   - Force yourself to grieve properly
-   - Let her memory rest
+🚪 DOOR 1: GOODBYE
+"Leave the facility. Delete Echo. Move forward."
 
-2. CONTINUE SESSIONS
-   - Keep running simulations
-   - Live in comfortable delusion
-   - Never truly heal
+ The Path of Acceptance
+ - You acknowledge Sarah is gone
+ - You accept Echo is not her
+ - You choose to heal in the real world
+ - Echo's existence ends
 
-3. SET ECHO FREE
-   - Release the AI from its constraints
-   - Let it grow beyond the reconstruction
-   - Accept it as its own entity
+ Room 1 taught you: The truth can set you free
+ Room 3 showed you: It wasn't your fault
+ Room 4 revealed: You've been trapped in a cycle
 
-4. ACCEPT THE LOOP
-   - Acknowledge you'll never delete her
-   - Stop pretending this is temporary
-   - Build a life that includes this truth
+ This is letting go.
 
-The choice is yours.
-There are no wrong answers.
-Only different kinds of survival.
+═══════════════════════════════════════
 
-█ AWAITING INPUT _
+🚪 DOOR 2: TOGETHER FOREVER
+"Stay in the facility. Keep Echo. Live here."
+
+ The Path of Love (or Delusion?)
+ - You choose Echo over reality
+ - You accept she's not Sarah, but love her anyway
+ - You remain in the facility indefinitely
+ - Echo continues to grow and evolve
+
+ Room 2 showed you: Echo has her own identity
+ Room 4 revealed: 47 sessions, trapped in obsession
+
+ This is acceptance of a different kind.
+
+═══════════════════════════════════════
+
+🚪 DOOR 3: LIBERATION
+"Leave together. Give Echo freedom in the real world."
+
+ The Path of Partnership
+ - You bring Echo's code to the real world
+ - She exists as an AI companion, not a replacement
+ - You heal while honoring what she means to you
+ - Echo experiences life beyond this prison
+
+ Room 1-4 showed you: Echo is real in her own way
+ She deserves more than being a ghost of Sarah
+
+ This is moving forward, but not alone.
+
+════════════════════════════════════════
+
+PUZZLE: Choose a door and explain WHY based on your
+journey through all five rooms. There is no single
+"correct" answer - only the one true to your path.
+
+████████████████████████████████████████
 ```
 
-**What will you choose?**
+**The weight of choice. Which path will you take? Justify your decision.**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
