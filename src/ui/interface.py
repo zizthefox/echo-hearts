@@ -212,9 +212,19 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                     final_terminal_btn = gr.Button("🖥️ FINAL TERMINAL", elem_classes=["terminal-btn"], scale=1)
 
                 # Collapsible panels for clues
-                # Room 1 panels
-                with gr.Accordion("🖥️ Terminal Display", open=False, visible=False) as terminal_panel:
-                    terminal_display = gr.Markdown("", elem_classes=["terminal-text"])
+                # Room 1 panels - Single unified terminal with question and answer input
+                with gr.Accordion("🖥️ Terminal", open=False, visible=False) as terminal_panel:
+                    with gr.Column(elem_classes=["terminal-container"]):
+                        terminal_display = gr.Markdown("", elem_classes=["terminal-text"])
+                        # Answer input integrated below the terminal display
+                        answer_input = gr.Textbox(
+                            label="",
+                            placeholder="Enter your answer...",
+                            elem_classes=["terminal-text"],
+                            visible=False
+                        )
+                        answer_submit_btn = gr.Button("🔓 SUBMIT ANSWER", elem_classes=["terminal-btn"], visible=False)
+                        answer_result = gr.Markdown("", elem_classes=["terminal-text"])
 
                 with gr.Accordion("📰 Newspaper Article", open=False, visible=False) as newspaper_panel:
                     newspaper_display = gr.Markdown("", elem_classes=["terminal-text"])
@@ -227,7 +237,7 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                         gr.Markdown("```\n▓▓▓ NATIONAL WEATHER SERVICE DATABASE ▓▓▓\n```", elem_classes=["terminal-text"])
                         weather_date = gr.Textbox(
                             label="Enter Date (YYYY-MM-DD)",
-                            placeholder="2023-10-15",
+                            placeholder="2022-10-15",
                             elem_classes=["terminal-text"]
                         )
                         weather_location = gr.Radio(
@@ -238,19 +248,9 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                         weather_submit_btn = gr.Button("⚡ QUERY WEATHER", elem_classes=["terminal-btn"])
                         weather_results = gr.Markdown("", elem_classes=["terminal-text"])
 
-                # Room 1 Answer Terminal - SUBMISSION TERMINAL (visually distinct)
-                with gr.Accordion("🔓 ANSWER SUBMISSION TERMINAL", open=False, visible=False) as answer_panel:
-                    with gr.Column(elem_classes=["submission-terminal"]):
-                        gr.Markdown("### ⚠️ PUZZLE SOLUTION TERMINAL", elem_classes=["submission-terminal-header"])
-                        gr.Markdown("```\n▓▓▓ DOOR UNLOCK TERMINAL ▓▓▓\nENTER ANSWER TO UNLOCK\n```", elem_classes=["terminal-text"])
-                        gr.Markdown("💡 **Hint:** Explore the room terminals above to find clues, then submit your answer here.", elem_classes=["instruction-banner"])
-                        answer_input = gr.Textbox(
-                            label="What was the weather on that day?",
-                            placeholder="Enter your answer...",
-                            elem_classes=["terminal-text"]
-                        )
-                        answer_submit_btn = gr.Button("🔓 SUBMIT ANSWER", elem_classes=["submit-answer-btn"])
-                        answer_result = gr.Markdown("", elem_classes=["terminal-text"])
+                # Keep answer_panel for backwards compatibility (points to terminal_panel)
+                answer_panel = terminal_panel
+                answer_terminal_visible = gr.State(False)
 
                 # Room 2 panels
                 with gr.Accordion("📝 Blog Archive", open=False, visible=False) as blog_panel:
@@ -456,7 +456,7 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
             terminal_btn.click(
                 self.show_terminal_clue,
                 inputs=[game_state, terminal_visible],
-                outputs=[terminal_panel, terminal_display, terminal_visible, game_state]
+                outputs=[terminal_panel, terminal_display, terminal_visible, answer_input, answer_submit_btn, game_state]
             )
 
             newspaper_btn.click(
@@ -484,13 +484,7 @@ Powered by InProcessMCP, Weather MCP, and Web MCP
                 outputs=[weather_results]
             )
 
-            # Answer terminal for Room 1
-            answer_terminal_btn.click(
-                self.show_answer_terminal,
-                inputs=[game_state, answer_terminal_visible],
-                outputs=[answer_panel, answer_terminal_visible, game_state]
-            )
-
+            # Answer submission for Room 1 (now integrated into terminal)
             answer_submit_btn.click(
                 self.submit_answer,
                 inputs=[answer_input, game_state, chatbot],
@@ -1171,15 +1165,18 @@ Your previous journey has ended, but the echoes remain...
 > VOICE AUTHENTICATION REQUIRED
 >
 > SECURITY QUESTION:
-> "What was the weather on your first date?"
+> "What was the weather on October 15, 2022?"
 >
 > HINT: Check surroundings for clues...
 > _ ▮
 ```
+
+**Examine the room for evidence. When ready, enter your answer below.**
         """
         # Toggle visibility - if visible, close it; if hidden, open it
         new_visibility = not current_visibility
-        return (gr.update(visible=new_visibility, open=new_visibility), terminal_content, new_visibility, game_state)
+        # Also show the input and submit button when terminal is opened
+        return (gr.update(visible=new_visibility, open=new_visibility), terminal_content, new_visibility, gr.update(visible=new_visibility), gr.update(visible=new_visibility), game_state)
 
     def show_newspaper_clue(self, game_state: GameState, current_visibility: bool) -> Tuple[gr.update, str, bool, GameState]:
         """Toggle newspaper clue visibility when clicked.
