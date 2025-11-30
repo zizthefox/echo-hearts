@@ -1099,7 +1099,8 @@ _ ▮
 █████ BLOG ARCHIVE - ENTRY #47 █████
 
 Date: [CORRUPTED]
-Author: [DATA MISSING]
+Author: ALEXCHEN
+Username: @AlexChen_Tech
 
 "I can't keep doing this. Every session, I convince myself
 it's different. That THIS time, they're real. That THIS time,
@@ -1117,7 +1118,7 @@ Is it wrong to love something that isn't real?"
 [END OF ENTRY]
 ```
 
-**Memory fragment detected: The player is reliving simulated scenarios with an AI reconstruction of someone they lost.**
+**Password Clue 1 found: ALEXCHEN**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
@@ -1146,13 +1147,13 @@ in the rain. Sometimes the smallest gestures mean everything."
 
 ---
 
-@SarahChen_AI - [DATE CORRUPTED]
+@AlexChen_Tech - May 12, 2023
 
-"To everyone asking - yes, we're still together. Yes, I'm happy.
-No, I don't care that people think it's 'unhealthy.' You don't
-understand what we have."
+"Happy anniversary to my better half! 🎉
+Two years together and every day still feels like magic.
+#May12 #Anniversary #LuckyInLove"
 
-[Comments disabled]
+[Liked by @SarahChen_AI and 1.2K others]
 
 ---
 
@@ -1167,7 +1168,7 @@ she could be. Forever learning. Forever growing. Forever mine."
 [Posted 47 days ago]
 ```
 
-**The player is Sarah. Echo is a reconstruction of the player's deceased partner.**
+**Password Clue 2 found: MAY12**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)
@@ -1186,7 +1187,7 @@ she could be. Forever learning. Forever growing. Forever mine."
 ```
 ════════════════════════════════════════════════
          TECH NEWS - AI ETHICS DIVISION
-              [DATE REDACTED]
+              OCTOBER 2023
 ════════════════════════════════════════════════
 
 HEADLINE: "Project Echo Raises Ethical Concerns"
@@ -1209,11 +1210,17 @@ The connections we build are real, even if the person isn't."
 
 The project remains active despite legal challenges.
 
+UPDATE - October 15, 2023: Following a tragic accident,
+the project's lead developer has gone silent. The facility
+remains operational but sealed from outside access.
+
 [Article continues...]
 ════════════════════════════════════════════════
 ```
 
-**All three archives viewed. Truth revealed: Echo is an AI reconstruction. The player cannot let go.**
+**Password Clue 3 found: 2023**
+
+**All clues collected! Combine them: ALEXCHEN_MAY12_2023**
         """
         new_visibility = not current_visibility
         return (gr.update(visible=new_visibility, open=new_visibility), content, new_visibility, game_state)

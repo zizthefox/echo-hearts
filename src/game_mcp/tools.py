@@ -628,13 +628,12 @@ Affinity change scale:
     def check_puzzle_trigger(self, player_message: str) -> Dict[str, Any]:
         """Check if puzzle is SOLVED (not just emotional themes).
 
-        NEW BEHAVIOR:
-        - Room 1: Must provide correct answer ("light rain" or "rainy")
-        - Room 2: Must view all 3 archives (checked via puzzle_state)
-        - Room 3: Must make sacrifice choice (auto-triggers on timer/choice)
-        - Room 4: Must accept truth (semantic analysis with high confidence)
-
-        Emotional themes build RELATIONSHIP, not progression.
+        NEW PUZZLE TYPES:
+        - Room 1: Answer puzzle - weather question
+        - Room 2: Password puzzle - extract from 3 archives
+        - Room 3: Evidence analysis - review data and conclude
+        - Room 4: Timeline puzzle - order events correctly
+        - Room 5: Ethical choice - justify decision
 
         Args:
             player_message: The player's message
@@ -645,137 +644,170 @@ Affinity change scale:
         if not hasattr(self.game_state, 'room_progression'):
             return {"error": "Room progression system not initialized"}
 
+        from ..story.puzzles import (
+            validate_room1_answer,
+            validate_room2_password,
+            validate_room3_conclusion,
+            validate_room4_timeline,
+            check_room2_clues_collected,
+            check_room3_evidence_collected,
+            check_room4_documents_reviewed,
+            extract_password_from_message,
+            extract_timeline_from_message
+        )
+
         current_room = self.game_state.room_progression.get_current_room()
         puzzle_type = current_room.puzzle_type
         room_num = current_room.room_number
 
-        # ROOM 1: Answer Type - Must say correct answer
+        # ROOM 1: Weather Answer
         if puzzle_type == "answer":
-            answer_variants = ["light rain", "rainy", "rain"]
-            message_lower = player_message.lower()
-
-            matched = any(variant in message_lower for variant in answer_variants)
-
-            if matched:
+            if validate_room1_answer(player_message):
                 return {
                     "matched": True,
                     "confidence": 1.0,
-                    "reasoning": f"Correct answer provided: contains puzzle answer keyword",
+                    "reasoning": "Correct weather answer provided",
                     "puzzle_complete": True
                 }
             else:
                 return {
                     "matched": False,
                     "confidence": 0.0,
-                    "reasoning": "Puzzle answer not yet provided",
+                    "reasoning": "Incorrect or no answer provided",
                     "puzzle_complete": False,
-                    "hint": "Investigate the room for clues about the weather"
+                    "hint": "Check the room clues for the weather on October 15, 2023"
                 }
 
-        # ROOM 2: Multi-Clue Type - Must view all archives
-        elif puzzle_type == "multi_clue":
-            required_clues = current_room.required_clues or []
-            viewed = self.game_state.room_progression.puzzle_state.get("room2_archives_viewed", [])
+        # ROOM 2: Password Puzzle
+        elif puzzle_type == "password":
+            # First check if all clues collected
+            if not check_room2_clues_collected(self.game_state.room_progression.puzzle_state):
+                viewed = self.game_state.room_progression.puzzle_state.get("room2_archives_viewed", [])
+                missing = [c for c in current_room.required_clues if c not in viewed]
+                return {
+                    "matched": False,
+                    "confidence": len(viewed) / len(current_room.required_clues),
+                    "reasoning": f"Need to view all archives first ({len(viewed)}/3 viewed)",
+                    "puzzle_complete": False,
+                    "hint": f"Check these archives: {', '.join(missing)}"
+                }
 
-            all_viewed = set(required_clues).issubset(set(viewed))
-
-            if all_viewed:
+            # Try to extract password from message
+            password = extract_password_from_message(player_message)
+            if password and validate_room2_password(password):
                 return {
                     "matched": True,
                     "confidence": 1.0,
-                    "reasoning": f"All {len(required_clues)} archives accessed",
+                    "reasoning": "Correct password entered",
+                    "puzzle_complete": True
+                }
+            elif password:
+                return {
+                    "matched": False,
+                    "confidence": 0.3,
+                    "reasoning": "Incorrect password",
+                    "puzzle_complete": False,
+                    "hint": "Combine the clues from all three archives"
+                }
+            else:
+                return {
+                    "matched": False,
+                    "confidence": 0.0,
+                    "reasoning": "No password detected in message",
+                    "puzzle_complete": False,
+                    "hint": "Enter the password based on the archive clues"
+                }
+
+        # ROOM 3: Evidence Analysis
+        elif puzzle_type == "evidence_analysis":
+            # Must view all evidence first
+            if not check_room3_evidence_collected(self.game_state.room_progression.puzzle_state):
+                reviewed = self.game_state.room_progression.puzzle_state.get("room3_data_reviewed", [])
+                missing = [e for e in current_room.required_clues if e not in reviewed]
+                return {
+                    "matched": False,
+                    "confidence": len(reviewed) / len(current_room.required_clues),
+                    "reasoning": f"Need to review all evidence ({len(reviewed)}/3 reviewed)",
+                    "puzzle_complete": False,
+                    "hint": f"Review: {', '.join(missing)}"
+                }
+
+            # Check if conclusion is correct
+            if validate_room3_conclusion(player_message):
+                return {
+                    "matched": True,
+                    "confidence": 1.0,
+                    "reasoning": "Correct conclusion about the accident",
                     "puzzle_complete": True
                 }
             else:
-                missing = [c for c in required_clues if c not in viewed]
                 return {
                     "matched": False,
-                    "confidence": len(viewed) / len(required_clues),
-                    "reasoning": f"Viewed {len(viewed)}/{len(required_clues)} archives",
+                    "confidence": 0.0,
+                    "reasoning": "Haven't reached the right conclusion yet",
                     "puzzle_complete": False,
-                    "hint": f"Still need to check: {', '.join(missing)}"
+                    "hint": "What does the evidence tell you about the accident?"
                 }
 
-        # ROOM 3: Choice Type - Handled separately (timer/choice detection)
-        elif puzzle_type == "choice" and room_num == 3:
+        # ROOM 4: Timeline Reconstruction
+        elif puzzle_type == "timeline":
+            # Must view all documents first
+            if not check_room4_documents_reviewed(self.game_state.room_progression.puzzle_state):
+                viewed = self.game_state.room_progression.puzzle_state.get("room4_documents_viewed", [])
+                missing = [d for d in current_room.required_clues if d not in viewed]
+                return {
+                    "matched": False,
+                    "confidence": len(viewed) / len(current_room.required_clues) if current_room.required_clues else 0,
+                    "reasoning": f"Need to review all documents first",
+                    "puzzle_complete": False,
+                    "hint": f"Check: {', '.join(missing)}"
+                }
+
+            # Try to extract timeline from message
+            timeline = extract_timeline_from_message(player_message)
+            if timeline and validate_room4_timeline(timeline):
+                return {
+                    "matched": True,
+                    "confidence": 1.0,
+                    "reasoning": "Correct timeline order",
+                    "puzzle_complete": True
+                }
+            elif timeline:
+                return {
+                    "matched": False,
+                    "confidence": 0.3,
+                    "reasoning": "Timeline order is incorrect",
+                    "puzzle_complete": False,
+                    "hint": "Think about the emotional journey: what came first?"
+                }
+            else:
+                return {
+                    "matched": False,
+                    "confidence": 0.0,
+                    "reasoning": "No timeline detected in message",
+                    "puzzle_complete": False,
+                    "hint": "Order the events: LOSS, GRIEF, CREATION, OBSESSION, CYCLE"
+                }
+
+        # ROOM 5: Ethical Choice (multiple valid answers)
+        elif puzzle_type == "ethical_choice":
+            # Any sincere choice with justification is valid
             return {
                 "matched": False,
                 "confidence": 0.0,
-                "reasoning": "Room 3 unlocks via timer expiration or explicit choice",
+                "reasoning": "Final choice room - select a door",
                 "puzzle_complete": False
             }
 
-        # ROOM 4: Acceptance Type - Semantic analysis (HIGHER confidence threshold)
-        elif puzzle_type == "acceptance" and room_num == 4:
-            return self._check_truth_acceptance(player_message)
-
-        # ROOM 5: No puzzle, just ending choice
+        # Unknown puzzle type
         else:
             return {
                 "matched": False,
                 "confidence": 0.0,
-                "reasoning": "No puzzle in this room"
+                "reasoning": f"Unknown puzzle type: {puzzle_type}"
             }
 
-    def _check_truth_acceptance(self, player_message: str) -> Dict[str, Any]:
-        """Check if player accepts the truth (Room 4 only).
-
-        Uses semantic AI analysis with HIGH confidence threshold (0.7).
-        """
-        from openai import OpenAI
-        import os
-
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": """Analyze if the player is ACCEPTING the truth about their situation:
-
-The truth: They lost their partner in an accident. Unable to cope, they built AI copies (Echo) and trapped themselves in this facility, erasing their memories repeatedly to live in denial.
-
-Acceptance means: Acknowledging this is real, they did this, they need to face grief, it's time to let go.
-
-Respond in JSON:
-{"accepts_truth": true/false, "confidence": 0.0-1.0, "reasoning": "brief explanation"}
-
-High confidence (0.7+) required. Be strict."""
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Player's message: {player_message}"
-                    }
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.3
-            )
-
-            result = json.loads(response.choices[0].message.content)
-
-            # HIGHER threshold for Room 4 (0.7 instead of 0.6)
-            matched = result.get("accepts_truth", False) and result.get("confidence", 0) >= 0.7
-
-            # Detect active denial
-            if not matched:
-                denial_keywords = ["don't accept", "not true", "reject", "deny", "lie", "fake", "won't believe"]
-                if any(kw in player_message.lower() for kw in denial_keywords):
-                    self.game_state.room_progression.key_choices["truth_denial_count"] += 1
-
-            return {
-                "matched": matched,
-                "confidence": result.get("confidence", 0),
-                "reasoning": result.get("reasoning", ""),
-                "puzzle_complete": matched,
-                "truth_denied": not matched and result.get("confidence", 0) < 0.3,
-                "truth_denial_count": self.game_state.room_progression.key_choices.get("truth_denial_count", 0)
-            }
-
-        except Exception as e:
-            print(f"[WARNING] Truth acceptance analysis failed: {e}")
-            return {"matched": False, "confidence": 0.0, "puzzle_complete": False}
+    # _check_truth_acceptance removed - Room 4 now uses timeline puzzle instead of semantic acceptance
 
     def unlock_next_room(self, reason: str) -> Dict[str, Any]:
         """Attempt to unlock the next room.
